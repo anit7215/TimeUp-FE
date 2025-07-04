@@ -1,3 +1,4 @@
+// src/components/common/ConfirmButton.tsx
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Svg, {
