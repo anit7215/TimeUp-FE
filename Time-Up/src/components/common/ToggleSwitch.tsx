@@ -1,4 +1,10 @@
-import React from "react";
+import React from 'react';
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  TouchableOpacity
+} from 'react-native';
 
 interface ToggleSwitchProps {
   isOn: boolean;
@@ -6,34 +12,78 @@ interface ToggleSwitchProps {
   disabled?: boolean;
 }
 
-export default function ToggleSwitch({ isOn, onToggle, disabled = false }: ToggleSwitchProps) {
-  const handleClick = () => {
+export default function ToggleSwitch({
+  isOn,
+  onToggle,
+  disabled = false,
+}: ToggleSwitchProps) {
+  const knobAnim = React.useRef(new Animated.Value(isOn ? 1 : 0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(knobAnim, {
+      toValue: isOn ? 1 : 0,
+      duration: 200,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start();
+  }, [isOn]);
+
+  const interpolatePosition = knobAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [2, 22], // knob's left position
+  });
+
+  const trackColor = disabled
+    ? '#A0A0A0'
+    : isOn
+    ? '#4D4DFF' // ✅ 활성 시 파란색
+    : '#D9D9D9';
+
+  const handleToggle = () => {
     if (!disabled) {
       onToggle?.(!isOn);
     }
   };
 
-  const backgroundClass = () => {
-    if (disabled) return "bg-gray-400";
-    if (isOn) return "bg-blue"; 
-    return "bg-[#D9D9D9]";
-  };
-  
-
-  const cursorClass = disabled ? "cursor-not-allowed" : "cursor-pointer";
-  const animationClass = disabled ? "" : isOn ? "animate-toggleOn" : "animate-toggleOff";
-
   return (
-    <div
-      onClick={handleClick}
-      className={`w-[40px] h-[20px] rounded-[10px] relative transition-colors duration-300 ${backgroundClass()} ${cursorClass}`}
+    <TouchableOpacity
+      onPress={handleToggle}
+      activeOpacity={0.8}
+      disabled={disabled}
+      style={[
+        styles.track,
+        { backgroundColor: trackColor, opacity: disabled ? 0.6 : 1 },
+      ]}
     >
-    <div
-    className={`w-[16px] h-[16px] bg-white rounded-full shadow-md absolute top-1/2 -translate-y-1/2 transition-all
-      ${isOn ? "left-[22px]" : "left-[2px]"}`}
-     />
-    </div>
+      <Animated.View
+        style={[
+          styles.knob,
+          {
+            left: interpolatePosition,
+          },
+        ]}
+      />
+    </TouchableOpacity>
   );
 }
 
-
+const styles = StyleSheet.create({
+  track: {
+    width: 40,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  knob: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 1.5,
+  },
+});

@@ -1,8 +1,14 @@
 'use client';
 
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  FlatList,
+  Pressable,
+  Text,
+  View
+} from 'react-native';
 
 interface DropdownItem {
   label: string;
@@ -23,7 +29,25 @@ export default function CustomDropdown({
   onChange,
 }: CustomDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const dropdownAnim = useRef(new Animated.Value(0)).current;
+
   const selectedLabel = data.find((d) => d.value === value)?.label;
+
+  useEffect(() => {
+    Animated.timing(dropdownAnim, {
+      toValue: open ? 1 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [open]);
+
+  const scale = dropdownAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.95, 1],
+  });
+
+  const opacity = dropdownAnim;
 
   return (
     <View className="w-full">
@@ -38,10 +62,14 @@ export default function CustomDropdown({
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color="#979B9F" />
       </Pressable>
 
-      {/* Dropdown list */}
       {open && (
-        <View className="relative mt-2">
-          {/* Inner shadow box */}
+        <Animated.View
+          className="relative mt-2"
+          style={{
+            transform: [{ scale }],
+            opacity,
+          }}
+        >
           <View
             className="absolute top-0 left-0 w-full h-full rounded-[20px] overflow-hidden"
             style={{
@@ -63,34 +91,39 @@ export default function CustomDropdown({
               keyExtractor={(item) => item.value}
               renderItem={({ item }) => {
                 const isSelected = item.value === value;
+                const isHovered = hovered === item.value;
+                const showHighlight = isSelected || isHovered;
+
                 return (
                   <View className="relative">
-                    {isSelected && (
-                      <View
-                        className="absolute top-0 left-0 w-full h-full rounded-[20px] overflow-hidden"
-                        style={{
-                          borderWidth: 1,
-                          borderColor: 'rgba(201, 205, 209, 0.25)',
-                          shadowColor: '#C9CDD1',
-                          shadowOffset: { width: 0, height: 2 },
-                          shadowOpacity: 0.25,
-                          shadowRadius: 4,
-                          elevation: 3,
-                        }}
-                        pointerEvents="none"
-                      />
+                    {showHighlight && (
+                      <View className="absolute top-0 left-0 w-full h-full rounded-[20px] overflow-hidden pointer-events-none">
+                        <View
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 20,
+                            backgroundColor: '#4D4DFF',
+                            boxShadow: 'inset 0px 2px 4px #C9CDD140',
+                          }}
+                        />
+                      </View>
                     )}
 
                     <Pressable
+                      onHoverIn={() => setHovered(item.value)}
+                      onHoverOut={() => setHovered(null)}
                       onPress={() => {
                         onChange(item.value);
                         setOpen(false);
                       }}
-                      className={`px-4 py-3 rounded-[20px] ${
-                        isSelected ? 'bg-[#4D4DFF]' : ''
-                      }`}
+                      className="px-4 py-3 rounded-[20px] z-10"
                     >
-                      <Text className="text-white text-[16px] font-pretendard">
+                      <Text
+                        className={`text-[16px] font-pretendard z-20 ${
+                          showHighlight ? 'text-white' : 'text-[#FFFFFF]'
+                        }`}
+                      >
                         {item.label}
                       </Text>
                     </Pressable>
@@ -99,7 +132,7 @@ export default function CustomDropdown({
               }}
             />
           </View>
-        </View>
+        </Animated.View>
       )}
     </View>
   );
