@@ -3,7 +3,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 
-export default function OnboardingPage() {
+export default function OnBoardingPage() {
   const navigation = useNavigation();
   return (
     <View className="flex-1 items-center justify-center bg-white">
