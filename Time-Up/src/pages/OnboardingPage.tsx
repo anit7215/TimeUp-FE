@@ -1,20 +1,31 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Button, Text, TouchableOpacity, View } from 'react-native';
+import { Button, Image, Text, TouchableOpacity, View } from 'react-native';
+import IconImage from '../../assets/images/Icon.svg';
 import Modal from '../components/common/Modal';
 
 
-export default function OnBoardingPage() {
+export default function OnboardingPage() {
   const navigation = useNavigation();
   const [open, setOpen] = useState(false);
 
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl text-blue-600 font-bold">온보딩</Text>
-      <TouchableOpacity className="mt-4 bg-blue-500 px-4 py-2 rounded"
-        onPress={() => navigation.navigate('LoginPage')}>
-        <Text className="text-white">로그인</Text>
+    <View className="flex-1 items-center justify-center bg-[#121212]">
+      <Image source={IconImage} className="w-24 h-24 mt-4" />
+      <TouchableOpacity
+        onPress={() => navigation.navigate('LoginPage')}
+        className="w-[120px] h-[36px] bg-[#33373B] rounded-[8px] px-4 py-2 shadow-md mb-4"
+        style={{
+          shadowColor: '#4D4DFF',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 4,
+        }}
+      >
+        <Text className="text-white text-center">구글로 로그인</Text>
       </TouchableOpacity>
+
       <Button title="모달 열기" onPress={() => setOpen(true)} />
       {open && (
         <Modal onClose={() => setOpen(false)}>

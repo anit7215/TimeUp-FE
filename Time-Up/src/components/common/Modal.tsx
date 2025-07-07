@@ -1,5 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
+import CancelButton from './CancleButton';
+import ConfirmButton from './ConfirmButton';
 
 interface ModalProps {
   onClose: () => void;
@@ -8,6 +10,12 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ onClose, onConfirm, children }) => {
+   const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    onClose();
+  };
   return (
     <View className="absolute inset-0 bg-black/40 justify-center items-center px-2.5">
       <View
@@ -26,20 +34,9 @@ const Modal: React.FC<ModalProps> = ({ onClose, onConfirm, children }) => {
           </Text>
         </View>
 
-        <View className="px-6 pb-4 flex-row justify-between gap-4">
-          <TouchableOpacity
-            onPress={onClose}
-            className="flex-1 h-[48px] rounded-xl bg-[#C9CDD1] justify-center items-center"
-          >
-            <Text className="text-center text-black font-semibold">취소</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={onConfirm ?? onClose}
-            className="flex-1 h-[48px] rounded-xl bg-[#4D4DFF] justify-center items-center"
-          >
-            <Text className="text-center text-white font-semibold">확인</Text>
-          </TouchableOpacity>
+        <View style={{ paddingHorizontal: 34 }} className="pb-4 flex-row justify-between gap-4">
+          <CancelButton onPress={onClose} />
+          <ConfirmButton title="확인" onPress = {handleConfirm}/>
         </View>
       </View>
     </View>
