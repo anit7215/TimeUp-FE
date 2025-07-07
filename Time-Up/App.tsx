@@ -7,8 +7,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import CalendarPage from './src/pages/CalendarPage';
 import LoginPage from './src/pages/LoginPage';
 import MyPage from './src/pages/MyPage';
-import OnBoardingPage from './src/pages/OnBoardingPage';
-
+import OnboardingPage from './src/pages/OnboardingPage';
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -16,10 +15,10 @@ export default function App() {
     <PaperProvider>
      <NavigationContainer>
       <Stack.Navigator 
-        initialRouteName="CalendarPage"
+        initialRouteName="OnboardingPage"
         screenOptions={{ headerShown: false }}>
         <Stack.Screen name="CalendarPage" component={CalendarPage}/>
-        <Stack.Screen name="OnboardingPage" component={OnBoardingPage}/>
+        <Stack.Screen name="OnboardingPage" component={OnboardingPage}/>
         <Stack.Screen name="LoginPage" component={LoginPage}/>
         <Stack.Screen name="MyPage" component={MyPage}/>
       </Stack.Navigator>
