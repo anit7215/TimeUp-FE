@@ -4,7 +4,7 @@ import { Button, Text, TouchableOpacity, View } from 'react-native';
 import Modal from '../components/common/Modal';
 
 
-export default function OnboardingPage() {
+export default function OnBoardingPage() {
   const navigation = useNavigation();
   const [open, setOpen] = useState(false);
 
