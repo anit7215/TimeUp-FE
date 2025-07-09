@@ -12,11 +12,14 @@ module.exports = {
         pretendard: ['Pretendard-Regular'],
         'pretendard-bold': ['Pretendard-Bold'],
         'pretendard-medium': ['Pretendard-Medium'],
+        roboto: ['Roboto']
       },
       colors: {
         gray: '#C9CDD1',
         blue: '#4D4DFF',
-
+        white: '#F7F7FE',
+        black: '#121212',
+        'gray-700': '#33373B',
       },
     },
   },
