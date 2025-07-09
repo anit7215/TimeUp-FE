@@ -14,9 +14,13 @@ module.exports = {
         'pretendard-medium': ['Pretendard-Medium'],
       },
       colors: {
-        gray: '#C9CDD1',
-        blue: '#4D4DFF',
-
+        white: '#F7F7FE',
+        light: '#B2B2FF',
+        blue: '#4D4DFF', 
+        gray300: '#979B9F',
+        gray500: '#66696D',
+        gray700: '#33373B',
+        black: '#121212',
       },
     },
   },
