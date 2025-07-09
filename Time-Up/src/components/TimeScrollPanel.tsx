@@ -1,10 +1,18 @@
 // src/components/TimeScrollPanel.tsx
-import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const ITEM_HEIGHT = 40;
 
-// 숫자를 두자리 문자열로 변환하는 함수(00, 01, ..., 23)
 const generateRange = (start: number, end: number) =>
   Array.from({ length: end - start + 1 }, (_, i) => String(i).padStart(2, '0'));
 
@@ -12,39 +20,133 @@ const hours = generateRange(0, 23);
 const minutes = generateRange(0, 59);
 
 export default function TimeScrollPanel() {
-  // 선택된 시간과 분 상태 관리. 초기값 00:00
   const [selectedHour, setSelectedHour] = useState('00');
   const [selectedMinute, setSelectedMinute] = useState('00');
 
-  // 스크롤 뷰 렌더링 함수
-  const renderList = (items: string[], selected: string, onChange: (val: string) => void) => (
-    <ScrollView
-      showsVerticalScrollIndicator={false}  // 스크롤바 숨김
-      snapToInterval={ITEM_HEIGHT}          // 각 아이템의 높이기준으로 스크롤 스냅
-      snapToAlignment="center"              // 아이템 자동 중앙 정렬
-      decelerationRate="fast"               // 스크롤 감속 속도 빠르게
-      contentContainerStyle={{ paddingVertical: 80 }}   // 첫번째/마지막 항목도 중앙 올 수 있도록 스크롤 상하단에 80px 여백 추가
-      onMomentumScrollEnd={(e) => {                     // 스크롤이 멈췄을 때 위치를 계산해서 선택값을 결정
-        const offsetY = e.nativeEvent.contentOffset.y;  // 현재 스크롤 된 Y 위치
-        const index = Math.round(offsetY / ITEM_HEIGHT);// 현재 스크롤 위치에서 아이템 높이(40px)로 나눈 값을 반올림하여 인덱스 계산
-        onChange(items[index]);                         // 해당 인덱스의 아이템을 선택값으로 설정
-      }}
-    >
-      {items.map((item, index) => (
-        <View key={index} className="h-[40px] items-center justify-center">
-          <Text className={`${item === selected ? 'text-3xl text-black font-bold' : 'text-2xl text-gray-400'}`}>
-            {item}
-          </Text>
-        </View>
-      ))}
-    </ScrollView>
+  const hourRef = useRef<FlatList<string> | null>(null);
+  const minuteRef = useRef<FlatList<string> | null>(null);
+
+  const onScrollEnd = (
+    e: NativeSyntheticEvent<NativeScrollEvent>,
+    items: string[],
+    onSelect: (val: string) => void
+  ) => {
+    const offsetY = e.nativeEvent.contentOffset.y;
+    const index = Math.round(offsetY / ITEM_HEIGHT);
+    onSelect(items[index]);
+  };
+
+  const renderItem = (item: string, selected: string) => (
+    <View className="h-[40px] items-center justify-center">
+      <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray300'}`}>
+        {item}
+      </Text>
+    </View>
   );
 
+  const decrease = (value: string, max: number) => {
+    const num = (parseInt(value) + 1) % (max + 1);
+    return String(num).padStart(2, '0');
+  };
+
+  const increase = (value: string, max: number) => {
+    const num = (parseInt(value) - 1 + (max + 1)) % (max + 1);
+    return String(num).padStart(2, '0');
+  };
+
+const renderControlList = (
+  label: string[],
+  selected: string,
+  setSelected: (val: string) => void,
+  max: number,
+  ref?: React.RefObject<FlatList<string> | null>
+) => {
+  const scrollToValue = (value: string) => {
+    const index = parseInt(value, 10);
+    ref?.current?.scrollToOffset({
+      offset: ITEM_HEIGHT * index,
+      animated: true,
+    });
+  };
+
+  const handleIncrease = () => {
+    const nextValue = increase(selected, max);
+    setSelected(nextValue);
+    scrollToValue(nextValue);
+  };
+
+  const handleDecrease = () => {
+    const nextValue = decrease(selected, max);
+    setSelected(nextValue);
+    scrollToValue(nextValue);
+  };
+
   return (
-    <View className="flex-row items-center justify-center bg-gray-200 w-[160px] h-[200px]">
-      <View className="flex-1 items-center">{renderList(hours, selectedHour, setSelectedHour)}</View>
-      <Text className="text-xl font-bold text-black px-2">:</Text>
-      <View className="flex-1 items-center">{renderList(minutes, selectedMinute, setSelectedMinute)}</View>
+    <View className="items-center">
+      {Platform.OS === 'web' && (
+        <TouchableOpacity onPress={handleIncrease}>
+          <Text className="text-white text-lg">▲</Text>
+        </TouchableOpacity>
+      )}
+
+      {Platform.OS === 'web' ? (
+        <FlatList
+          ref={ref}
+          data={label}
+          keyExtractor={(item) => item}
+          snapToInterval={ITEM_HEIGHT}
+          decelerationRate="fast"
+          showsVerticalScrollIndicator={false}
+          getItemLayout={(_, index) => ({
+            length: ITEM_HEIGHT,
+            offset: ITEM_HEIGHT * index,
+            index,
+          })}
+          contentContainerStyle={{ paddingVertical: 80 }}
+          style={{ height: ITEM_HEIGHT * 5 }}
+          onMomentumScrollEnd={(e) => onScrollEnd(e, label, setSelected)}
+          renderItem={({ item }) => renderItem(item, selected)}
+          extraData={selected}
+        />
+      ) : (
+        <View style={{ height: ITEM_HEIGHT * 5, overflow: 'hidden' }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            snapToInterval={ITEM_HEIGHT}
+            snapToAlignment="center"
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingVertical: 80 }}
+            onMomentumScrollEnd={(e) => onScrollEnd(e, label, setSelected)}
+          >
+            {label.map((item, index) => (
+              <View key={index} className="h-[40px] items-center justify-center">
+                <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray300'}`}>
+                  {item}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {Platform.OS === 'web' && (
+        <TouchableOpacity onPress={handleDecrease}>
+          <Text className="text-white text-lg">▼</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+  return (
+    <View className="flex-row items-center justify-center bg-gray700 w-[160px] h-[260px]">
+      <View className="flex-1 items-center">
+        {renderControlList(hours, selectedHour, setSelectedHour, 23, hourRef)}
+      </View>
+      <Text className="text-xl font-bold text-white px-2">:</Text>
+      <View className="flex-1 items-center">
+        {renderControlList(minutes, selectedMinute, setSelectedMinute, 59, minuteRef)}
+      </View>
     </View>
   );
 }
