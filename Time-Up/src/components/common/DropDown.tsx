@@ -62,7 +62,6 @@ export default function CustomDropdown({
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color="#979B9F" />
       </Pressable>
 
-      {/* Dropdown list */}
       {open && (
         <Animated.View
           className="relative mt-2"
@@ -71,7 +70,6 @@ export default function CustomDropdown({
             opacity,
           }}
         >
-          {/* outer shadow box for the list */}
           <View
             className="absolute top-0 left-0 w-full h-full rounded-[20px] overflow-hidden"
             style={{
@@ -98,7 +96,6 @@ export default function CustomDropdown({
 
                 return (
                   <View className="relative">
-                    {/* inset shadow + bg for selected or hovered */}
                     {showHighlight && (
                       <View className="absolute top-0 left-0 w-full h-full rounded-[20px] overflow-hidden pointer-events-none">
                         <View
