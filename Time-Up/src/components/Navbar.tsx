@@ -32,7 +32,7 @@ export default function Navbar() {
 
   const renderTabs = () => (
     <View
-      className="flex-row justify-around items-center h-16 border-t border-gray-200"
+      className="flex-row justify-around items-center h-16"
       style={Platform.OS === 'web' ? { width: 474, alignSelf: 'center' } : undefined}
     >
       {tabs.map((tab) => {
@@ -62,7 +62,7 @@ export default function Navbar() {
 
   return (
     <SafeAreaView edges={['bottom']} className="bg-black items-center">
-      <View className="w-full h-[2px] bg-gray500" />
+      <View className="w-full h-[2px] bg-gray-500" />
       {renderTabs()}
     </SafeAreaView>
   );

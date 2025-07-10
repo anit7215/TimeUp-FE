@@ -1,3 +1,4 @@
+// src/components/HalfTimeScrollPanel.tsx
 import React, { useRef, useState } from 'react';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 
@@ -57,7 +58,7 @@ export default function HalfTimeScrollPanel() {
 
   const renderItem = (item: string, selected: string) => (
     <View className="h-[40px] items-center justify-center">
-      <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray300'}`}>
+      <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>
         {item}
       </Text>
     </View>
@@ -143,7 +144,7 @@ export default function HalfTimeScrollPanel() {
           >
             {items.map((item, index) => (
               <View key={index} className="h-[40px] items-center justify-center">
-                <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray300'}`}>
+                <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>
                   {item}
                 </Text>
               </View>
@@ -162,7 +163,7 @@ export default function HalfTimeScrollPanel() {
   };
 
   return (
-    <View className="flex-row items-center justify-center bg-gray700 w-[220px] h-[260px] px-2">
+    <View className="flex-row items-center justify-center bg-gray-700 w-[220px] h-[260px] px-2">
       <View className="w-[70px] items-center">
         {renderControlList(periods, selectedPeriod, setSelectedPeriod, periodRef, 'periods')}
       </View>
