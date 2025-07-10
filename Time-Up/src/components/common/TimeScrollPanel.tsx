@@ -139,7 +139,7 @@ const renderControlList = (
 };
 
   return (
-    <View className="flex-row items-center justify-center bg-gray-700 w-[160px] h-[260px]">
+    <View className="flex-row items-center justify-center bg-transparent w-[160px] h-[260px]">
       <View className="flex-1 items-center">
         {renderControlList(hours, selectedHour, setSelectedHour, 23, hourRef)}
       </View>
