@@ -5,6 +5,7 @@ import { Dimensions, Platform } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
+import AlarmDetailPage from './src/pages/AlarmDetailPage';
 import AlarmPage from './src/pages/AlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
@@ -13,6 +14,8 @@ import MyPage from './src/pages/MyPage';
 import OnboardingPage from './src/pages/OnboardingPage';
 import TestHalfTimeScrollPage from './src/pages/TestHalfTimeScrollPage';
 import TestTimeScrollPage from './src/pages/TestTimeScrollPage';
+import WakeUpAlarmPage from './src/pages/WakeUpAlarmPage';
+import WakeUpAlarmPageNotAuto from './src/pages/WakeUpAlarmPageNotAuto';
 
 // 화면 높이 가져오기
 const screenHeight = Dimensions.get('window').height;
@@ -22,15 +25,19 @@ export default function App() {
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="AlarmDetailPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="LoginPage" component={LoginPage} />
         <Stack.Screen name="MyPage" component={MyPage} />
+        <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
+        <Stack.Screen name="WakeUpAlarmPageNotAuto" component={WakeUpAlarmPageNotAuto} />
         <Stack.Screen name="AlarmPage" component={AlarmPage} />
         <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
         <Stack.Screen name="TestTimeScrollPage" component={TestTimeScrollPage} />
         <Stack.Screen name="TestHalfTimeScrollPage" component={TestHalfTimeScrollPage} />
+        <Stack.Screen name="AlarmDetailPage" component={AlarmDetailPage} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

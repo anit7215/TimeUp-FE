@@ -6,6 +6,7 @@ import CheckBox from '../components/common/CheckBox';
 import ConfirmButton from '../components/common/ConfirmButton'; // 확인 버튼 테스트용 임포트
 import Dropdown from '../components/common/DropDown'; // 드롭다운 컴포넌트 임포트
 import ToggleSwitch from '../components/common/ToggleSwitch';
+import BottomLayout from '../Layouts/BottomLayout';
 
 
 export default function CalendarPage() {
@@ -37,6 +38,7 @@ export default function CalendarPage() {
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
   return (
+    <BottomLayout>
     <View className="flex-1 items-center justify-center bg-[#121212] p-20">
       <Text className="text-xl text-white font-bold">테스트</Text>
       <ConfirmButton title="확인" onPress = {handleConfirm}/>
@@ -62,6 +64,7 @@ export default function CalendarPage() {
       <CancleButton title="취소" onPress = {handleConfirm}/>
 
     </View>
+    </BottomLayout>
   );
 }
 

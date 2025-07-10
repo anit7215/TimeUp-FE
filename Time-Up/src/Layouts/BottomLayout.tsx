@@ -1,7 +1,7 @@
 // src/layouts/BottomLayout.tsx
 import React from 'react';
 import { View } from 'react-native';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/common/Navbar';
 
 interface BottomLayoutProps {
   children: React.ReactNode;
