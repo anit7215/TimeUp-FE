@@ -1,3 +1,4 @@
+// src/pages/OnboardingPage.tsx
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Button, Image, Text, TouchableOpacity, View } from 'react-native';

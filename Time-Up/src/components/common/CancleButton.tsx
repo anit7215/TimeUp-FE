@@ -39,7 +39,6 @@ export default function CancelButton({
         position: 'relative',
       }}
     >
-      {/* ✅ Inset shadow */}
       <View
         style={{
           position: 'absolute',
@@ -53,7 +52,7 @@ export default function CancelButton({
               <FeOffset dx="0" dy="2" />
               <FeGaussianBlur stdDeviation="2" result="offset-blur" />
               <FeComposite in="SourceGraphic" in2="offset-blur" operator="out" result="inverse" />
-              <FeFlood floodColor="#F7F7FE80" result="color" /> {/* ✅ 투명도 포함 */}
+              <FeFlood floodColor="#F7F7FE80" result="color" />
               <FeComposite in="color" in2="inverse" operator="in" result="shadow" />
               <FeComposite in="shadow" in2="SourceGraphic" operator="over" />
             </Filter>
@@ -72,7 +71,6 @@ export default function CancelButton({
         </Svg>
       </View>
 
-      {/* ✅ 가운데 정렬된 텍스트 */}
       <View
         style={{
           position: 'absolute',
