@@ -4,17 +4,17 @@ import React from 'react';
 import { Image, Platform, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import IconAlarm from '../../assets/images/IconAlarm.png';
-import IconCalendar from '../../assets/images/IconCalendar.png';
-import IconDiary from '../../assets/images/IconDiary.png';
-import IconMy from '../../assets/images/IconMy.png';
+import IconAlarm from '../../../assets/images/IconAlarm.png';
+import IconCalendar from '../../../assets/images/IconCalendar.png';
+import IconDiary from '../../../assets/images/IconDiary.png';
+import IconMy from '../../../assets/images/IconMy.png';
 
 type TabName = 'DiaryWritePage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
 
 // 탭의 소속 페이지 그룹 정의. 페이지 만들 때마다 여기에 추가!!
 const tabGroups: Record<TabName, string[]> = {
   DiaryWritePage: ['DiaryWritePage'],
-  AlarmPage: ['AlarmPage', 'TestTimeScrollPage', 'TestHalfTimeScrollPage'],
+  AlarmPage: ['WakeUpAlarmPage', 'WakeUpAlarmPageNotAuto', 'TestTimeScrollPage', 'TestHalfTimeScrollPage', 'AlarmDetailPage'],
   CalendarPage: ['CalendarPage'],
   MyPage: ['MyPage'],
 };

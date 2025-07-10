@@ -1,9 +1,9 @@
 // src/pages/TestTimeScrollPage.tsx
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import BottomLayout from '../Layouts/BottomLayout';
-import PageBackButton from '../components/PageBackButton';
+import PageBackButton from '../components/common/PageBackButton';
 import TimeScrollPanel from '../components/TimeScrollPanel';
+import BottomLayout from '../Layouts/BottomLayout';
 
 export default function AlarmPage() {
   return (

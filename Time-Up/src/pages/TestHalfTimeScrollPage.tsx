@@ -2,8 +2,8 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../Layouts/BottomLayout';
-import HalfTimeScrollPanel from '../components/HalfTimeScrollPanel';
-import PageBackButton from '../components/PageBackButton';
+import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
+import PageBackButton from '../components/common/PageBackButton';
 
 export default function AlarmPage() {
   return (
