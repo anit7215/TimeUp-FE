@@ -1,4 +1,3 @@
-// src/pages/CalendarPage.tsx
 import React, { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import CancleButton from '../components/common/CancleButton';
