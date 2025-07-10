@@ -5,6 +5,12 @@ import BeforeButton from '../../components/Onboarding/BeforeButton';
 import NextButton from '../../components/Onboarding/NextButton';
 import useAppNavigation from '../../hooks/useAppNavigation';
 
+interface AddressItem {
+  id: number;
+  region: string;
+  address: string;
+}
+
 export default function AddressSearchPage() {
   const navigation = useAppNavigation();
   const mockResults = [
@@ -17,8 +23,8 @@ export default function AddressSearchPage() {
   ];
 
   const [searchText, setSearchText] = useState('');
-  const [results, setResults] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [results, setResults] = useState<AddressItem[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const handleSearch = () => {
     const filtered =
@@ -28,7 +34,7 @@ export default function AddressSearchPage() {
     setResults(filtered);
   };
 
-  const handleSelect = (id) => {
+  const handleSelect = (id:number) => {
     setSelectedId(id);
   };
 
