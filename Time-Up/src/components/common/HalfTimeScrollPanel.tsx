@@ -163,7 +163,7 @@ export default function HalfTimeScrollPanel() {
   };
 
   return (
-    <View className="flex-row items-center justify-center bg-gray-700 w-[220px] h-[260px] px-2">
+    <View className="flex-row items-center justify-center bg-transparent w-[220px] h-[260px] px-2">
       <View className="w-[70px] items-center">
         {renderControlList(periods, selectedPeriod, setSelectedPeriod, periodRef, 'periods')}
       </View>
