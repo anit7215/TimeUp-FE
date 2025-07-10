@@ -5,15 +5,16 @@ import { Dimensions, Platform } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
-import AlarmDetailPage from './src/pages/AlarmDetailPage';
 import AlarmPage from './src/pages/AlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
 import LoginPage from './src/pages/LoginPage';
+import MyAlarmPage from './src/pages/MyAlarmPage';
 import MyPage from './src/pages/MyPage';
 import OnboardingPage from './src/pages/OnboardingPage';
 import TestHalfTimeScrollPage from './src/pages/TestHalfTimeScrollPage';
 import TestTimeScrollPage from './src/pages/TestTimeScrollPage';
+import WakeUpAlarmDetailPage from './src/pages/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/WakeUpAlarmPage';
 import WakeUpAlarmPageNotAuto from './src/pages/WakeUpAlarmPageNotAuto';
 
@@ -25,7 +26,7 @@ export default function App() {
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="AlarmDetailPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="WakeUpAlarmDetailPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="LoginPage" component={LoginPage} />
@@ -36,7 +37,8 @@ export default function App() {
         <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
         <Stack.Screen name="TestTimeScrollPage" component={TestTimeScrollPage} />
         <Stack.Screen name="TestHalfTimeScrollPage" component={TestHalfTimeScrollPage} />
-        <Stack.Screen name="AlarmDetailPage" component={AlarmDetailPage} />
+        <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
+        <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
 
       </Stack.Navigator>
     </NavigationContainer>
