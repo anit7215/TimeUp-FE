@@ -1,3 +1,4 @@
+// src/components/common/ToggleSwitch.tsx
 import React from 'react';
 import {
   Animated,

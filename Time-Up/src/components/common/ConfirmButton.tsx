@@ -39,7 +39,6 @@ export default function ConfirmButton({
         position: 'relative',
       }}
     >
-      {/* ✅ inset shadow */}
       <View
         style={{
           position: 'absolute',
@@ -72,7 +71,6 @@ export default function ConfirmButton({
         </Svg>
       </View>
 
-      {/* ✅ 가운데 정렬된 텍스트 */}
       <View
         style={{
           position: 'absolute',

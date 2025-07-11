@@ -16,8 +16,8 @@ export default function StepWakeUp() {
           onPress={() => alert(`${day} 기상 시간 설정`)}
         >
           <Text className="text-white font-medium text-base">{day}</Text>
-          <Text className="text-gray font-normal text-base">|</Text>
-          <Text className="text-gray font-normal text-base">오전 08:00</Text>
+          <Text className="text-white font-normal text-base">|</Text>
+          <Text className="text-white font-normal text-base">오전 08:00</Text>
         </TouchableOpacity>
       ))}
     </>

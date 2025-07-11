@@ -19,14 +19,14 @@ export default function StepAddress() {
         onPress={() => navigation.navigate('AddressSearchPage')}
       >
         <Text className="text-white font-medium text-base">집</Text>
-        <Text className="text-gray font-normal text-base">선택</Text>
+        <Text className="text-gray-100 font-normal text-base">선택</Text>
       </TouchableOpacity>
       <TouchableOpacity
         className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
         onPress={() => navigation.navigate('AddressSearchPage')}
       >
         <Text className="text-white font-medium text-base">직장/학교</Text>
-        <Text className="text-gray font-normal text-base">선택</Text>
+        <Text className="text-gray-100 font-normal text-base">선택</Text>
       </TouchableOpacity>
     </>
   );

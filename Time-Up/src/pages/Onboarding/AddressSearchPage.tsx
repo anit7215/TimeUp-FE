@@ -78,7 +78,7 @@ export default function AddressSearchPage() {
     <View className="flex-1 bg-black px-4 pt-[88px]">
       <Text className="font-pretendard font-medium text-[20px] leading-[28px] tracking-[-0.02em] text-white mb-6">주소 검색</Text>
 
-      <View className="w-full h-12 px-4 border border-gray rounded-[20px] flex-row items-center mt-4 mb-3">
+      <View className="w-full h-12 px-4 border border-gray-300 rounded-[20px] flex-row items-center mt-4 mb-3">
         <TextInput
           className="flex-1 text-white"
           placeholder="주소 검색"
