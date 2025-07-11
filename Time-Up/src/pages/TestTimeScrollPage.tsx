@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import PageBackButton from '../components/common/PageBackButton';
-import TimeScrollPanel from '../components/TimeScrollPanel';
+import TimeScrollPanel from '../components/common/TimeScrollPanel';
 import BottomLayout from '../Layouts/BottomLayout';
 
 export default function AlarmPage() {

@@ -9,7 +9,7 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ onClose, onConfirm, children }) => {
+const Modal = ({ onClose, onConfirm, children }: ModalProps) =>{
    const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();

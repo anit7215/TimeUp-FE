@@ -1,11 +1,11 @@
 // src/pages/AlarmPage.tsx
-import { useNavigation } from '@react-navigation/native';
+import useAppNavigation from '../hooks/useAppNavigation';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../Layouts/BottomLayout';
 
 export default function AlarmPage() {
-  const navigation = useNavigation();
+  const navigation = useAppNavigation();
   return (
     <BottomLayout>
       <View className="flex-1 items-center justify-center bg-white">
