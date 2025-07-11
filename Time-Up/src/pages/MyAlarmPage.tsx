@@ -1,4 +1,4 @@
-// src/pages/AlarmPage.tsx
+// src/pages/MyAlarmPage.tsx
 // 자동알람 - 기상알람 페이지
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomLayout from '../Layouts/BottomLayout';
 import ToggleSwitch from '../components/common/ToggleSwitch';
 
-export default function AlarmPage() {
+export default function MyAlarmPage() {
   const navigation = useNavigation();
   const [on, setOn] = useState(false);
   
@@ -22,8 +22,8 @@ export default function AlarmPage() {
         <View className="h-[19%] bg-blue justify-center rounded-t rounded-[20%]">
           <Text className="font-pretendard text-white text-3xl ml-5 mb-4">자동 알람</Text>
         </View>
-        <View className="h-14 w-[91%] bg-gray-700 rounded-2xl self-center items-center flex-row -m-7">
-          <Text className="font-pretendard text-white ml-[4%] mr-[27%] text-xl">6월 28일 (일) ㅣ 오전 07 : 30</Text>
+        <View className="h-14 w-[91%] bg-light rounded-2xl self-center items-center flex-row -m-7">
+          <Text className="font-pretendard text-black ml-[4%] mr-[27%] text-xl">6월 28일 (일) ㅣ 오전 07 : 30</Text>
           <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false}></ToggleSwitch>
         </View>
         <View className="flex-row items-start mt-[33%]">

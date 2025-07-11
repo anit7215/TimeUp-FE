@@ -1,4 +1,4 @@
-// src/pages/AlarmPage.tsx
+// src/pages/WakeUpAlarmPageNotAuto.tsx
 // 자동알람 - 기상알람 페이지
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomLayout from '../Layouts/BottomLayout';
 import ToggleSwitch from '../components/common/ToggleSwitch';
 
-export default function AlarmPage() {
+export default function WakeUpAlarmPageNotAuto() {
   const navigation = useNavigation();
   const [on, setOn] = useState(false);
   
@@ -21,8 +21,8 @@ export default function AlarmPage() {
         <View className="h-[19%] bg-blue justify-center rounded-t rounded-[20%]">
           <Text className="font-pretendard text-white text-3xl ml-5 mb-4">자동 알람</Text>
         </View>
-        <View className="h-14 w-[91%] bg-gray-700 rounded-2xl self-center justify-center -m-7">
-          <Text className="text-white ml-4 text-xl">설정된 자동 알람이 존재하지 않습니다.</Text>
+        <View className="h-14 w-[91%] bg-light rounded-2xl self-center justify-center -m-7">
+          <Text className="text-black ml-4 text-xl">자동 알람을 계산 중 입니다...</Text>
         </View>
         <View className="flex-row items-start mt-[33%]">
           <Text className='font-pretendard text-white text-[24px] ml-[4%]'>기상 알람</Text>

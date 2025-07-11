@@ -14,7 +14,7 @@ type TabName = 'DiaryWritePage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
 // 탭의 소속 페이지 그룹 정의. 페이지 만들 때마다 여기에 추가!!
 const tabGroups: Record<TabName, string[]> = {
   DiaryWritePage: ['DiaryWritePage'],
-  AlarmPage: ['WakeUpAlarmPage', 'WakeUpAlarmPageNotAuto', 'MyAlarmPage', 'TestTimeScrollPage', 'TestHalfTimeScrollPage', 'WakeUpAlarmDetailPage'],
+  AlarmPage: ['WakeUpAlarmPage', 'WakeUpAlarmPageNotAuto', 'MyAlarmPage', 'TestTimeScrollPage', 'TestHalfTimeScrollPage', 'WakeUpAlarmDetailPage', 'AlarmMemoPage', 'SelectAlarmSoundPage', 'SelectAlarmReplayPage', 'SelectAlarmVibratePage', 'EditWakeUpAlarmPage'],
   CalendarPage: ['CalendarPage'],
   MyPage: ['MyPage'],
 };

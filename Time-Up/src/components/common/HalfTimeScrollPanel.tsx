@@ -7,14 +7,14 @@ const ITEM_HEIGHT = 40;
 const generateRange = (start: number, end: number) =>
   Array.from({ length: end - start + 1 }, (_, i) => String(i + start).padStart(2, '0'));
 
-const hours = generateRange(1, 12);
+const hours = generateRange(0, 12);
 const minutes = generateRange(0, 59);
 const periods = Platform.OS === 'web'
   ? ['오전', '오후']
   : [' ', ' ', '오전', '오후', ' ', ' '];
 
 export default function HalfTimeScrollPanel() {
-  const [selectedHour, setSelectedHour] = useState('01');
+  const [selectedHour, setSelectedHour] = useState('00');
   const [selectedMinute, setSelectedMinute] = useState('00');
   const [selectedPeriod, setSelectedPeriod] = useState('오전');
 
