@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import BeforeButton from '../../components/Onboarding/BeforeButton';
@@ -11,7 +11,7 @@ import StepWakeUp from '../../components/Onboarding/StepWakeUp';
 import Modal from '../../components/common/Modal';
 
 export default function ProfileSettingPage() {
-    const navigation = useNavigation();
+  const navigation = useAppNavigation();
   const [step, setStep] = useState(1);
   const [open, setOpen] = useState(false);
 
@@ -127,7 +127,7 @@ export default function ProfileSettingPage() {
       </View>
       {open && (
         // 확인 시 로직 추가 예정
-        <Modal onClose={() => setOpen(false)} >
+        <Modal onClose={() => setOpen(false)} onConfirm={()=>navigation.navigate('MyPage')} >
           {"지금까지 입력하신 내용을 \n제출하시겠습니까?"}
         </Modal>
       )}
