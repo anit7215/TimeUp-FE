@@ -9,6 +9,7 @@ import AlarmPage from './src/pages/AlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
 import MyPage from './src/pages/Mypage/MyPage';
+import UserInfoPage from './src/pages/Mypage/UserInfoPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
@@ -31,6 +32,8 @@ export default function App() {
         <Stack.Screen name="TestHalfTimeScrollPage" component={TestHalfTimeScrollPage} />
         <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
         <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
+        <Stack.Screen name="UserInfoPage" component={UserInfoPage} />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

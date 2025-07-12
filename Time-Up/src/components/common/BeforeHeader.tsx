@@ -12,7 +12,7 @@ type BeforeHeaderProps = {
 export default function BeforeHeader({ title, rightLabel, onRightPress }: BeforeHeaderProps) {
     const navigation = useNavigation();
     return (
-    <View className="flex-row items-center justify-between px-4 pt-[60px] bg-black relative">
+    <View className="flex-row items-center justify-between px-4 pt-[60px] pb-9 bg-black relative">
     <TouchableOpacity onPress={() => navigation.goBack()}>
         <BeforeArrowIcon />
     </TouchableOpacity>
