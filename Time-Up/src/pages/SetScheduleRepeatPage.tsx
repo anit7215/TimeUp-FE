@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
 import {
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  BottomSheetModal, BottomSheetView
+} from '@gorhom/bottom-sheet';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import moment from 'moment';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import LeftArrowIcon from '../../assets/icons/LeftArrowIcon.svg';
 import CheckBox from '../components/common/CheckBox';
 
+
 export default function SetScheduleRepeatPage() {
+      const [selectedItem, setSelectedItem] = useState<string | null>(null)
+      const route=useRoute()
+      const navigation=useNavigation() as any
+      const { onSelect, currentValue } = useRoute().params as {
+        onSelect: (val: string) => void
+        currentValue: string
+      }
+      const [selectedRepeat, setSelectedRepeat] = useState(currentValue || '')
+      const bottomSheetModalRef = useRef<BottomSheetModal>(null)
+      const snapPoints = useMemo(() => ['50%', '50%'], [])
+      const handleSheetChanges = useCallback((index: number) => {
+        console.log('handleSheetChanges', index)
+      }, [])
+      const [currentDate, setCurrentDate] = useState(moment().format('YYYY-MM-DD'))
     const [repeatType, setRepeatType] = useState<'weekly' | 'monthly' | 'none'>('none')
     const [selectedWeekdays, setSelectedWeekdays] = useState<{ [key: string]:boolean}>({
         Sun: false,
@@ -58,15 +79,117 @@ export default function SetScheduleRepeatPage() {
 
 
   return ( // 뒤로가기랑 확인 네비게이션은 나중에 공통으로 만들도록 합시다
-    <View className="flex-1 bg-[#121212] pt-12 px-4">
+    <View className="flex-1 bg-[#121212] pt-20 px-4">
+    <BottomSheetModal
+        ref={bottomSheetModalRef}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
+        backgroundStyle={{ backgroundColor: '#33363B' }} // 배경색 설정
+    > 
+  <BottomSheetView style={{ flex: 1, padding: 16}}>
+
+      {(selectedItem === '종료 날짜 설정') && (
+        <View>
+          <Calendar
+            key={currentDate}
+            current={currentDate}
+            theme={{
+              calendarBackground: '#33363B',
+              textDisabledColor: 'gray',
+
+            }}
+            markedDates={{
+              [currentDate]: {
+                selected: true,
+                selectedColor: 'blue',
+              },
+            }}
+
+            renderHeader={(date) => {
+              return (
+                <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>
+                  {moment(date).format('M월 YYYY')}
+                </Text>
+              )
+            }}
+
+            dayComponent={({ date, state }) => {
+              if (!date) return null
+
+              const day = date.day
+              const dateString = date.dateString
+              const dayOfWeek = new Date(dateString).getDay()
+              const isSelected = dateString === currentDate
+
+              const getTextColor = () => {
+                if (state === 'disabled') return 'gray'
+                if (isSelected) return 'white'
+                if (dayOfWeek === 0) return '#FF3B30'
+                if (dayOfWeek === 6) return '#007AFF'
+                return 'white'
+              }
+
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log('Pressed date:', dateString)
+                    setCurrentDate(dateString)
+                  }}
+                >
+                  <View
+                    className={`w-10 h-10 justify-center items-center rounded-full ${
+                      isSelected ? 'bg-blue-600' : ''
+                    }`}
+                  >
+                    <Text style={{ color: getTextColor(), fontSize: 16 }}>{day}</Text>
+                  </View>
+                </TouchableOpacity>
+              )
+            }}
+            />
+                <View className="flex-row justify-between mt-6 px-10 py-8">
+                  <TouchableOpacity
+                    onPress={() => console.log('취소')}
+                    className="w-[48%] bg-transparent py-3 rounded-lg items-center "
+                  >
+                    <Text className="text-white text-base text-[18px]">취소</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => console.log('선택')}
+                    className="w-[48%] bg-transparent py-3 rounded-lg items-center"
+                  >
+                    <Text className="text-white text-base text-[18px]">선택</Text>
+                     {/* 선택 버튼 누르면 저장되고 모달 자동으로 닫히는 로직 추후 추가 */}
+                  </TouchableOpacity>
+                            </View>
+                </View>
+      )}
+            </BottomSheetView>
+        </BottomSheetModal>
+  
         <View className="flex-row space-between">
         <TouchableOpacity onPress={() => console.log('뒤로가기')}>
             < LeftArrowIcon/>
           </TouchableOpacity>
+          <TouchableOpacity
+          onPress={() => {
+            if (onSelect) onSelect(selectedRepeat)
+            navigation.goBack()
+          }}
+          style={{
+            marginTop: 40,
+            padding: 16,
+            backgroundColor: '#007AFF',
+            borderRadius: 8,
+            alignItems: 'center',
+          }}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>확인</Text>
+      </TouchableOpacity>
         </View>
 
         <View className="flex-column ml-[16px] mr-[16px] pl-4 pt-4">
-            <Text className="text-white text-[30px]">반복 주기</Text>
+            <Text className="text-white text-[20px]">반복 주기</Text>
                 <View className="flex-row p-4">
                     <CheckBox
                     isChecked={repeatType === 'weekly'}
@@ -119,15 +242,15 @@ export default function SetScheduleRepeatPage() {
                 {repeatType === 'monthly' && (
                     <View className="m-4">
                         <TouchableOpacity
-                            className="bg-[#33373B] w-[238px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center"
+                            className="bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center"
                         >
-                            <Text className="text-white">21일마다 반복</Text>
+                            <Text className="text-white text-[18px]">21일마다 반복</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            className="bg-[#33373B] w-[238px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center"
+                            className="bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center"
                         >
-                            <Text className="text-white">세 번째 수요일마다 반복</Text>
+                            <Text className="text-white text-[18px]">세 번째 수요일마다 반복</Text>
                         </TouchableOpacity>
                         </View>
 
@@ -138,7 +261,7 @@ export default function SetScheduleRepeatPage() {
 
 
         <View className="flex-column ml-[16px] mr-[16px] pl-4 pt-4">
-            <Text className="text-white text-[30px]">반복 기간</Text>
+            <Text className="text-white text-[20px]">반복 기간</Text>
                 <View className="flex-row p-4">
                     <CheckBox
                     isChecked={endType === 'setRepeatNum'}
@@ -168,7 +291,11 @@ export default function SetScheduleRepeatPage() {
                 <View className="flex-row pl-4">
                     <CheckBox
                     isChecked={endType === 'setEndDay'}
-                    onValueChangeHandler={() => handleEndType('setEndDay')}
+                    onValueChangeHandler={() => {
+                        handleEndType('setEndDay')
+                        setSelectedItem('종료 날짜 설정')
+                        bottomSheetModalRef.current?.present()
+                    } }
                     disabled={false}
                     >
                     </CheckBox>
@@ -181,5 +308,6 @@ export default function SetScheduleRepeatPage() {
         </View>
   
     </View>
+    
   )
 }
