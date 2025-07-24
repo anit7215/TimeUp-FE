@@ -75,10 +75,17 @@ export default function ProfileSettingPage() {
           />
         );
       case 3:
-        return (<StepTransport
-          selected={transport}
-          options={transportOptions}
-          onSelect={onSelectTransport}/>);
+        return (
+        <>
+          <Text className="font-pretendard font-medium text-[24px] leading-[32px] tracking-[-0.02em] text-white mb-9">
+            선호하는 이동 수단을 알려주세요
+          </Text>
+          <StepTransport
+            selected={transport}
+            options={transportOptions}
+            onSelect={onSelectTransport}/>
+        </>
+        );
       case 4:
         return (
           <StepTime/>

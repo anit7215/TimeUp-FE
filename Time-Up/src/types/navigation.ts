@@ -7,5 +7,7 @@ export type RootStackParamList = {
   AddressSearchPage: undefined;
   TestTimeScrollPage: undefined;
   TestHalfTimeScrollPage: undefined;
-  UserInfoPage: undefined;
+  EditInfoPage: undefined;
+  EditAlarmPage: undefined;
+  FeedbackPage: undefined;
 };

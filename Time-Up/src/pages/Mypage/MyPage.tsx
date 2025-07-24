@@ -33,15 +33,15 @@ export default function MyPage() {
               <Text className="text-darkblue text-[12px]">로그아웃</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-800 rounded-[12px] mb-2" onPress={() => navigation.navigate('UserInfoPage')}>
+          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-900 rounded-[12px] mb-2" onPress={() => navigation.navigate('EditInfoPage')}>
             <Text className="font-pretendard text-white text-[18px] text-medium">개인정보</Text>
             <NextIcon/>
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-800 rounded-[12px] mb-2" onPress={() => navigation.navigate('UserInfoPage')}>
+          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-900 rounded-[12px] mb-2" onPress={() => navigation.navigate('EditAlarmPage')}>
             <Text className="font-pretendard text-white text-[18px] text-medium">리마인드 / 알람</Text>
             <NextIcon/>
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-800 rounded-[12px]" onPress={() => navigation.navigate('UserInfoPage')}>
+          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-900 rounded-[12px]" onPress={() => navigation.navigate('FeedbackPage')}>
             <Text className="font-pretendard text-white text-[18px] text-medium">자동 알람 피드백</Text>
             <NextIcon/>
           </TouchableOpacity>

@@ -10,9 +10,6 @@ interface Props {
 export default function StepTransport({ selected, options, onSelect }: Props) {
   return (
     <>
-      <Text className="font-pretendard font-medium text-[24px] leading-[32px] tracking-[-0.02em] text-white mb-9">
-        선호하는 이동 수단을 알려주세요
-      </Text>
       {options.map((opt) => {
         const selectedIndex = selected.indexOf(opt.value);
         const isSelected = selectedIndex !== -1;
