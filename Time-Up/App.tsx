@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { Dimensions, Platform, useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
@@ -22,12 +22,10 @@ import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
 import WakeUpAlarmPageNotAuto from './src/pages/Alarm/WakeUpAlarmPageNotAuto';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
-import LoginPage from './src/pages/LoginPage';
-import MyPage from './src/pages/MyPage';
-import OnboardingPage from './src/pages/OnboardingPage';
-
-// 화면 높이 가져오기
-const screenHeight = Dimensions.get('window').height;
+import MyPage from './src/pages/Mypage/MyPage';
+import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
+import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
+import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -35,10 +33,9 @@ export default function App() {
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="MyAlarmDetailPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
-        <Stack.Screen name="LoginPage" component={LoginPage} />
         <Stack.Screen name="MyPage" component={MyPage} />
         <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
         <Stack.Screen name="WakeUpAlarmPageNotAuto" component={WakeUpAlarmPageNotAuto} />
@@ -56,7 +53,8 @@ export default function App() {
         <Stack.Screen name="SelectAlarmDatePage" component={SelectAlarmDatePage} />
         <Stack.Screen name="SelectAlarmTimePage" component={SelectAlarmTimePage} />
         <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
-
+        <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
+        <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

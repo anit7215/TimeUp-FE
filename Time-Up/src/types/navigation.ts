@@ -5,4 +5,4 @@ export type RootStackParamList = {
   MyPage: undefined;
   ProfileSettingPage: undefined;
   AddressSearchPage: undefined;
-};
+}

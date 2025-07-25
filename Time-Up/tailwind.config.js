@@ -12,6 +12,7 @@ module.exports = {
         pretendard: ['Pretendard-Regular'],
         'pretendard-bold': ['Pretendard-Bold'],
         'pretendard-medium': ['Pretendard-Medium'],
+        roboto: ['Roboto']
       },
       colors: {
         white: '#F7F7FE',
@@ -19,7 +20,7 @@ module.exports = {
         blue: '#4D4DFF', 
         dark: '#27273F',
         'dark-stroke': '#3A3A5F',
-        'gray-100': '#e7ebeeff',
+        'gray-100': '#C9CDD1',
         'gray-200': '#CFD3D7',
         'gray-300': '#979B9F',
         'gray-400': '#787c81ff',
