@@ -9,7 +9,7 @@ interface BottomLayoutProps {
 
 export default function BottomLayout({ children }: BottomLayoutProps) {
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-black">
       <View className="flex-1">{children}</View>
       <Navbar />
     </View>

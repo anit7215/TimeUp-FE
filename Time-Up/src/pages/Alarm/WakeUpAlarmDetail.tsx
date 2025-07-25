@@ -1,14 +1,13 @@
-// src/pages/MyAlarmDetailPage.tsx
+// src/pages/WakeUpAlarmDetail.tsx
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import TransparentButton from '../components/alarm/TransparentButton';
-import PageBackButton from '../components/common/PageBackButton';
-import ToggleSwitch from '../components/common/ToggleSwitch';
-import BottomLayout from '../Layouts/BottomLayout';
+import TransparentButton from '../../components/alarm/TransparentButton';
+import PageBackButton from '../../components/common/PageBackButton';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import BottomLayout from '../../Layouts/BottomLayout';
 
-export default function MyAlarmDetailPage() {
+export default function WakeUpAlarmDetail() {
   const navigation = useNavigation();
   const [on, setOn] = useState(false);
 
@@ -19,29 +18,38 @@ export default function MyAlarmDetailPage() {
   }, [])
 
   const handleEdit = () => {
-    console.log('내 알람 설정을 편집합니다');
-    navigation.navigate('EditMyAlarmPage');
+    console.log('기상 알람 설정을 편집합니다');
+    navigation.navigate('EditWakeUpAlarmPage');
   }
   
   
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="flex-row items-center justify-between mr-[4%]" 
           style={{ marginTop: Platform.OS === 'web' ? 30 : 15 }}>
           <PageBackButton />
-          <Text className='font-pretendard text-white text-[24px] mr-[4%]'>딥러닝 과제 제출</Text>
+          <Text className='font-pretendard text-white text-[24px] mr-[4%]'>월요일 기상 알람</Text>
           <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false}></ToggleSwitch>
         </View>
         <View className="bg-black items-center justify-center mt-[15%]">
           <View className="w-[80%] bg-blue rounded-3xl items-center justify-center"
             style={{ height: height * 0.18 }}>
-            <Text className="font-pretendard text-white text-2xl mb-4">5월 21일 (수)</Text>
-            <Text className="font-pretendard text-white text-3xl">오전    12  :  00</Text>
+            <Text className="font-pretendard text-white text-3xl">오전    08  :  00</Text>
           </View>
         </View>
         <View className="h-[55%] bg-gray-800 rounded-t-[30px] mt-[20%]">
-          <View className="h-[8%] w-[80%] self-center items-center justify-between flex-row mt-[8%]">
+          <Text className='text-white text-xl ml-[6%] mt-[7%]'>반복요일</Text>
+          <View className="flex-row items-center justify-center mt-[4%] mx-4">
+            <Text className='text-white text-xl'>   월   </Text>
+            <Text className='text-white text-xl'>   화   </Text>
+            <Text className='text-white text-xl'>   수   </Text>
+            <Text className='text-white text-xl'>   목   </Text>
+            <Text className='text-white text-xl'>   금   </Text>
+            <Text className='text-white text-xl'>   토   </Text>
+            <Text className='text-white text-xl'>   일   </Text>
+          </View>
+          <View className="self-center h-[1px] w-[85%] bg-gray-500 mt-[4%]"/>
+          <View className="h-[8%] w-[80%] self-center items-center justify-between flex-row mt-[2%]">
             <Text className="font-pretendard text-white text-xl">알람음</Text>
             <Text className="font-pretendard text-white ml-[5%] text-xl">Heavy Raindrop</Text>
           </View>
@@ -61,14 +69,12 @@ export default function MyAlarmDetailPage() {
           </View>
 
           <View className="flex-row items-center justify-center mx-4 gap-3"
-            style={{ marginTop: Platform.OS === 'web' ? 150 : 100 }}>
-            <TransparentButton title="삭제" onPress={handleEdit} />
+            style={{ marginTop: Platform.OS === 'web' ? 40 : 35 }}>
             <TransparentButton title="편집" onPress={handleEdit} />
           </View>
 
 
         </View>
-      </SafeAreaView>
     </BottomLayout>
   );
 }

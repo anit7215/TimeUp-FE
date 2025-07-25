@@ -2,11 +2,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import TransparentButton from '../components/alarm/TransparentButton';
-import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
-import ToggleSwitch from '../components/common/ToggleSwitch';
-import BottomLayout from '../Layouts/BottomLayout';
+import TransparentButton from '../../components/alarm/TransparentButton';
+import HalfTimeScrollPanel from '../../components/common/HalfTimeScrollPanel';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import BottomLayout from '../../Layouts/BottomLayout';
 
 export default function SelectAlarmTimePage() {
   const navigation = useNavigation();
@@ -30,7 +29,6 @@ export default function SelectAlarmTimePage() {
   
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="flex-row items-center justify-between mr-[4%]" 
           style={{ marginTop: Platform.OS === 'web' ? 30 : 15 }}>
           <Text className='font-pretendard text-white text-[24px] ml-[4%]'>알람 이름</Text>
@@ -56,7 +54,6 @@ export default function SelectAlarmTimePage() {
 
 
         </View>
-      </SafeAreaView>
     </BottomLayout>
   );
 }

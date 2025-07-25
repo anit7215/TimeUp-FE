@@ -1,11 +1,10 @@
 // src/pages/SelectAlarmSoundPage.tsx
 import React from 'react';
 import { Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomLayout from '../Layouts/BottomLayout';
-import TransparentButton from '../components/alarm/TransparentButton';
-import CheckBox from '../components/common/CheckBox';
-import PageBackButton from '../components/common/PageBackButton';
+import BottomLayout from '../../Layouts/BottomLayout';
+import TransparentButton from '../../components/alarm/TransparentButton';
+import CheckBox from '../../components/common/CheckBox';
+import PageBackButton from '../../components/common/PageBackButton';
 
 export default function SelectAlarmSoundPage() {
   const handleConfirm = () => {
@@ -20,7 +19,6 @@ export default function SelectAlarmSoundPage() {
 
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="flex-row mt-3 items-center justify-between">
           <PageBackButton />
           <TransparentButton title="확인" onPress={handleConfirm} />
@@ -48,7 +46,6 @@ export default function SelectAlarmSoundPage() {
           <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
         </View>        
 
-      </SafeAreaView>
     </BottomLayout>
   );
 }

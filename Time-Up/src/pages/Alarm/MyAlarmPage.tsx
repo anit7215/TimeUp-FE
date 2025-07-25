@@ -4,9 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomLayout from '../Layouts/BottomLayout';
-import ToggleSwitch from '../components/common/ToggleSwitch';
+import BottomLayout from '../../Layouts/BottomLayout';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 export default function MyAlarmPage() {
   const navigation = useNavigation();
@@ -18,7 +17,6 @@ export default function MyAlarmPage() {
   
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="h-[19%] bg-blue justify-center rounded-t rounded-[20%]">
           <Text className="font-pretendard text-white text-3xl ml-5 mb-4">자동 알람</Text>
         </View>
@@ -121,7 +119,6 @@ export default function MyAlarmPage() {
           </View>
 
         </View>
-      </SafeAreaView>
     </BottomLayout>
   );
 }

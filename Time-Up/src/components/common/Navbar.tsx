@@ -2,7 +2,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import { Image, Platform, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconAlarm from '../../../assets/images/IconAlarm.png';
 import IconCalendar from '../../../assets/images/IconCalendar.png';
@@ -61,10 +60,10 @@ export default function Navbar() {
   );
 
   return (
-    <SafeAreaView edges={['bottom']} className="bg-black items-center">
+    <View className="bg-black items-center">
       <View className="w-full h-[2px] bg-gray-500" />
       {renderTabs()}
-    </SafeAreaView>
+    </View>
   );
 }
 

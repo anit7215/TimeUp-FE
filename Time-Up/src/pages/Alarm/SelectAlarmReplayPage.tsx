@@ -1,13 +1,12 @@
-// src/pages/SelectAlarmVibratePage.tsx
+// src/pages/AlarmReplayPage.tsx
 import React from 'react';
 import { Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomLayout from '../Layouts/BottomLayout';
-import TransparentButton from '../components/alarm/TransparentButton';
-import CheckBox from '../components/common/CheckBox';
-import PageBackButton from '../components/common/PageBackButton';
+import BottomLayout from '../../Layouts/BottomLayout';
+import TransparentButton from '../../components/alarm/TransparentButton';
+import CheckBox from '../../components/common/CheckBox';
+import PageBackButton from '../../components/common/PageBackButton';
 
-export default function SelectAlarmVibratePage() {
+export default function AlarmReplayPage() {
   const handleConfirm = () => {
     console.log('확인 버튼 클릭됨');
   };
@@ -20,35 +19,38 @@ export default function SelectAlarmVibratePage() {
 
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="flex-row mt-3 items-center justify-between">
           <PageBackButton />
           <TransparentButton title="확인" onPress={handleConfirm} />
         </View>
-        <Text className="text-xl text-white ml-9 mt-8">진동</Text>
+        <Text className="text-xl text-white ml-9 mt-8">반복 간격</Text>
+        <View className="flex-row ml-9 mt-6">
+          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
+          <Text className="text-white text-xl ml-4">5분</Text>
+        </View>
+        <View className="flex-row ml-9 mt-6">
+          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
+          <Text className="text-white text-xl ml-4">10분</Text>
+        </View>
+        <View className="flex-row ml-9 mt-6">
+          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
+          <Text className="text-white text-xl ml-4">15분</Text>
+        </View>
+        <View className="flex-row ml-9 mt-6">
+          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
+          <Text className="text-white text-xl ml-4">20분</Text>
+        </View>
 
+        <Text className="text-xl text-white ml-9 mt-16">반복 기간</Text>
         <View className="flex-row ml-9 mt-6">
           <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
+          <Text className="text-white text-xl ml-4">3회</Text>
         </View>
         <View className="flex-row ml-9 mt-6">
           <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
+          <Text className="text-white text-xl ml-4">5회</Text>
         </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>        
 
-      </SafeAreaView>
     </BottomLayout>
   );
 }

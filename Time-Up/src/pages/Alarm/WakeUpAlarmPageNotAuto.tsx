@@ -1,13 +1,12 @@
-// src/pages/WakeUpAlarmPage.tsx
+// src/pages/WakeUpAlarmPageNotAuto.tsx
 // 자동알람 - 기상알람 페이지
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomLayout from '../Layouts/BottomLayout';
-import ToggleSwitch from '../components/common/ToggleSwitch';
+import BottomLayout from '../../Layouts/BottomLayout';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 
-export default function WakeUpAlarmPage() {
+export default function WakeUpAlarmPageNotAuto() {
   const navigation = useNavigation();
   const [on, setOn] = useState(false);
   
@@ -17,13 +16,11 @@ export default function WakeUpAlarmPage() {
   
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="h-[19%] bg-blue justify-center rounded-t rounded-[20%]">
           <Text className="font-pretendard text-white text-3xl ml-5 mb-4">자동 알람</Text>
         </View>
-        <View className="h-14 w-[91%] bg-light rounded-2xl self-center items-center flex-row -m-7">
-          <Text className="font-pretendard text-black ml-[4%] mr-[27%] text-xl">6월 28일 (일) ㅣ 오전 07 : 30</Text>
-          <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false}></ToggleSwitch>
+        <View className="h-14 w-[91%] bg-light rounded-2xl self-center justify-center -m-7">
+          <Text className="text-black ml-4 text-xl">자동 알람을 계산 중 입니다...</Text>
         </View>
         <View className="flex-row items-start mt-[33%]">
           <Text className='font-pretendard text-white text-[24px] ml-[4%]'>기상 알람</Text>
@@ -77,7 +74,6 @@ export default function WakeUpAlarmPage() {
             <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false}></ToggleSwitch>
           </View>
         </View>
-      </SafeAreaView>
     </BottomLayout>
   );
 }

@@ -2,11 +2,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import TransparentButton from '../components/alarm/TransparentButton';
-import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
-import ToggleSwitch from '../components/common/ToggleSwitch';
-import BottomLayout from '../Layouts/BottomLayout';
+import TransparentButton from '../../components/alarm/TransparentButton';
+import HalfTimeScrollPanel from '../../components/common/HalfTimeScrollPanel';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import BottomLayout from '../../Layouts/BottomLayout';
 
 export default function EditWakeUpAlarmPage() {
   const navigation = useNavigation();
@@ -26,7 +25,6 @@ export default function EditWakeUpAlarmPage() {
   
   return (
     <BottomLayout>
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         <View className="flex-row items-center justify-between mr-[4%]" 
           style={{ marginTop: Platform.OS === 'web' ? 30 : 30 }}>
           <Text className='font-pretendard text-white text-[24px] ml-[4%] mr-[45%]'>월요일 기상 알람</Text>
@@ -78,7 +76,6 @@ export default function EditWakeUpAlarmPage() {
 
 
         </View>
-      </SafeAreaView>
     </BottomLayout>
   );
 }
