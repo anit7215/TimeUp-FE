@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { Dimensions, Platform } from 'react-native';
+import { Dimensions, Platform, useWindowDimensions } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
@@ -31,10 +31,11 @@ const screenHeight = Dimensions.get('window').height;
 
 export default function App() {
   const Stack = createNativeStackNavigator();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="PushAlarmPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="MyAlarmDetailPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="LoginPage" component={LoginPage} />
@@ -62,21 +63,17 @@ export default function App() {
 
   return (
     <PaperProvider>
-      {Platform.OS === 'web' ? (
-        <SafeAreaView
-          style={{
-            width: 474,
-            height: screenHeight,
-            alignSelf: 'center',
-            borderWidth: 1,
-            borderColor: '#ccc',
-          }}
-        >
-          {content}
-        </SafeAreaView>
-      ) : (
-        content
-      )}
+      <SafeAreaView
+        edges={['top', 'bottom']}
+        className="flex-1 bg-black"
+        style={{
+          width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
+          height: screenHeight,
+          alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
+        }}
+      >
+        {content}
+      </SafeAreaView>
     </PaperProvider>
-    );
-  }
+  );
+}
