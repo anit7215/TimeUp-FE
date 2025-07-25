@@ -1,7 +1,7 @@
 // src/pages/PushAlarmPage.tsx
-import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import useAppNavigation from '../../hooks/useAppNavigation';
 
 export default function PushAlarmPage() {
   const navigation = useAppNavigation();

@@ -1,9 +1,9 @@
 // src/pages/SelectAlarmDatePage.tsx
-import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
 import TransparentButton from '../../components/alarm/TransparentButton';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
+import useAppNavigation from '../../hooks/useAppNavigation';
 import BottomLayout from '../../Layouts/BottomLayout';
 
 export default function SelectAlarmDatePage() {

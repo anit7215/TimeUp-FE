@@ -1,4 +1,4 @@
-// src/components/PageBackButton.tsx
+// src/components/common/PageBackButton.tsx
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';

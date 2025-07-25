@@ -5,6 +5,7 @@ import { Platform, useWindowDimensions } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
+import { AlarmProvider } from './src/contexts/AlarmContext';
 import AlarmMemoPage from './src/pages/Alarm/AlarmMemoPage';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
 import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
@@ -33,7 +34,7 @@ export default function App() {
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="EditWakeUpAlarmPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="MyPage" component={MyPage} />
@@ -61,17 +62,19 @@ export default function App() {
 
   return (
     <PaperProvider>
-      <SafeAreaView
-        edges={['top', 'bottom']}
-        className="flex-1 bg-black"
-        style={{
-          width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
-          height: screenHeight,
-          alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
-        }}
-      >
-        {content}
-      </SafeAreaView>
+      <AlarmProvider>
+        <SafeAreaView
+          edges={['top', 'bottom']}
+          className="flex-1 bg-black"
+          style={{
+            width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
+            height: screenHeight,
+            alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
+          }}
+        >
+          {content}
+        </SafeAreaView>
+      </AlarmProvider>
     </PaperProvider>
   );
 }

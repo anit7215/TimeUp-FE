@@ -1,11 +1,11 @@
 // src/pages/AlarmReplayPage.tsx
-import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React from 'react';
 import { Text, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import TransparentButton from '../../components/alarm/TransparentButton';
 import CheckBox from '../../components/common/CheckBox';
 import PageBackButton from '../../components/common/PageBackButton';
+import useAppNavigation from '../../hooks/useAppNavigation';
 
 export default function AlarmReplayPage() {
   const navigation = useAppNavigation();

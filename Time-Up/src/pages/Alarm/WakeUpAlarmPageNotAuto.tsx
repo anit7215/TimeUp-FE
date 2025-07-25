@@ -1,10 +1,10 @@
 // src/pages/WakeUpAlarmPageNotAuto.tsx
 // 자동알람 - 기상알람 페이지
-import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
+import useAppNavigation from '../../hooks/useAppNavigation';
 
 export default function WakeUpAlarmPageNotAuto() {
   const navigation = useAppNavigation();
