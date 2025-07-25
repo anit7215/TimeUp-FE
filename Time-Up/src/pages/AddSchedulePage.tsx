@@ -2,10 +2,11 @@ import {
   BottomSheetModal,
   BottomSheetView
 } from '@gorhom/bottom-sheet';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Text,
   TextInput,
   TouchableOpacity,
@@ -16,20 +17,19 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
 import StarIcon from '../../assets/icons/StarIcon.svg';
 import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
+import { Schedule } from '../types/schedule';
+import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
+import { createSchedule } from '../apis/schedule';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 export default function AddSchedulePage() {
-  const [schedule, setSchedule] = useState({
-    title: '',
-    startDate: '',
-    endDate: '',
-    startTime: '',
-    endTime: '',
-    color: '#F7A1A1', // 기본 색상
-    memo: '',
-    isImportant: false, // 중요 일정 여부
-    repeat: '',
-    remind: '',
-  })
+  const route = useRoute();
+  const { schedule } = route.params as { schedule: Schedule };
+  const { date } = route.params as { date: string }; // 날짜 파라미
+  const [startDate, setStartDate] useState(date);
+  const [form, setForm] = useState<Schedule>(schedule);
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"]
 
@@ -38,11 +38,31 @@ export default function AddSchedulePage() {
 
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
-  const snapPoints = useMemo(() => ['50%', '50%'], [])
+  const snapPoints = useMemo(() => ['50%', '50%'], []) // 모달 얼마나 열리는지 설정
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index)
   }, [])
   const [currentDate, setCurrentDate] = useState(moment().format('YYYY-MM-DD'))
+
+const handleSave = async () => {
+  try {
+    const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      Alert.alert('로그인이 필요합니다');
+      return;
+    }
+
+    // form을 API로 전송
+    const savedSchedule = await createSchedule(form, token); // token을 넘기도록 함수 수정해야 함
+
+    // CalendarPage로 form 넘기기
+    navigation.navigate('CalendarPage', { newSchedule: savedSchedule });
+
+  } catch (err) {
+    console.error(err);
+    Alert.alert('일정 저장 실패', '네트워크 오류 또는 서버 오류입니다');
+  }
+};
 
   return (
   <GestureHandlerRootView style={{ flex: 1 }}>
@@ -62,9 +82,9 @@ export default function AddSchedulePage() {
                   className="w-full h-[50px] border-[#65696D] border-[1px] p-4 rounded-[16px] text-white"
                   placeholder='일정 이름 입력'
                   placeholderTextColor={"#979B9F"}
-                  value={schedule.title || ''}
+                  value={form.name || ''}
                   onChangeText={(text) => {
-                    setSchedule({ ...schedule, title: text })
+                    setForm({...form, name: text})
                     console.log('일정 이름:', text) // 입력된 일정 이름 확인
                   }}
                 />
@@ -77,7 +97,7 @@ export default function AddSchedulePage() {
                         <TouchableOpacity
                           key={index}
                           onPress={() => {
-                            setSchedule({ ...schedule, color }) // 선택한 색상을 schedule에 저장
+                            setForm({ ...form, color }) // 선택한 색상을 schedule에 저장
                             console.log('선택한 색상:', color) // 선택한 색상 확인
                           }}
                           className={`
@@ -86,7 +106,7 @@ export default function AddSchedulePage() {
                         >
                           <View
                             className={`w-[60px] h-[60px] rounded-full ${
-                              schedule.color === color ? 'border-2 border-white' : 'border-0'
+                              form.color === color ? 'border-2 border-white' : 'border-0' // schedule로 해야하는거야?
                             }`}
                             style={{ backgroundColor: color }}
                           />
@@ -103,8 +123,8 @@ export default function AddSchedulePage() {
                 placeholderTextColor={"#979B9F"}
                 multiline={true}
                 textAlignVertical='top'
-                value={schedule.memo}
-                onChangeText={(text) => setSchedule({ ...schedule, memo: text })}
+                value={form.memo}
+                onChangeText={(text) => setForm({ ...form, memo: text })}
                 >
                   
                 </TextInput>
@@ -235,14 +255,14 @@ export default function AddSchedulePage() {
                 lineHeight: 24,
               }}
             >
-              {schedule.title ? schedule.title : '일정 이름'} {/* ✨ 기본값 처리 */}
+              {form.name ? form.name : '일정 이름'} {/* ✨ 기본값 처리 */}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={()=>{setSchedule({...schedule, isImportant: !schedule.isImportant})}
+          <TouchableOpacity onPress={()=>{setForm({...form, isImportant: !form.isImportant})}
 
         }>
-            <StarIcon fill={schedule.isImportant ? 'white' : 'none'}/>
+            <StarIcon fill={form.isImportant ? 'white' : 'none'}/>
           </TouchableOpacity>
         </View>
 
@@ -262,13 +282,13 @@ export default function AddSchedulePage() {
               () => {setSelectedItem("시작 날짜")
                 bottomSheetModalRef.current?.present() // 모달 오픈
               }}>
-              <Text className="text-white h-[32px]">7월 7일 (월)</Text>
+              <Text className="text-white h-[32px]">{formatKoreanDate(form.start_date)}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={
               () => {setSelectedItem("시작 시간")
                 bottomSheetModalRef.current?.present() // 모달 오픈
               }}>
-              <Text className="text-white h-[50px] text-[36px]">15:00</Text>
+              <Text className="text-white h-[50px] text-[36px]">{timeOnly(form.start_date)}</Text>
             </TouchableOpacity>
           </View>
           <View className="m-8">
@@ -279,13 +299,13 @@ export default function AddSchedulePage() {
               () => {setSelectedItem("종료 날짜")
                 bottomSheetModalRef.current?.present() // 모달 오픈
               }}>
-              <Text className="text-white h-[32px]">7월 7일 (월)</Text>
+              <Text className="text-white h-[32px]">{formatKoreanDate(form.end_date)}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={
               () => {setSelectedItem("종료 시간")
                 bottomSheetModalRef.current?.present() // 모달 오픈
               }}>
-              <Text className="text-white h-[50px] text-[36px]">15:00</Text>
+              <Text className="text-white h-[50px] text-[36px]">{timeOnly(form.end_date)}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -310,11 +330,11 @@ export default function AddSchedulePage() {
                   const getOnSelect = () => {
                     if (item.label === '반복') {
                       return (repeatValue: string) => {
-                        setSchedule({ ...schedule, repeat: repeatValue })
+                        setForm({ ...form, is_recurring: repeatValue })
                       }
                     } else if (item.label === '리마인드') {
                       return (remindValue: string) => {
-                        setSchedule({ ...schedule, remind: remindValue })
+                        setForm({ ...form, is_reminding: remindValue })
                       }
                     }
                     return undefined
@@ -322,7 +342,7 @@ export default function AddSchedulePage() {
               
                   navigation.navigate(item.screen, {
                     onSelect: getOnSelect(),
-                    currentValue: schedule[item.label === '반복' ? 'repeat' : 'remind'],
+                    currentValue: form[item.label === '반복' ? 'is_recurring' : 'is_reminding'],
                   })
                 }}}
                 className="flex-row justify-between items-center py-5 px-4 pt-10"
@@ -342,13 +362,13 @@ export default function AddSchedulePage() {
             {/* 하단 버튼 */}
             <View className="flex-row justify-between mt-6 px-10 py-8">
               <TouchableOpacity
-                onPress={() => console.log('취소')}
+                onPress={() => navigation.goBack()}
                 className="w-[48%] bg-transparent py-3 rounded-lg items-center "
               >
                 <Text className="text-white text-[18px]">취소</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => console.log('저장')}
+                onPress={() => handleSave()}
                 className="w-[48%] bg-transparent py-3 rounded-lg items-center"
               >
                 <Text className="text-white text-[18px]">저장</Text>

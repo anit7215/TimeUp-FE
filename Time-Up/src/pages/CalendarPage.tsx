@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -8,14 +8,45 @@ import {
   View,
 } from 'react-native';
 import PlusIcon from '../../assets/icons/plusIcon.svg';
+import { Schedule } from '../types/schedule';
 
+const route = useRoute();
 const { width } = Dimensions.get('window');
+const { newSchedule } = route.params as { newSchedule?: Schedule };
+
+const [selectMode, setSelectMode] = useState(false);
+const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
 const CustomCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [events, setEvents] = useState({});
   const navigation = useNavigation<any>();
+
+
+    const handleAddSchedule = (selectedDate: string) => {
+      
+    const initialSchedule: Schedule = {
+      scheduleId: '', // 등록 전에는 비워두기
+      name: '',
+      start_date: selectedDate,
+      end_date: selectedDate,
+      place_name: '',
+      address: '',
+      color: '#FFB366',
+      memo: '',
+      is_reminding: false,
+      remind_at: 0,
+      is_recurring: false,
+      is_important: false,
+    };
+
+    navigation.navigate('AddSchedule', { schedule: initialSchedule });
+  };
+
+  const handleDateSelect = (date: string) => {
+    navigation.navigate('AddSchedulePage', { date: selectedDate }) // 날짜 넘김
+  };
   
   // 현재 연도와 월 가져오기
   const year = currentDate.getFullYear();
@@ -152,11 +183,9 @@ const CustomCalendar = () => {
   };
   
   const handleDatePress = (day) => {
-    if (day.isCurrentMonth) {
-      setSelectedDate(day.date);
-      // 여기서 해당 날짜의 일정 상세 정보를 가져올 수 있음
-      console.log(`${year}-${month + 1}-${day.date} 선택됨`);
-    }
+      navigation.navigate('SchedulePage', { date: `${year}-${month + 1}-${day.date}` }); // 날짜 넘김
+      handleDateSelect(`${year}-${month + 1}-${day.date}`); // 날짜 넘김
+    
   };
   
   const renderCalendarDays = () => {
@@ -182,6 +211,7 @@ const CustomCalendar = () => {
                 onPress={() => handleDatePress(day)}
                 activeOpacity={0.7}
               >
+              
                 <Text
                   style={[
                     styles.dayText,
@@ -209,7 +239,7 @@ const CustomCalendar = () => {
       <View className="absolute top-0 left-0 right-0 z-10 mt-4 mb-4">
         <TouchableOpacity 
           style={{ position: 'absolute', top: 20, right: 20 }}
-          onPress={() => navigation.navigate('AddSchedulePage' as never)}
+          onPress={() => handleAddSchedule(`${year}-${month + 1}-${selectedDate}`)} // 날짜 불투명 설정하고 선택한 날짜는 동그라미 표시되도록 함
           activeOpacity={0.7}
         >
           <PlusIcon width={36} height={36} />
