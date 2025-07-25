@@ -1,15 +1,6 @@
-// src/components/TimeScrollPanel.tsx
+// src/components/common/TimeScrollPanel.tsx
 import React, { useRef, useState } from 'react';
-import {
-  FlatList,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 
 const ITEM_HEIGHT = 40;
 
@@ -36,11 +27,28 @@ export default function TimeScrollPanel() {
     onSelect(items[index]);
   };
 
-  const renderItem = (item: string, selected: string) => (
-    <View className="h-[40px] items-center justify-center">
-      <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>
-        {item}
-      </Text>
+  const getFontSizeClass = (
+    item: string,
+    selected: string,
+    index: number,
+    items: string[]
+  ): string => {
+    const selectedIndex = items.findIndex((v) => v === selected);
+    const distance = Math.abs(index - selectedIndex);
+
+    if (item === selected) return 'text-5xl text-white';
+    if (distance === 1) return 'text-3xl text-gray-300';
+    return 'text-2xl text-gray-300';
+  };
+
+  const renderItem = (
+    item: string,
+    selected: string,
+    index: number,
+    items: string[]
+  ) => (
+    <View className="items-center justify-center" style={{ height: ITEM_HEIGHT }}>
+      <Text className={getFontSizeClass(item, selected, index, items)}>{item}</Text>
     </View>
   );
 
@@ -54,89 +62,95 @@ export default function TimeScrollPanel() {
     return String(num).padStart(2, '0');
   };
 
-const renderControlList = (
-  label: string[],
-  selected: string,
-  setSelected: (val: string) => void,
-  max: number,
-  ref?: React.RefObject<FlatList<string> | null>
-) => {
-  const scrollToValue = (value: string) => {
-    const index = parseInt(value, 10);
-    ref?.current?.scrollToOffset({
-      offset: ITEM_HEIGHT * index,
-      animated: true,
-    });
-  };
+  const renderControlList = (
+    label: string[],
+    selected: string,
+    setSelected: (val: string) => void,
+    max: number,
+    ref?: React.RefObject<FlatList<string> | null>
+  ) => {
+    const scrollToValue = (value: string) => {
+      const index = parseInt(value, 10);
+      ref?.current?.scrollToOffset({
+        offset: ITEM_HEIGHT * index,
+        animated: true,
+      });
+    };
 
-  const handleIncrease = () => {
-    const nextValue = increase(selected, max);
-    setSelected(nextValue);
-    scrollToValue(nextValue);
-  };
+    const handleIncrease = () => {
+      const nextValue = increase(selected, max);
+      setSelected(nextValue);
+      scrollToValue(nextValue);
+    };
 
-  const handleDecrease = () => {
-    const nextValue = decrease(selected, max);
-    setSelected(nextValue);
-    scrollToValue(nextValue);
-  };
+    const handleDecrease = () => {
+      const nextValue = decrease(selected, max);
+      setSelected(nextValue);
+      scrollToValue(nextValue);
+    };
 
-  return (
-    <View className="items-center">
-      {Platform.OS === 'web' && (
-        <TouchableOpacity onPress={handleIncrease}>
-          <Text className="text-white text-lg">▲</Text>
-        </TouchableOpacity>
-      )}
+    return (
+      <View className="items-center">
+        {Platform.OS === 'web' && (
+          <TouchableOpacity onPress={handleIncrease}>
+            <Text className="text-white text-lg">▲</Text>
+          </TouchableOpacity>
+        )}
 
-      {Platform.OS === 'web' ? (
-        <FlatList
-          ref={ref}
-          data={label}
-          keyExtractor={(item) => item}
-          snapToInterval={ITEM_HEIGHT}
-          decelerationRate="fast"
-          showsVerticalScrollIndicator={false}
-          getItemLayout={(_, index) => ({
-            length: ITEM_HEIGHT,
-            offset: ITEM_HEIGHT * index,
-            index,
-          })}
-          contentContainerStyle={{ paddingVertical: 80 }}
-          style={{ height: ITEM_HEIGHT * 5 }}
-          onMomentumScrollEnd={(e) => onScrollEnd(e, label, setSelected)}
-          renderItem={({ item }) => renderItem(item, selected)}
-          extraData={selected}
-        />
-      ) : (
-        <View style={{ height: ITEM_HEIGHT * 5, overflow: 'hidden' }}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
+        {Platform.OS === 'web' ? (
+          <FlatList
+            ref={ref}
+            data={label}
+            keyExtractor={(item) => item}
             snapToInterval={ITEM_HEIGHT}
-            snapToAlignment="center"
             decelerationRate="fast"
-            contentContainerStyle={{ paddingVertical: 80 }}
+            showsVerticalScrollIndicator={false}
+            getItemLayout={(_, index) => ({
+              length: ITEM_HEIGHT,
+              offset: ITEM_HEIGHT * index,
+              index,
+            })}
+            contentContainerStyle={{ paddingVertical: ITEM_HEIGHT * 2 }}
+            style={{ height: ITEM_HEIGHT * 5 }}
             onMomentumScrollEnd={(e) => onScrollEnd(e, label, setSelected)}
-          >
-            {label.map((item, index) => (
-              <View key={index} className="h-[40px] items-center justify-center">
-                <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>
-                  {item}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+            renderItem={({ item, index }) =>
+              renderItem(item, selected, index, label)
+            }
+            extraData={selected}
+          />
+        ) : (
+          <View style={{ height: ITEM_HEIGHT * 5, overflow: 'hidden' }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_HEIGHT}
+              snapToAlignment="center"
+              decelerationRate="fast"
+              contentContainerStyle={{ paddingVertical: ITEM_HEIGHT * 2 }}
+              onMomentumScrollEnd={(e) => onScrollEnd(e, label, setSelected)}
+            >
+              {label.map((item, index) => (
+                <View
+                  key={index}
+                  className="items-center justify-center"
+                  style={{ height: ITEM_HEIGHT }}
+                >
+                  <Text className={getFontSizeClass(item, selected, index, label)}>
+                    {item}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
-      {Platform.OS === 'web' && (
-        <TouchableOpacity onPress={handleDecrease}>
-          <Text className="text-white text-lg">▼</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-};
+        {Platform.OS === 'web' && (
+          <TouchableOpacity onPress={handleDecrease}>
+            <Text className="text-white text-lg">▼</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   return (
     <View className="flex-row items-center justify-center bg-transparent w-[160px] h-[260px]">
