@@ -1,5 +1,5 @@
 // src/pages/AlarmMemoPage.tsx
-import { useNavigation } from '@react-navigation/native';
+import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useCallback, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import TransparentButton from '../../components/alarm/TransparentButton';
@@ -8,7 +8,7 @@ import ToggleSwitch from '../../components/common/ToggleSwitch';
 import BottomLayout from '../../Layouts/BottomLayout';
 
 export default function AlarmMemoPage() {
-  const navigation = useNavigation();
+  const navigation = useAppNavigation();
   const [on, setOn] = useState(false);
   
   const handleToggleSwitch = useCallback(() => {

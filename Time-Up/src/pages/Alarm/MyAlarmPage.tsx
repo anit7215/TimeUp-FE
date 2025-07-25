@@ -1,14 +1,14 @@
 // src/pages/MyAlarmPage.tsx
 // 자동알람 - 기상알람 페이지
+import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 export default function MyAlarmPage() {
-  const navigation = useNavigation();
+  const navigation = useAppNavigation();
   const [on, setOn] = useState(false);
   
   const handleToggleSwitch = useCallback(() => {

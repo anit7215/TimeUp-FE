@@ -1,4 +1,5 @@
 // src/pages/SelectAlarmVibratePage.tsx
+import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React from 'react';
 import { Text, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
@@ -7,6 +8,8 @@ import CheckBox from '../../components/common/CheckBox';
 import PageBackButton from '../../components/common/PageBackButton';
 
 export default function SelectAlarmVibratePage() {
+  const navigation = useAppNavigation();
+
   const handleConfirm = () => {
     console.log('확인 버튼 클릭됨');
   };

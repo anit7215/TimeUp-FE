@@ -1,8 +1,11 @@
 // src/pages/PushAlarmPage.tsx
+import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 export default function PushAlarmPage() {
+  const navigation = useAppNavigation();
+
   const handleOff = () => {
     console.log('알람 해제 버튼 클릭됨');
   };
