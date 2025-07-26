@@ -5,6 +5,18 @@ export type RootStackParamList = {
   MyPage: undefined;
   ProfileSettingPage: undefined;
   AddressSearchPage: undefined;
-  TestTimeScrollPage: undefined;
-  TestHalfTimeScrollPage: undefined;
-};
+  AlarmMemoPage: undefined;
+  AlarmPage: undefined;
+  EditMyAlarmPage: undefined;
+  EditWakeUpAlarmPage: undefined;
+  MyAlarmDetailPage: undefined;
+  MyAlarmPage: undefined;
+  PushAlarmPage: undefined;
+  SelectAlarmDatePage: undefined;
+  SelectAlarmReplayPage: undefined;
+  SelectAlarmSoundPage: undefined;
+  SelectAlarmTimePage: undefined;
+  SelectAlarmVibratePage: undefined;
+  WakeUpAlarmDetailPage: undefined;
+  WakeUpAlarmPage: undefined;
+}
