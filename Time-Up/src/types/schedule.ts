@@ -11,6 +11,8 @@ export interface Schedule {
     remind_at?: number;
     is_recurring: boolean;
     is_important: boolean;
+    repeat: string;
+    remind: string;
 }
 
 export type CreateScheduleRequest = Omit<Schedule, 'id'>;

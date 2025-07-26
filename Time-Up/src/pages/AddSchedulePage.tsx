@@ -2,6 +2,7 @@ import {
   BottomSheetModal,
   BottomSheetView
 } from '@gorhom/bottom-sheet';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -16,11 +17,10 @@ import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
 import StarIcon from '../../assets/icons/StarIcon.svg';
-import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
-import { Schedule } from '../types/schedule';
-import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
 import { createSchedule } from '../apis/schedule';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
+import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
+import { Schedule } from '../types/schedule';
 
 
 
@@ -28,8 +28,7 @@ export default function AddSchedulePage() {
   const route = useRoute();
   const { schedule } = route.params as { schedule: Schedule };
   const { date } = route.params as { date: string }; // 날짜 파라미
-  const [startDate, setStartDate] useState(date);
-  const [form, setForm] = useState<Schedule>(schedule);
+  const [form, setForm] = useState(schedule as Schedule);
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"]
 
@@ -259,10 +258,10 @@ const handleSave = async () => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={()=>{setForm({...form, isImportant: !form.isImportant})}
+          <TouchableOpacity onPress={()=>{setForm({...form, is_important: !form.is_important})}
 
         }>
-            <StarIcon fill={form.isImportant ? 'white' : 'none'}/>
+            <StarIcon fill={form.is_important ? 'white' : 'none'}/>
           </TouchableOpacity>
         </View>
 
@@ -330,11 +329,11 @@ const handleSave = async () => {
                   const getOnSelect = () => {
                     if (item.label === '반복') {
                       return (repeatValue: string) => {
-                        setForm({ ...form, is_recurring: repeatValue })
+                        setForm({ ...form, is_recurring: true, repeat: repeatValue })
                       }
                     } else if (item.label === '리마인드') {
                       return (remindValue: string) => {
-                        setForm({ ...form, is_reminding: remindValue })
+                        setForm({ ...form, is_reminding: true, remind: remindValue })
                       }
                     }
                     return undefined
