@@ -212,7 +212,8 @@ export default function HalfTimeScrollPanel() {
       <View className="w-[50px] items-center">
         {renderControlList(hours, selectedHour, setSelectedHour, hourRef, 'hours')}
       </View>
-      <Text className="text-xl font-bold text-white px-2">:</Text>
+      <Text className="text-xl font-bold text-white px-2"
+        style={{ marginBottom: Platform.OS === 'web' ? 25 : 0 }}>    :    </Text>
       <View className="w-[50px] items-center">
         {renderControlList(
           minutes,

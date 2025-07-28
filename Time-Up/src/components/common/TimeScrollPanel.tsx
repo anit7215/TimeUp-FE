@@ -157,7 +157,8 @@ export default function TimeScrollPanel() {
       <View className="flex-1 items-center">
         {renderControlList(hours, selectedHour, setSelectedHour, 23, hourRef)}
       </View>
-      <Text className="text-xl font-bold text-white px-2">:</Text>
+      <Text className="text-xl font-bold text-white px-2"
+        style={{ marginBottom: Platform.OS === 'web' ? 25 : 0 }}>    :    </Text>
       <View className="flex-1 items-center">
         {renderControlList(minutes, selectedMinute, setSelectedMinute, 59, minuteRef)}
       </View>

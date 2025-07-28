@@ -37,7 +37,7 @@ export default function WakeUpAlarmDetailPage() {
         <PageBackButton />
 
         <Text className='font-pretendard text-white text-[24px] mr-[4%]'>
-          {selectedDay ?? '요일'} 기상 알람
+          {selectedDay}요일 기상 알람
         </Text>
         <ToggleSwitch
           isOn={selectedDay ? weekdaySwitchStates[selectedDay] : false}

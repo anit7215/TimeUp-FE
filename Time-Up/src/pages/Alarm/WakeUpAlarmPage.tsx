@@ -1,23 +1,17 @@
 // src/pages/WakeUpAlarmPage.tsx
 // 자동알람 - 기상알람 페이지
-import React, { useState } from 'react';
+import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 import { Day, useAlarmContext } from '../../contexts/AlarmContext';
 import useAppNavigation from '../../hooks/useAppNavigation';
 
-const weekdays: Day[] = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
 export default function WakeUpAlarmPage() {
   const navigation = useAppNavigation();
-  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates } = useAlarmContext();
-
-  const [autoAlarmOn, setAutoAlarmOn] = useState(false);
-
-  const [switchStates, setSwitchStates] = useState<Record<Day, boolean>>(() =>
-    weekdays.reduce((acc, day) => ({ ...acc, [day]: false }), {} as Record<Day, boolean>)
-  );
+  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, } = useAlarmContext();
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -28,13 +22,13 @@ export default function WakeUpAlarmPage() {
     setAutoAlarmOn((prev) => !prev);
   };
 
-const handleToggleSwitchForDay = (day: Day) => {
-  setWeekdaySwitchStates(prev => {
-    const next = { ...prev, [day]: !prev[day] };
-    console.log(`${day} 기상알람이 ${next[day] ? '켜졌습니다' : '꺼졌습니다'}.`);
-    return next;
-  });
-};
+  const handleToggleSwitchForDay = (day: Day) => {
+    setWeekdaySwitchStates(prev => {
+      const next = { ...prev, [day]: !prev[day] };
+      console.log(`${day} 기상알람이 ${next[day] ? '켜졌습니다' : '꺼졌습니다'}.`);
+      return next;
+    });
+  };
 
   const handleMyPage = () => {
     console.log('내 알람 페이지로 이동합니다.');
@@ -88,15 +82,15 @@ const handleToggleSwitchForDay = (day: Day) => {
           >
             <View className="h-14 w-[91%] bg-dark border border-dark-stroke rounded-full self-center flex-row items-center justify-between px-[5%] mt-4">
               <View className="flex-row items-center gap-x-2 flex-nowrap overflow-hidden">
-                <Text className="font-pretendard text-white text-xl">{day}</Text>
+                <Text className="font-pretendard text-white text-xl">{day}요일</Text>
                 <Text className="font-pretendard text-white text-xl">   ㅣ   </Text>
                 <Text className="font-pretendard text-white text-xl">오전 08 : 00</Text>
               </View>
-<ToggleSwitch
-  isOn={weekdaySwitchStates[day]}
-  onToggle={() => handleToggleSwitchForDay(day)}
-  disabled={false}
-/>
+              <ToggleSwitch
+                isOn={weekdaySwitchStates[day]}
+                onToggle={() => handleToggleSwitchForDay(day)}
+                disabled={false}
+              />
             </View>
           </TouchableOpacity>
         ))}

@@ -24,8 +24,6 @@ export default function SelectAlarmTimePage() {
   const handleCancel = () => {
     console.log('날짜 선택을 취소합니다.');
   }
-
-  
   
   return (
     <BottomLayout>

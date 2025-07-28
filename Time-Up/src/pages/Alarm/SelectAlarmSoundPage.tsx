@@ -9,45 +9,38 @@ import useAppNavigation from '../../hooks/useAppNavigation';
 
 export default function SelectAlarmSoundPage() {
   const navigation = useAppNavigation();
+  const [selectedSound, setSelectedSound] = React.useState<string | null>(null);
+
+  const soundOptions = ['Heavy Raindrop', 'Basic Ring', 'Ocean Wave', 'Bird Chirp', 'Classic Bell'];
 
   const handleConfirm = () => {
     console.log('확인 버튼 클릭됨');
+    navigation.goBack();
   };
 
-  const [checked, setChecked] = React.useState(false);
-  const handleCheckBoxChange = (val: boolean) => {
-    setChecked(val);
-    console.log(`체크박스 상태: ${val ? '선택됨' : '선택되지 않음'}`);
-  }
+  const handleSelectSound = (sound: string) => {
+    setSelectedSound(sound);
+    console.log(`선택된 알람음: ${sound}`);
+  };
 
   return (
     <BottomLayout>
-        <View className="flex-row mt-3 items-center justify-between">
-          <PageBackButton />
-          <TransparentButton title="확인" onPress={handleConfirm} />
-        </View>
-        <Text className="text-xl text-white ml-9 mt-8">알람음</Text>
+      <View className="flex-row mt-3 items-center justify-between">
+        <PageBackButton />
+        <TransparentButton title="확인" onPress={handleConfirm} />
+      </View>
+      <Text className="text-xl text-white ml-9 mt-8">알람음</Text>
 
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
+      {soundOptions.map((sound) => (
+        <View key={sound} className="flex-row ml-9 mt-6">
+          <CheckBox
+            isChecked={selectedSound === sound}
+            onValueChangeHandler={() => handleSelectSound(sound)}
+            disabled={false}
+          />
+          <Text className="text-white text-xl ml-4">{sound}</Text>
         </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>        
+      ))}
 
     </BottomLayout>
   );

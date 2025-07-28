@@ -9,45 +9,38 @@ import useAppNavigation from '../../hooks/useAppNavigation';
 
 export default function SelectAlarmVibratePage() {
   const navigation = useAppNavigation();
+  const [selectedVibration, setSelectedVibration] = React.useState<string | null>(null);
+
+  const vibrationOptions = ['Basic Ring', 'Soft Buzz', 'Sharp Pulse', 'Heartbeat', 'Heavy Hit'];
 
   const handleConfirm = () => {
     console.log('확인 버튼 클릭됨');
+    navigation.goBack();
   };
 
-  const [checked, setChecked] = React.useState(false);
-  const handleCheckBoxChange = (val: boolean) => {
-    setChecked(val);
-    console.log(`체크박스 상태: ${val ? '선택됨' : '선택되지 않음'}`);
-  }
+  const handleSelectVibration = (vibration: string) => {
+    setSelectedVibration(vibration);
+    console.log(`선택된 진동 패턴: ${vibration}`);
+  };
 
   return (
     <BottomLayout>
-        <View className="flex-row mt-3 items-center justify-between">
-          <PageBackButton />
-          <TransparentButton title="확인" onPress={handleConfirm} />
-        </View>
-        <Text className="text-xl text-white ml-9 mt-8">진동</Text>
+      <View className="flex-row mt-3 items-center justify-between">
+        <PageBackButton />
+        <TransparentButton title="확인" onPress={handleConfirm} />
+      </View>
+      <Text className="text-xl text-white ml-9 mt-8">진동</Text>
 
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
+      {vibrationOptions.map((vibration) => (
+        <View key={vibration} className="flex-row ml-9 mt-6">
+          <CheckBox
+            isChecked={selectedVibration === vibration}
+            onValueChangeHandler={() => handleSelectVibration(vibration)}
+            disabled={false}
+          />
+          <Text className="text-white text-xl ml-4">{vibration}</Text>
         </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Basic Ring</Text>
-        </View>        
+      ))}
 
     </BottomLayout>
   );

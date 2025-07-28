@@ -1,71 +1,123 @@
 // src/pages/MyAlarmDetailPage.tsx
+import AlarmButton from '@/src/components/alarm/AlarmButton';
+import { useAlarmContext } from '@/src/contexts/AlarmContext';
+import { formatDate, formatTime } from '@/src/utils/AlarmFormat';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import TransparentButton from '../../components/alarm/TransparentButton';
 import PageBackButton from '../../components/common/PageBackButton';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 import useAppNavigation from '../../hooks/useAppNavigation';
 import BottomLayout from '../../Layouts/BottomLayout';
 
+import IconBiv from '../../../assets/images/AlarmBiv.svg';
+import IconMemo from '../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+
+
 export default function MyAlarmDetailPage() {
   const navigation = useAppNavigation();
   const [on, setOn] = useState(false);
-
   const { height } = Dimensions.get('window');
-  
+  const { selectedAlarmId, myAlarms, setMyAlarms } = useAlarmContext();
+
+  const alarm = myAlarms.find((a) => a.id === selectedAlarmId);
+
   const handleToggleSwitch = useCallback(() => {
     setOn((prev) => !prev);
-  }, [])
+  }, []);
 
   const handleEdit = () => {
-    console.log('내 알람 설정을 편집합니다');
+  console.log(`${alarm!.title} 알람 설정을 편집합니다`);
     navigation.navigate('EditMyAlarmPage');
-  }
-  
-  
-  return (
+  };
+
+  const handleDelete = () => {
+    if (!selectedAlarmId) return;
+
+    const alarmToDelete = myAlarms.find((a) => a.id === selectedAlarmId);
+    if (alarmToDelete) {
+      console.log(`${alarmToDelete.title} 알람이 삭제되었습니다.`);
+      const updatedAlarms = myAlarms.filter((a) => a.id !== selectedAlarmId);
+      setMyAlarms(updatedAlarms);
+      navigation.navigate('MyAlarmPage'); // 삭제 후 목록으로 이동
+    }
+  };
+
+  if (!alarm) {
+    return (
       <BottomLayout>
-        <View className="flex-row items-center justify-between mr-[4%]" 
-          style={{ marginTop: Platform.OS === 'web' ? 30 : 15 }}>
-          <PageBackButton />
-          <Text className='font-pretendard text-white text-[24px] mr-[4%]'>딥러닝 과제 제출</Text>
-          <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false}></ToggleSwitch>
-        </View>
-        <View className="bg-black items-center justify-center mt-[15%]">
-          <View className="w-[80%] bg-blue rounded-3xl items-center justify-center"
-            style={{ height: height * 0.18 }}>
-            <Text className="font-pretendard text-white text-2xl mb-4">5월 21일 (수)</Text>
-            <Text className="font-pretendard text-white text-3xl">오전    12  :  00</Text>
-          </View>
-        </View>
-        <View className="h-[55%] bg-gray-800 rounded-t-[30px] mt-[20%]">
-          <View className="h-[8%] w-[80%] self-center items-center justify-between flex-row mt-[8%]">
-            <Text className="font-pretendard text-white text-xl">알람음</Text>
-            <Text className="font-pretendard text-white ml-[5%] text-xl">Heavy Raindrop</Text>
-          </View>
-          <View className="self-center h-[1px] w-[85%] bg-gray-500 mt-[2%]"/>
-          <View className="h-[8%] w-[80%] self-center items-center justify-between flex-row mt-[2%]">
-            <Text className="font-pretendard text-white text-xl">진동</Text>
-            <Text className="font-pretendard text-white ml-[5%] text-xl">Basic Ring</Text>
-          </View>
-          <View className="self-center h-[1px] w-[85%] bg-gray-500 mt-[2%]"/>
-          <View className="h-[8%] w-[80%] self-center items-center justify-between flex-row mt-[2%]">
-            <Text className="font-pretendard text-white text-xl">다시 울림</Text>
-            <Text className="font-pretendard text-white ml-[5%] text-xl">10분, 5회</Text>
-          </View>
-          <View className="self-center h-[1px] w-[85%] bg-gray-500 mt-[2%]"/>
-          <View className="h-[8%] w-[80%] self-center items-center justify-between flex-row mt-[2%]">
-            <Text className="font-pretendard text-white text-xl">메모</Text>
-          </View>
-
-          <View className="flex-row items-center justify-center mx-4 gap-3"
-            style={{ marginTop: Platform.OS === 'web' ? 150 : 100 }}>
-            <TransparentButton title="삭제" onPress={handleEdit} />
-            <TransparentButton title="편집" onPress={handleEdit} />
-          </View>
-
-
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-white text-xl">알람 정보를 찾을 수 없습니다.</Text>
         </View>
       </BottomLayout>
+    );
+  }
+
+  return (
+    <BottomLayout>
+      <View className="flex-row items-center justify-between mr-[4%]" style={{ marginTop: Platform.OS === 'web' ? 30 : 0 }}>
+        <PageBackButton />
+        <Text className="font-pretendard text-white text-[24px] mr-[4%]" style={{ width: Platform.OS === 'web' ? 300 : 210}}>{alarm.title}</Text>
+        <ToggleSwitch isOn={alarm.isActive} onToggle={handleToggleSwitch} disabled={false}/>
+      </View>
+
+      <View className="bg-black items-center justify-center -mt-5">
+        <View className="w-[80%] items-center justify-center"
+          style={{ height: Platform.OS === 'web' ? height * 0.20 : height * 0.25 }}>
+          <Text className="font-pretendard text-white text-3xl mb-4">{formatDate(alarm.date)}</Text>
+          <Text className="font-pretendard text-white text-[40px]">{formatTime(alarm.time)}</Text>
+        </View>
+      </View>
+
+
+      <View className="w-full h-[55%] items-center gap-3 space-y-3">
+        <View className="w-[91%] flex-row gap-3">
+          <View className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3">
+            <View className="flex-row items-center">
+              <IconMusic width={20} height={20} />
+              <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
+            </View>
+            <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
+              <Text className="font-pretendard text-gray-200 text-xl">-</Text>
+            </View>
+          </View>
+          <View className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3">
+            <View className="flex-row items-center">
+              <IconBiv width={20} height={20} />
+              <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
+            </View>    
+            <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
+              <Text className="font-pretendard text-gray-200 text-xl">-</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
+          <View className="flex-row items-center">
+            <IconRepeat width={20} height={20} />
+            <Text className="font-pretendard text-gray-200 text-xl ml-2">다시 울림</Text>
+          </View>
+          <Text className="font-pretendard text-gray-200 text-xl ml-2">-</Text>
+        </View>
+
+        <View className="w-[91%] h-[200px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
+          <View className="flex-row items-center">
+            <IconMemo width={20} height={20} />
+            <Text className="font-pretendard text-gray-200 text-xl ml-2">메모</Text>
+          </View>
+          <Text className="font-pretendard text-gray-200 text-xl ml-2">
+            {alarm.memo?.trim() !== '' ? alarm.memo : '-'}
+          </Text>
+        </View>
+      </View>
+
+      <View className="flex-row items-center justify-center gap-10 mt-[3%]">
+        <AlarmButton title="삭제" onPress={handleDelete} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }}/>
+        <AlarmButton title="편집" onPress={handleEdit} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }}/>
+      </View>
+
+
+    </BottomLayout>
   );
 }

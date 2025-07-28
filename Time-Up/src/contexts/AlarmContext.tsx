@@ -1,9 +1,10 @@
 // src/contexts/AlarmContext.tsx
 import React, { createContext, useContext, useState } from 'react';
+import { MyAlarm } from '../types/alarm';
 
-export type Day = '월요일' | '화요일' | '수요일' | '목요일' | '금요일' | '토요일' | '일요일';
+export type Day = '월' | '화' | '수' | '목' | '금' | '토' | '일';
 
-const weekdays: Day[] = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
 interface AlarmContextProps {
   selectedDay: Day | null;
@@ -11,6 +12,15 @@ interface AlarmContextProps {
 
   weekdaySwitchStates: Record<Day, boolean>;
   setWeekdaySwitchStates: React.Dispatch<React.SetStateAction<Record<Day, boolean>>>;
+
+  autoAlarmOn: boolean;
+  setAutoAlarmOn: React.Dispatch<React.SetStateAction<boolean>>;
+
+  myAlarms: MyAlarm[];
+  setMyAlarms: React.Dispatch<React.SetStateAction<MyAlarm[]>>;
+
+  selectedAlarmId: string | null;
+  setSelectedAlarmId: (id: string | null) => void;
 }
 
 const AlarmContext = createContext<AlarmContextProps | undefined>(undefined);
@@ -25,6 +35,49 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [weekdaySwitchStates, setWeekdaySwitchStates] = useState<Record<Day, boolean>>(initialSwitchStates);
 
+  const [autoAlarmOn, setAutoAlarmOn] = useState<boolean>(false);
+
+  const [myAlarms, setMyAlarms] = useState<MyAlarm[]>([
+    {
+      id: '1',
+      title: '딥러닝 과제 제출',
+      time: {
+        period: '오후',
+        hour: 10,
+        minute: 0,
+      },
+      date: {
+        fullDate: '2025-06-27',
+        dayOfWeek: '토',
+      },
+      sound: 'Heavy Raindrop',
+      vibrate: true,
+      repeat: '10분, 5회',
+      memo: '',
+      isActive: true,
+    },
+    {
+      id: '2',
+      title: '딥러닝 과제 제출 후에 꼭 확인 할 것',
+      time: {
+        period: '오후',
+        hour: 10,
+        minute: 5,
+      },
+      date: {
+        fullDate: '2025-06-27',
+        dayOfWeek: '토',
+      },
+      sound: 'Basic Ring',
+      vibrate: false,
+      repeat: '5분, 3회',
+      memo: '',
+      isActive: true,
+    },
+  ]);
+
+  const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null);
+
   return (
     <AlarmContext.Provider
       value={{
@@ -32,6 +85,12 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedDay,
         weekdaySwitchStates,
         setWeekdaySwitchStates,
+        autoAlarmOn,
+        setAutoAlarmOn,
+        myAlarms,
+        setMyAlarms,
+        selectedAlarmId,
+        setSelectedAlarmId,
       }}
     >
       {children}
