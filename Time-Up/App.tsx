@@ -37,7 +37,7 @@ export default function App() {
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="EditWakeUpAlarmPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="MyPage" component={MyPage} />
