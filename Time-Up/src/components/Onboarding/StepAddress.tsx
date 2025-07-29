@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../types/navigation';
 
 type Navigation = NativeStackNavigationProp<RootStackParamList, 'OnboardingPage'>;
@@ -22,10 +22,13 @@ export default function StepAddress() {
         <Text className="text-gray-100 font-normal text-base">선택</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
+        className="px-4 py-[6px] mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
         onPress={() => navigation.navigate('AddressSearchPage')}
       >
-        <Text className="text-white font-medium text-base">직장/학교</Text>
+        <View className="flex-col">
+          <Text className="text-white font-medium text-base">직장/학교까지 이동 시간</Text>
+          <Text className="text-gray-200 font-regular text-[10px]">*선택 사항</Text>
+        </View>
         <Text className="text-gray-100 font-normal text-base">선택</Text>
       </TouchableOpacity>
     </>

@@ -1,14 +1,14 @@
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
-import BeforeButton from '../../components/Onboarding/BeforeButton';
-import NextButton from '../../components/Onboarding/NextButton';
+import BeforeHeader from '../../components/common/BeforeHeader';
+import Modal from '../../components/common/Modal';
+import NextButton from '../../components/common/NextButton';
 import StepAddress from '../../components/Onboarding/StepAddress';
 import StepForm from '../../components/Onboarding/StepForm';
 import StepTime from '../../components/Onboarding/StepTime';
 import StepTransport from '../../components/Onboarding/StepTransport';
 import StepWakeUp from '../../components/Onboarding/StepWakeUp';
-import Modal from '../../components/common/Modal';
 
 export default function ProfileSettingPage() {
   const navigation = useAppNavigation();
@@ -108,30 +108,25 @@ export default function ProfileSettingPage() {
   };
 
   return (
-    <View className="flex-1 pt-[88px] bg-black p-4 pb-[80px] justify-between">
-      <View>{renderStepContent()}</View>
-
-      <View className="flex-row justify-between">
+    <View className="flex-1 bg-black p-4 pt-6 pb-[80px] justify-between">
         {step > 1 ? (
-          <BeforeButton onPress={() => setStep(step - 1)} />
-        ) : (
-          <View />
-        )}
-
-        {step < 6 ? (
-          <NextButton
-            onPress={() => setStep(step + 1)}
-            disabled={
-              (step === 1 && !birthYear) ||
-              (step === 2 && !job) ||
-              (step === 3 && transport.length !== transportOptions.length)
-              // step 4, 5, 6 추가 예정
-            }
-          />
-        ) : (
-            <NextButton title="제출" onPress={() => setOpen(true)} />
-        )}
-      </View>
+           <BeforeHeader onBackPress={() => setStep(step - 1)}/>
+        ):(<View className='mb-[72px]'/>)}
+        <View className="flex-1 justify-start">
+          {renderStepContent()}
+        </View>
+        <NextButton
+          title={step < 6 ? '다음' : '제출'}
+          onPress={() => {
+            if (step < 6) setStep(step + 1);
+            else setOpen(true);
+          }}
+          disabled={
+            (step === 1 && !birthYear) ||
+            (step === 2 && !job) ||
+            (step === 3 && transport.length !== transportOptions.length)
+          }
+        />
       {open && (
         // 확인 시 로직 추가 예정
         <Modal onClose={() => setOpen(false)} onConfirm={()=>navigation.navigate('MyPage')} >

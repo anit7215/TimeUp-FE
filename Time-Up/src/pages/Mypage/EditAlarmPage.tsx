@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
 
-export default function ReminderAlarmPage() {
+export default function EditrAlarmPage() {
   const [ringTone, setRingTone] = useState<string | null>(null);
   const [vibration, setVibration] = useState<string | null>(null);
   const [alarmSound, setAlarmSound] = useState<string | null>(null);
@@ -35,9 +35,8 @@ export default function ReminderAlarmPage() {
   ];
 
   return (
-    <>
+    <ScrollView className="flex-1 bg-black px-4 py-4">
       <BeforeHeader title="리마인드 / 알람" rightLabel="저장" onRightPress={() => alert('저장됨')} />
-      <ScrollView className="flex-1 bg-black px-4 py-4">
         <View className="bg-gray-800 rounded-2xl p-4 mb-2">
           <View className="flex-row items-center justify-between mb-3">
             <Text className="text-white">리마인드 알람 설정</Text>
@@ -123,7 +122,6 @@ export default function ReminderAlarmPage() {
             </Text>
           </View>
         </TouchableOpacity>
-      </ScrollView>
-    </>
+    </ScrollView>
   );
 }

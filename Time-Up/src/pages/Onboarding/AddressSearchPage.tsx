@@ -1,40 +1,27 @@
 import React, { useState } from 'react';
 import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import BeforeHeader from '../../components/common/BeforeHeader';
 import SearchIcon from '../../../assets/images/SearchIcon.svg';
-import BeforeButton from '../../components/Onboarding/BeforeButton';
-import NextButton from '../../components/Onboarding/NextButton';
 import useAppNavigation from '../../hooks/useAppNavigation';
 
-interface AddressItem {
-  id: number;
-  region: string;
-  address: string;
-}
+import { fetchAddress } from '../../apis/googleAddress';
+import { AddressItem } from '../../types/address';  
 
 export default function AddressSearchPage() {
   const navigation = useAppNavigation();
-  const mockResults = [
-    { id: 1, region: '서대문구 신촌동', address: '서울특별시' },
-    { id: 2, region: '마포구 신촌', address: '서울특별시' },
-    { id: 3, region: '서대문구 신촌역로', address: '서울특별시' },
-    { id: 4, region: '서대문구 신촌로1길', address: '서울특별시' },
-    { id: 5, region: '서대문구 신촌로3가길', address: '서울특별시' },
-    { id: 6, region: '마포구 신촌로 14길', address: '서울특별시' },
-  ];
 
   const [searchText, setSearchText] = useState('');
   const [results, setResults] = useState<AddressItem[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  const handleSearch = () => {
-    const filtered =
-      searchText.trim() === ''
-        ? mockResults
-        : mockResults.filter((item) => item.region.includes(searchText));
-    setResults(filtered);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const handleSearch = async () => {
+    setLoading(true);
+    const res = await fetchAddress(searchText);
+    setResults(res);
+    setLoading(false);
   };
 
-  const handleSelect = (id:number) => {
+  const handleSelect = (id: string) => {
     setSelectedId(id);
   };
 
@@ -42,45 +29,49 @@ export default function AddressSearchPage() {
     const selected = results.find((item) => item.id === selectedId);
     if (selected) {
       console.log('선택된 주소:', selected);
+      navigation.goBack();
     }
   };
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = ({ item, index }: { item: AddressItem; index: number }) => {
     const isSelected = item.id === selectedId;
     const isFirst = index === 0;
     const isLast = index === results.length - 1;
 
     const roundedStyle = isFirst
-      ? 'rounded-t-xl'
+      ? 'rounded-t-[20px]'
       : isLast
-      ? 'rounded-b-xl'
+      ? 'rounded-b-[20px]'
       : 'rounded-none';
 
-      return (
-        <TouchableOpacity
-          onPress={() => handleSelect(item.id)}
+    return (
+      <TouchableOpacity onPress={() => handleSelect(item.id)}>
+        <View
+          className={`${roundedStyle} px-4 py-3 ${
+            isSelected ? 'bg-blue' : 'bg-gray-800'
+          } border-b border-black`}
         >
-          <View
-            className={`${roundedStyle} px-4 py-3 ${
-              isSelected ? 'bg-blue' : 'bg-gray-700'
-            }`}
-          >
-            <Text className="text-white font-medium text-[16px]">
-              {item.region}
-            </Text>
-            <Text className="text-white text-[14px]">{item.address}</Text>
-          </View>
-        </TouchableOpacity>
-      );
-    };
+          <Text className="text-slate-50 text-base font-normal leading-tight mb-1">{item.region}</Text>
+          <Text className="text-gray-200 text-sm font-normal leading-tight">{item.address}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <View className="flex-1 bg-black px-4 pt-[88px]">
-      <Text className="font-pretendard font-medium text-[20px] leading-[28px] tracking-[-0.02em] text-white mb-6">주소 검색</Text>
+    <View className="flex-1 bg-black px-4 pt-6">
+      <BeforeHeader rightLabel="확인" onRightPress={handleConfirm} />
 
-      <View className="w-full h-12 px-4 border border-gray-300 rounded-[20px] flex-row items-center mt-4 mb-3">
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-white text-xl font-medium leading-7">주소 검색</Text>
+        <TouchableOpacity>
+          <Text className="text-gray-300 underline text-sm font-normal leading-tight">나중에 입력할게요.</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View className="flex-row items-center border border-gray-300 rounded-[20px] px-4 h-12 mb-3">
         <TextInput
-          className="flex-1 text-white"
+          className="flex-1 text-white text-base font-normal leading-tight"
           placeholder="주소 검색"
           placeholderTextColor="gray"
           value={searchText}
@@ -92,21 +83,14 @@ export default function AddressSearchPage() {
         </TouchableOpacity>
       </View>
 
-      {results.length > 0 && (
-          <FlatList
-            data={results}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          />
-      )}
+      {loading && <Text className="text-white text-center mb-3">검색 중...</Text>}
 
-      <View className="absolute bottom-6 left-4 right-4 flex-row justify-between">
-        <BeforeButton onPress={()=>navigation.goBack()}/>
-        <NextButton
-          onPress={handleConfirm}
-          disabled={!selectedId}/>
-      </View>
+      <FlatList
+        data={results}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      />
     </View>
   );
 }

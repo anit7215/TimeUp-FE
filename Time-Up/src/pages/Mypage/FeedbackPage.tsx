@@ -3,7 +3,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import BeforeHeader from '../../components/common/BeforeHeader';
 import Modal from '../../components/common/Modal';
 
-export default function AlarmFeedbackPage() {
+export default function FeedbackPage() {
   const [opinion, setOpinion] = useState('');
   const [alarmTimeScore, setAlarmTimeScore] = useState<number | null>(null);
   const [wakeUpScore, setWakeUpScore] = useState<number | null>(null);
@@ -11,8 +11,8 @@ export default function AlarmFeedbackPage() {
 
   return (
     <>
-      <BeforeHeader title="자동 알람 피드백" rightLabel="제출" onRightPress={() => setOpenModal(true)} />
       <ScrollView className="flex-1 bg-black px-4 py-4">
+        <BeforeHeader title="자동 알람 피드백" rightLabel="제출" onRightPress={() => setOpenModal(true)} />
         <View className="bg-gray-900 rounded-2xl p-4 mb-4">
           <Text className="text-white mb-2 font-normal text-[18px] leading-[24px] tracking-normal">오늘 기상 알람 시간은 어땠나요?</Text>
           <View className="flex-row items-center justify-between mb-1 px-4">

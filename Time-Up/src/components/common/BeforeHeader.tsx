@@ -7,13 +7,14 @@ type BeforeHeaderProps = {
   title?: string;
   rightLabel?: string;
   onRightPress?: () => void;
+  onBackPress?: () => void;
 };
 
-export default function BeforeHeader({ title, rightLabel, onRightPress }: BeforeHeaderProps) {
+export default function BeforeHeader({ title, rightLabel, onRightPress, onBackPress }: BeforeHeaderProps) {
     const navigation = useNavigation();
     return (
-    <View className="flex-row items-center justify-between px-4 pt-[60px] pb-9 bg-black relative">
-    <TouchableOpacity onPress={() => navigation.goBack()}>
+    <View className="flex-row items-center justify-between pt-6 pb-6 bg-black relative">
+    <TouchableOpacity onPress={onBackPress ?? (() => navigation.goBack())}>
         <BeforeArrowIcon />
     </TouchableOpacity>
     <View style={{ position: 'absolute', left: 0, right: 0, top: 60, alignItems: 'center' }}>
