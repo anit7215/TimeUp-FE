@@ -8,7 +8,7 @@ const API_BASE = 'https://localhost:8081'; // 실제 서버 주소로 교체
 export const postMyAlarm = async (data: PatchMyAlarmRequest) => {
   const res = await axios.post<PatchMyAlarmResponse>(`${API_BASE}/my-alarms`, data, {
     headers: {
-      Authorization: 'Bearer your-token', // 필요 시 추가
+      Authorization: 'Bearer your-token', // Author 필요하면 추가
       'Content-Type': 'application/json',
     },
   });
