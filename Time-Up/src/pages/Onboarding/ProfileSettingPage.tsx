@@ -77,7 +77,7 @@ export default function ProfileSettingPage() {
       case 3:
         return (
         <>
-          <Text className="font-pretendard font-medium text-[24px] leading-[32px] tracking-[-0.02em] text-white mb-9">
+          <Text className="font-pretendard font-medium text-2xl leading-loose text-white mb-8">
             선호하는 이동 수단을 알려주세요
           </Text>
           <StepTransport

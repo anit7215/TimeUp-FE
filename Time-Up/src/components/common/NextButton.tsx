@@ -18,11 +18,11 @@ export default function NextButton({
       disabled={disabled}
       activeOpacity={0.8}
       className={`
-        w-full h-[50px] rounded-[20px] items-center justify-center py-3
-        ${disabled ? 'bg-light' : 'bg-blue'}
+        w-full h-[50px] rounded-3xl items-center justify-center py-3
+        ${disabled ? 'bg-gray-700' : 'bg-light'}
       `}
     >
-      <Text className={`text-sm font-pretendard font-normal text-[18px] leading-[26px] text-black `}>
+      <Text className={`text-lg font-pretendard font-medium text-lg leading-relaxed text-black `}>
         {title}
       </Text>
     </TouchableOpacity>

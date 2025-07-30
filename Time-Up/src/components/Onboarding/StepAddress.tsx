@@ -11,25 +11,25 @@ export default function StepAddress() {
 
   return (
     <>
-      <Text className="font-pretendard font-medium text-[24px] leading-[32px] tracking-[-0.02em] text-white mb-9">
+      <Text className="font-pretendard font-medium text-2xl leading-loose text-white mb-8">
         주소를 입력해주세요
       </Text>
       <TouchableOpacity
-        className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
+        className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-800"
         onPress={() => navigation.navigate('AddressSearchPage')}
       >
-        <Text className="text-white font-medium text-base">집</Text>
-        <Text className="text-gray-100 font-normal text-base">선택</Text>
+        <Text className="text-white font-medium text-base leading-normal">집</Text>
+        <Text className="text-gray-200 font-normal text-base leading-tight">입력</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="px-4 py-[6px] mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
+        className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
         onPress={() => navigation.navigate('AddressSearchPage')}
       >
         <View className="flex-col">
-          <Text className="text-white font-medium text-base">직장/학교까지 이동 시간</Text>
-          <Text className="text-gray-200 font-regular text-[10px]">*선택 사항</Text>
+          <Text className="text-white font-medium text-base leading-noraml">직장/학교까지 이동 시간</Text>
+          <Text className="text-gray-200 font-regular text-[10px] leading-3 tracking-tight">*선택 사항</Text>
         </View>
-        <Text className="text-gray-100 font-normal text-base">선택</Text>
+        <Text className="text-gray-100 font-normal text-base leading-tight">입력</Text>
       </TouchableOpacity>
     </>
   );

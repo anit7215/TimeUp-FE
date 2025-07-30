@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import BeforeHeader from '../../components/common/BeforeHeader';
 import SearchIcon from '../../../assets/images/SearchIcon.svg';
+import BeforeHeader from '../../components/common/BeforeHeader';
 import useAppNavigation from '../../hooks/useAppNavigation';
 
 import { fetchAddress } from '../../apis/googleAddress';
-import { AddressItem } from '../../types/address';  
+import { AddressItem } from '../../types/address';
 
 export default function AddressSearchPage() {
   const navigation = useAppNavigation();
@@ -69,7 +69,7 @@ export default function AddressSearchPage() {
         </TouchableOpacity>
       </View>
 
-      <View className="flex-row items-center border border-gray-300 rounded-[20px] px-4 h-12 mb-3">
+      <View className="flex-row items-center border border-gray-300 rounded-[20px] px-4 py-3 mb-3">
         <TextInput
           className="flex-1 text-white text-base font-normal leading-tight"
           placeholder="주소 검색"

@@ -21,10 +21,10 @@ export default function StepTransport({ selected, options, onSelect }: Props) {
             style={{ backgroundColor: isSelected ? '#4D4DFF' : '#33373B' }}
             onPress={() => onSelect(opt.value)}
           >
-            <Text className="text-white font-medium text-base">{opt.label}</Text>
+            <Text className="text-white font-medium text-base leading-normal">{opt.label}</Text>
             {isSelected && (
-              <View className="w-12 flex items-center justify-center">
-                <Text className="text-gray-100 font-normal text-base" style={{ flexShrink: 0 }}>
+              <View className="flex items-center justify-center">
+                <Text className="text-gray-100 font-normal text-base leading-tight" style={{ flexShrink: 0 }}>
                   {selectedIndex + 1}순위
                 </Text>
               </View>
