@@ -1,6 +1,6 @@
 // src/contexts/AlarmContext.tsx
 import React, { createContext, useContext, useState } from 'react';
-import { MyAlarm } from '../types/alarm';
+import { AlarmItem } from '../types/alarm';
 
 export type Day = '월' | '화' | '수' | '목' | '금' | '토' | '일';
 
@@ -16,8 +16,8 @@ interface AlarmContextProps {
   autoAlarmOn: boolean;
   setAutoAlarmOn: React.Dispatch<React.SetStateAction<boolean>>;
 
-  myAlarms: MyAlarm[];
-  setMyAlarms: React.Dispatch<React.SetStateAction<MyAlarm[]>>;
+  myAlarms: AlarmItem[];
+  setMyAlarms: React.Dispatch<React.SetStateAction<AlarmItem[]>>;
 
   selectedAlarmId: string | null;
   setSelectedAlarmId: (id: string | null) => void;
@@ -37,7 +37,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [autoAlarmOn, setAutoAlarmOn] = useState<boolean>(false);
 
-  const [myAlarms, setMyAlarms] = useState<MyAlarm[]>([
+  const [myAlarms, setMyAlarms] = useState<AlarmItem[]>([
     {
       id: '1',
       title: '딥러닝 과제 제출',
@@ -51,7 +51,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         dayOfWeek: '토',
       },
       sound: 'Heavy Raindrop',
-      vibrate: true,
+      vibrate: 'Basic Ring',
       repeat: '10분, 5회',
       memo: '',
       isActive: true,
@@ -69,7 +69,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         dayOfWeek: '토',
       },
       sound: 'Basic Ring',
-      vibrate: false,
+      vibrate: 'Basic Ring',
       repeat: '5분, 3회',
       memo: '',
       isActive: true,

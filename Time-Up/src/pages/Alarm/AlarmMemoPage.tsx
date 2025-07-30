@@ -1,6 +1,7 @@
 // src/pages/AlarmMemoPage.tsx
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
+import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate, formatTime } from '@/src/utils/AlarmFormat';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
@@ -9,15 +10,16 @@ import ToggleSwitch from '../../components/common/ToggleSwitch';
 import useAppNavigation from '../../hooks/useAppNavigation';
 import BottomLayout from '../../Layouts/BottomLayout';
 
-
 export default function AlarmMemoPage() {
   const { selectedAlarmId, myAlarms } = useAlarmContext();
 
   // 임시 데이터
   const alarm = myAlarms.find((a) => a.id === selectedAlarmId);
   const title = alarm?.title ?? '';
-  const date = alarm?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' };
-  const time = alarm?.time ?? { period: '오전', hour: 7, minute: 0 };
+  const defaultDate: AlarmItem['date'] = { fullDate: '2025-06-30', dayOfWeek: '월' };
+  const defaultTime: AlarmItem['time'] = { period: '오전', hour: 7, minute: 0 };
+  const date = alarm?.date ?? defaultDate;
+  const time = alarm?.time ?? defaultTime;
 
   const navigation = useAppNavigation();
   const [on, setOn] = useState(false);

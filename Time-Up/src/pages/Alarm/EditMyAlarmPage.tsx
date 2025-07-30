@@ -1,7 +1,7 @@
 // src/pages/EditMyAlarmPage.tsx
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
-import type { MyAlarm } from '@/src/types/alarm';
+import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate, formatTime } from '@/src/utils/AlarmFormat';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Platform, Text, TouchableOpacity, View } from 'react-native';
@@ -28,14 +28,14 @@ export default function EditMyAlarmPage() {
 
   // 수정용 초기값 설정. 알람 상세 설정 상태 관리 구현 후 제거하기.
   const [title, setTitle] = useState(alarmToEdit?.title ?? '');
-  const [time, setTime] = useState<MyAlarm['time']>(
+  const [time, setTime] = useState<AlarmItem['time']>(
     alarmToEdit?.time ?? { period: '오전', hour: 7, minute: 0 }
   );
-  const [date, setDate] = useState<MyAlarm['date']>(
+  const [date, setDate] = useState<AlarmItem['date']>(
     alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
   );
   const [sound, setSound] = useState(alarmToEdit?.sound ?? 'Heavy Raindrop');
-  const [vibrate, setVibrate] = useState(alarmToEdit?.vibrate ?? true);
+  const [vibrate, setVibrate] = useState(alarmToEdit?.vibrate ?? 'Basic Ring');
   const [repeat, setRepeat] = useState(alarmToEdit?.repeat ?? '10분, 5회');
   const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
   const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
@@ -49,28 +49,28 @@ export default function EditMyAlarmPage() {
     console.log('내 알람을 저장합니다.');
     if (selectedAlarmId) {
       // 기존 알람 수정
-      setMyAlarms(prev =>
-        prev.map(alarm =>
+      setMyAlarms((prev) =>
+        prev.map((alarm) =>
           alarm.id === selectedAlarmId
-            ? { ...alarm, title, time, date, sound, vibrate, repeat, memo, isActive }
+            ? { ...alarm, memo }
             : alarm
         )
       );
-    } else {
-      // 새 알람 생성
-      const newAlarm = {
-        id: Date.now().toString(), // 간단한 ID 생성
-        title,
-        time,
-        date,
-        sound,
-        vibrate,
-        repeat,
-        memo,
-        isActive,
-      };
-      setMyAlarms(prev => [...prev, newAlarm]);
-    }
+} else {
+  // 새 알람 생성
+  const newAlarm: AlarmItem = {
+    id: Date.now().toString(), // 간단한 ID 생성
+    title,
+    time,
+    date,
+    sound,
+    vibrate,
+    repeat,
+    memo,
+    isActive,
+  };
+  setMyAlarms(prev => [...prev, newAlarm]);
+}
 
     navigation.goBack();
   };
