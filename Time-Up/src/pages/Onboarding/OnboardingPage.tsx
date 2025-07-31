@@ -57,7 +57,7 @@ export default function OnboardingPage() {
     };
 
     fetchLogin();
-  }, [response]);
+  }, [response, navigation]);
 
   return (
     <View className="flex-1 items-center pt-[208px] bg-black">
