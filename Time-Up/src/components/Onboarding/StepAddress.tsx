@@ -1,32 +1,45 @@
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
-import { RootStackParamList } from '../../types/navigation';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { AddressItem } from '../../types/address';
 
-type Navigation = NativeStackNavigationProp<RootStackParamList, 'OnboardingPage'>;
+type Props = {
+  homeAddress: AddressItem | null;
+  workAddress: AddressItem | null;
+  onSelect: (type: 'home' | 'work') => void;
+};
 
-export default function StepAddress() {
-  const navigation = useNavigation<Navigation>();
-
+export default function StepAddress({ homeAddress, workAddress, onSelect }: Props) {
   return (
     <>
-      <Text className="font-pretendard font-medium text-[24px] leading-[32px] tracking-[-0.02em] text-white mb-9">
+      <Text className="font-pretendard font-medium text-2xl leading-loose text-white mb-8">
         주소를 입력해주세요
       </Text>
+
       <TouchableOpacity
-        className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
-        onPress={() => navigation.navigate('AddressSearchPage')}
+        className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-800"
+        onPress={() => onSelect('home')}
       >
-        <Text className="text-white font-medium text-base">집</Text>
-        <Text className="text-gray-100 font-normal text-base">선택</Text>
+        <Text className="text-white font-medium text-base leading-normal">집</Text>
+        <Text className="text-gray-200 font-normal text-base leading-tight">
+          {homeAddress?.region || '입력'}
+        </Text>
       </TouchableOpacity>
+
       <TouchableOpacity
-        className="px-4 py-3 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
-        onPress={() => navigation.navigate('AddressSearchPage')}
+        className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
+        onPress={() => onSelect('work')}
       >
-        <Text className="text-white font-medium text-base">직장/학교</Text>
-        <Text className="text-gray-100 font-normal text-base">선택</Text>
+        <View className="flex-col">
+          <Text className="text-white font-medium text-base leading-normal">
+            직장/학교까지 이동 시간
+          </Text>
+          <Text className="text-gray-200 font-regular text-[10px] leading-3 tracking-tight">
+            *선택 사항
+          </Text>
+        </View>
+        <Text className="text-gray-100 font-normal text-base leading-tight">
+          {workAddress?.region || '입력'}
+        </Text>
       </TouchableOpacity>
     </>
   );

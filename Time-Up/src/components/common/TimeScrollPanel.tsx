@@ -1,5 +1,4 @@
-// src/components/common/TimeScrollPanel.tsx
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 
 const ITEM_HEIGHT = 40;
@@ -10,12 +9,19 @@ const generateRange = (start: number, end: number) =>
 const hours = generateRange(0, 23);
 const minutes = generateRange(0, 59);
 
-export default function TimeScrollPanel() {
+interface TimeScrollPanelProps {
+  onTimeChange?: (hour: string, minute: string) => void;
+}
+
+export default function TimeScrollPanel({ onTimeChange }: TimeScrollPanelProps) {
   const [selectedHour, setSelectedHour] = useState('00');
   const [selectedMinute, setSelectedMinute] = useState('00');
 
   const hourRef = useRef<FlatList<string> | null>(null);
   const minuteRef = useRef<FlatList<string> | null>(null);
+  useEffect(() => {
+    onTimeChange?.(selectedHour, selectedMinute);
+  }, [selectedHour, selectedMinute, onTimeChange]);
 
   const onScrollEnd = (
     e: NativeSyntheticEvent<NativeScrollEvent>,

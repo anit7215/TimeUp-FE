@@ -1,5 +1,4 @@
-// src/components/common/HalfTimeScrollPanel.tsx
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 
 const ITEM_HEIGHT = 37;
@@ -13,7 +12,12 @@ const periods = Platform.OS === 'web'
   ? ['오전', '오후']
   : [' ', ' ', '오전', '오후', ' ', ' '];
 
-export default function HalfTimeScrollPanel() {
+interface HalfTimeScrollPanelProps {
+  onTimeChange?: (hour: string, minute: string, period:string) => void;
+}
+
+export default function HalfTimeScrollPanel({ onTimeChange }: HalfTimeScrollPanelProps)
+ {
   const [selectedHour, setSelectedHour] = useState('08');
   const [selectedMinute, setSelectedMinute] = useState('00');
   const [selectedPeriod, setSelectedPeriod] = useState('오전');
@@ -21,7 +25,9 @@ export default function HalfTimeScrollPanel() {
   const hourRef = useRef<FlatList<string> | null>(null);
   const minuteRef = useRef<FlatList<string> | null>(null);
   const periodRef = useRef<FlatList<string> | null>(null);
-
+  useEffect(() => {
+      onTimeChange?.(selectedHour, selectedMinute, selectedPeriod);
+    }, [selectedHour, selectedMinute, selectedPeriod ]);
   const onScrollEnd = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
     items: string[],

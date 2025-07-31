@@ -23,6 +23,9 @@ import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
 import WakeUpAlarmPageNotAuto from './src/pages/Alarm/WakeUpAlarmPageNotAuto';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
+import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
+import EditInfoPage from './src/pages/Mypage/EditInfoPage';
+import FeedbackPage from './src/pages/Mypage/FeedbackPage';
 import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
@@ -34,7 +37,7 @@ export default function App() {
 
   const content = (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="EditWakeUpAlarmPage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="MyPage" component={MyPage} />
@@ -56,6 +59,11 @@ export default function App() {
         <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
         <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
         <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
+        <Stack.Screen name="EditInfoPage" component={EditInfoPage} />
+        <Stack.Screen name="EditAlarmPage" component={EditAlarmPage} />
+        <Stack.Screen name="FeedbackPage" component={FeedbackPage} />
+
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
