@@ -1,5 +1,8 @@
 // src/pages/WakeUpAlarmPage.tsx
 // 자동알람 - 기상알람 페이지
+import { formatTime } from '@/src/utils/AlarmFormat';
+import { createDefaultWakeupAlarm } from '@/src/utils/alarmDefaults';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
@@ -11,7 +14,7 @@ const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
 export default function WakeUpAlarmPage() {
   const navigation = useAppNavigation();
-  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, } = useAlarmContext();
+  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, myAlarms, setMyAlarms, setSelectedAlarmId, } = useAlarmContext();
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -36,6 +39,16 @@ export default function WakeUpAlarmPage() {
   };
 
   const handleDetailPage = (day: Day) => {
+    const alarmExists = myAlarms.find((alarm) => alarm.date.dayOfWeek === day);
+
+    if (!alarmExists) {
+      const defaultAlarm = createDefaultWakeupAlarm(day);
+      setMyAlarms((prev) => [...prev, defaultAlarm]);
+      setSelectedAlarmId(defaultAlarm.id);
+    } else {
+      setSelectedAlarmId(alarmExists.id);
+    }
+
     setSelectedDay(day);
     console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
     navigation.navigate('WakeUpAlarmDetailPage');
@@ -43,22 +56,24 @@ export default function WakeUpAlarmPage() {
 
   return (
     <BottomLayout>
-      <View className="h-[19%] bg-blue justify-center rounded-t rounded-[20%]">
-        <Text className="font-pretendard text-white text-3xl ml-5 mb-4">자동 알람</Text>
+      <View className="flex-row items-center justify-between mr-[4%] mt-[6%]">
+        <Text className="font-pretendard text-white text-3xl ml-5 mb-4">내일의 자동 알람</Text>
+        <ToggleSwitch isOn={autoAlarmOn} onToggle={handleToggleAutoAlarm} disabled={false} />
       </View>
 
-      <View className="h-[4.5rem] w-[91%] bg-light rounded-3xl self-center flex-row -m-7 items-center justify-between px-[4%] border border-light-stroke">
-        <View className="flex-row items-center space-x-2">
-          <Text className="font-pretendard text-black text-xl">6월 28일 (일)</Text>
-          <Text className="font-pretendard text-black text-xl">  ㅣ  </Text>
-          <Text className="font-pretendard text-black text-xl">오전 07 : 30</Text>
+      <LinearGradient
+        colors={['#F7F7FE', '#4D4DFF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ borderRadius: 57, padding: 1 }}
+      >
+        <View className="h-[8.5rem] w-full bg-dark rounded-full self-center flex-row items-center justify-between px-[4%]">
+          <View className="flex-1 items-center justify-center">
+            <Text className="font-pretendard text-white text-xl">6월 28일 (일)</Text>
+            <Text className="font-pretendard text-white text-4xl mt-1">오전 07 : 30</Text>
+          </View>
         </View>
-        <ToggleSwitch
-          isOn={autoAlarmOn}
-          onToggle={handleToggleAutoAlarm}
-          disabled={false}
-        />
-      </View>
+      </LinearGradient>
 
       <View className="flex-row items-start mt-[20%] ml-[4%]">
         <Text className="font-pretendard text-[24px] mr-4 text-white font-semibold">
@@ -74,26 +89,31 @@ export default function WakeUpAlarmPage() {
       </View>
 
       <View className="mt-3">
-        {weekdays.map((day) => (
-          <TouchableOpacity
-            key={day}
-            onPress={() => handleDetailPage(day)}
-            activeOpacity={0.7}
-          >
-            <View className="h-14 w-[91%] bg-dark border border-dark-stroke rounded-full self-center flex-row items-center justify-between px-[5%] mt-4">
-              <View className="flex-row items-center gap-x-2 flex-nowrap overflow-hidden">
-                <Text className="font-pretendard text-white text-xl">{day}요일</Text>
-                <Text className="font-pretendard text-white text-xl">   ㅣ   </Text>
-                <Text className="font-pretendard text-white text-xl">오전 08 : 00</Text>
+        {weekdays.map((day) => {
+          const alarm = myAlarms.find((a) => a.date.dayOfWeek === day);
+          const formattedTime = alarm ? formatTime(alarm.time) : '오전 08 : 00';
+
+          return (
+            <TouchableOpacity
+              key={day}
+              onPress={() => handleDetailPage(day)}
+              activeOpacity={0.7}
+            >
+              <View className="h-14 w-[91%] bg-dark border border-dark-stroke rounded-full self-center flex-row items-center justify-between px-[5%] mt-4">
+                <View className="flex-row items-center gap-x-2 flex-nowrap overflow-hidden">
+                  <Text className="font-pretendard text-white text-xl">{day}요일</Text>
+                  <Text className="font-pretendard text-white text-xl">   ㅣ   </Text>
+                  <Text className="font-pretendard text-white text-xl">{formattedTime}</Text>
+                </View>
+                <ToggleSwitch
+                  isOn={weekdaySwitchStates[day]}
+                  onToggle={() => handleToggleSwitchForDay(day)}
+                  disabled={false}
+                />
               </View>
-              <ToggleSwitch
-                isOn={weekdaySwitchStates[day]}
-                onToggle={() => handleToggleSwitchForDay(day)}
-                disabled={false}
-              />
-            </View>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </BottomLayout>
   );

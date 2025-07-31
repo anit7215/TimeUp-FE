@@ -3,6 +3,7 @@
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import { formatDate, formatTime } from '@/src/utils/AlarmFormat';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
@@ -51,22 +52,24 @@ export default function MyAlarmPage() {
 
   return (
     <BottomLayout>
-      <View className="h-[19%] bg-blue justify-center rounded-t rounded-[20%]">
-        <Text className="font-pretendard text-white text-3xl ml-5 mb-4">자동 알람</Text>
+      <View className="flex-row items-center justify-between mr-[4%] mt-[6%]">
+        <Text className="font-pretendard text-white text-3xl ml-5 mb-4">내일의 자동 알람</Text>
+        <ToggleSwitch isOn={autoAlarmOn} onToggle={handleToggleAutoAlarm} disabled={false} />
       </View>
 
-      <View className="h-[4.5rem] w-[91%] bg-light rounded-3xl self-center flex-row -m-7 items-center justify-between px-[4%] border border-light-stroke">
-        <View className="flex-row items-center space-x-2">
-          <Text className="font-pretendard text-black text-xl">6월 28일 (일)</Text>
-          <Text className="font-pretendard text-black text-xl">  ㅣ  </Text>
-          <Text className="font-pretendard text-black text-xl">오전 07 : 30</Text>
+      <LinearGradient
+        colors={['#F7F7FE', '#4D4DFF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ borderRadius: 57, padding: 1 }}
+      >
+        <View className="h-[8.5rem] w-full bg-dark rounded-full self-center flex-row items-center justify-between px-[4%]">
+          <View className="flex-1 items-center justify-center">
+            <Text className="font-pretendard text-white text-xl">6월 28일 (일)</Text>
+            <Text className="font-pretendard text-white text-4xl mt-1">오전 07 : 30</Text>
+          </View>
         </View>
-        <ToggleSwitch
-          isOn={autoAlarmOn}
-          onToggle={handleToggleAutoAlarm}
-          disabled={false}
-        />
-      </View>
+      </LinearGradient>
 
       <View className="flex-row items-start mt-[20%] ml-[4%]">
         <Text className="font-pretendard text-[24px] mr-4 text-gray-300" onPress={handleGoToWakeUpPage}>
@@ -124,7 +127,6 @@ export default function MyAlarmPage() {
             </View>
           </TouchableOpacity>
         ))}
-
 
       </View>
     </BottomLayout>

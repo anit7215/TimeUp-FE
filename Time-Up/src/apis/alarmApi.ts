@@ -2,7 +2,7 @@
 import type { PatchMyAlarmRequest, PatchMyAlarmResponse } from '@/src/types/alarm';
 import axios from 'axios';
 
-const API_BASE = 'https://localhost:8081'; // 실제 서버 주소로 교체
+const API_BASE = 'https://timeup-server.o-r.kr/';
 
 // 알람 등록 (POST)
 export const postMyAlarm = async (data: PatchMyAlarmRequest) => {
