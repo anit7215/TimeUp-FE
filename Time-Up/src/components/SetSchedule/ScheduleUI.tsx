@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   SafeAreaView,
@@ -10,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import PlusIcon from '../../../assets/icons/plusIcon.svg';
+import PageBackButton from '../common/PageBackButton';
 
 interface Event {
   id: string;
@@ -28,7 +28,7 @@ interface ScheduleUIProps {
 }
 
 const ScheduleUI: React.FC<ScheduleUIProps> = ({
-  date = '5월 21일 일요일',
+  date,
   events = [
     { id: '1', title: '대학 탐방 회의', startTime: 9, duration: 1, color: '#FFB366' }, // 일정아이디, 일정명, 일정 날짜, 일정 시작-끝 시간, 컬러를 불러옴
     { id: '2', title: '머리 2차 과제', startTime: 15, duration: 1, color: '#90EE90' },
@@ -97,9 +97,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        <PageBackButton/>
         <Text style={styles.headerTitle}>{date}</Text>
         <TouchableOpacity style={styles.addButton}>
           <PlusIcon />

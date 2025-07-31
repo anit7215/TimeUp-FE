@@ -32,3 +32,12 @@ export const updateSchedule = async (id: string, data: Partial<CreateScheduleReq
   const res = await axios.put(`${API_URL}/schedules/${id}`, data);
   return res.data;
 };
+
+export const fetchDaySchedule = async (date: string) => {
+  const res = await axios.get(`${API_URL}/schedule?date=${date}`, {
+    params: { date },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}

@@ -21,3 +21,13 @@ export type UpdateScheduleRequest = Partial<CreateScheduleRequest> & {
     scheduleId: string;
 };
 
+export interface ImportantSchedule {
+    scheduleId: string;
+    name: string;
+    start_date: string;
+    end_date: string;
+    place_name?: string;
+    color: string;
+    is_important: boolean;
+}
+

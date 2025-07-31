@@ -9,22 +9,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
 import BottomLayout from './src/Layouts/BottomLayout';
 import AddSchedulePage from './src/pages/AddSchedulePage';
-import AlarmPage from './src/pages/AlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
-import DiaryWritePage from './src/pages/DiaryWritePage';
 import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
 import SchedulePage from './src/pages/SchedulePage';
+import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import TestHalfTimeScrollPage from './src/pages/TestHalfTimeScrollPage';
 import TestTimeScrollPage from './src/pages/TestTimeScrollPage';
+import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
+import { RootStackParamList } from './src/types/navigation';
 
 
 export default function App() {
-  const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator<RootStackParamList>();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
 
   const content = (
@@ -32,7 +33,7 @@ export default function App() {
     <BottomSheetModalProvider>
       <PaperProvider>
         <NavigationContainer>
-      <Stack.Navigator initialRouteName="SchedulePage" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="CalendarPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
         <Stack.Screen name="CalendarPage" 
           component={() => (
@@ -46,14 +47,19 @@ export default function App() {
               <SchedulePage />
             </BottomLayout>
           )} />
+        <Stack.Screen name="ViewScheduleDetailPage"
+          component={() => (
+            <BottomLayout>
+              <ViewScheduleDetailPage />
+            </BottomLayout>
+          )} />
         <Stack.Screen name="MyPage" component={MyPage} />
-        <Stack.Screen name="AlarmPage" component={AlarmPage} />
-        <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
         <Stack.Screen name="TestTimeScrollPage" component={TestTimeScrollPage} />
         <Stack.Screen name="TestHalfTimeScrollPage" component={TestHalfTimeScrollPage} />
         <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
         <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
-        <Stack.Screen name="AddSchedulePage"           component={() => (
+        <Stack.Screen name="SetLocationPage" component={SetLocationPage}/>
+        <Stack.Screen name="AddSchedulePage" component={() => (
             <BottomLayout>
               <AddSchedulePage />
             </BottomLayout>

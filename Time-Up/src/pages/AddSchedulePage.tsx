@@ -2,7 +2,6 @@ import {
   BottomSheetModal,
   BottomSheetView
 } from '@gorhom/bottom-sheet';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -15,6 +14,11 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BellIcon from '../../assets/icons/addSchedulePage/BellIcon.svg';
+import CalendarIcon from '../../assets/icons/addSchedulePage/CalendarIcon.svg';
+import LocationIcon from '../../assets/icons/addSchedulePage/LocationIcon.svg';
+import MemoIcon from '../../assets/icons/addSchedulePage/MemoIcon.svg';
+import RepeatIcon from '../../assets/icons/addSchedulePage/RepeatIcon.svg';
 import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
 import StarIcon from '../../assets/icons/StarIcon.svg';
 import { createSchedule } from '../apis/schedule';
@@ -28,7 +32,23 @@ export default function AddSchedulePage() {
   const route = useRoute();
   const { schedule } = route.params as { schedule: Schedule };
   const { date } = route.params as { date: string }; // 날짜 파라미
-  const [form, setForm] = useState(schedule as Schedule);
+  const [form, setForm] = useState<Schedule>({
+    scheduleId: '',
+    name: schedule?.name || '',
+    start_date: schedule?.start_date || '',
+    end_date: schedule?.end_date || '',
+    place_name: schedule?.place_name || '',
+    address: schedule?.address || '',
+    color: schedule?.color || '#FFB366',
+    memo: schedule?.memo || '',
+    is_reminding: schedule?.is_reminding || false,
+    remind_at: schedule?.remind_at || 0,
+    is_recurring: schedule?.is_recurring || false,
+    is_important: schedule?.is_important || false,
+    repeat: schedule?.repeat || 'none',
+    remind: schedule?.remind || 'none',
+  });
+  
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"]
 
@@ -41,27 +61,31 @@ export default function AddSchedulePage() {
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index)
   }, [])
-  const [currentDate, setCurrentDate] = useState(moment().format('YYYY-MM-DD'))
+  const [currentDate, setCurrentDate] = useState(form.start_date)
 
 const handleSave = async () => {
   try {
-    const token = await AsyncStorage.getItem('access_token');
-    if (!token) {
-      Alert.alert('로그인이 필요합니다');
-      return;
-    }
+    // const token = await AsyncStorage.getItem('access_token');
+    // if (!token) {
+     // Alert.alert('로그인이 필요합니다');
+     // return;
+    //}
+
+    const token = 'dev-token'; // 개발 중에는 임시로 토큰을 하드코딩
 
     // form을 API로 전송
     const savedSchedule = await createSchedule(form, token); // token을 넘기도록 함수 수정해야 함
 
     // CalendarPage로 form 넘기기
-    navigation.navigate('CalendarPage', { newSchedule: savedSchedule });
+    navigation.navigate('ViewScheduleDetailPage', { newSchedule: savedSchedule });
 
   } catch (err) {
     console.error(err);
     Alert.alert('일정 저장 실패', '네트워크 오류 또는 서버 오류입니다');
   }
 };
+
+
 
   return (
   <GestureHandlerRootView style={{ flex: 1 }}>
@@ -83,36 +107,12 @@ const handleSave = async () => {
                   placeholderTextColor={"#979B9F"}
                   value={form.name || ''}
                   onChangeText={(text) => {
-                    setForm({...form, name: text})
+                    setForm(prev => {
+                      return {...prev, name: text}})
                     console.log('일정 이름:', text) // 입력된 일정 이름 확인
                   }}
                 />
               </View>
-            )}
-
-            {selectedItem === '색상' && (
-              <View className="flex-row flex-wrap w-full justify-center">
-                {colorOptions.map((color, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          onPress={() => {
-                            setForm({ ...form, color }) // 선택한 색상을 schedule에 저장
-                            console.log('선택한 색상:', color) // 선택한 색상 확인
-                          }}
-                          className={`
-                            w-1/4 p-[20px] items-center justify-center
-                          `}
-                        >
-                          <View
-                            className={`w-[60px] h-[60px] rounded-full ${
-                              form.color === color ? 'border-2 border-white' : 'border-0' // schedule로 해야하는거야?
-                            }`}
-                            style={{ backgroundColor: color }}
-                          />
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-
             )}
 
             {(selectedItem === '메모') && (
@@ -203,6 +203,7 @@ const handleSave = async () => {
                   console.log('취소')
                   bottomSheetModalRef.current?.dismiss() // 모달 닫기
                   setSelectedItem(null) // 선택된 아이템 초기화
+                  
                 }
                 }
                 className="w-[48%] bg-transparent py-3 rounded-lg items-center "
@@ -218,7 +219,6 @@ const handleSave = async () => {
                 className="w-[48%] bg-transparent py-3 rounded-lg items-center"
               >
                 <Text className="text-white text-base text-[18px]">선택</Text>
-                {/* 선택 버튼 누르면 저장되고 모달 자동으로 닫히는 로직 추후 추가 */}
               </TouchableOpacity>
             </View>
           </BottomSheetView>
@@ -271,8 +271,8 @@ const handleSave = async () => {
             justifyContent: 'center',
             flexDirection: 'row',
             marginTop: 50,
-            marginLeft: 16,
-            padding: 136,
+            marginLeft: 14,
+            padding: 35,
             alignContent: 'center',
           }}
         >
@@ -281,7 +281,7 @@ const handleSave = async () => {
               () => {setSelectedItem("시작 날짜")
                 bottomSheetModalRef.current?.present() // 모달 오픈
               }}>
-              <Text className="text-white h-[32px]">{formatKoreanDate(form.start_date)}</Text>
+              <Text className="text-white h-[30px] text-[16px]">{formatKoreanDate(form.start_date)}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={
               () => {setSelectedItem("시작 시간")
@@ -298,7 +298,7 @@ const handleSave = async () => {
               () => {setSelectedItem("종료 날짜")
                 bottomSheetModalRef.current?.present() // 모달 오픈
               }}>
-              <Text className="text-white h-[32px]">{formatKoreanDate(form.end_date)}</Text>
+              <Text className="text-white h-[30px]">{formatKoreanDate(form.end_date)}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={
               () => {setSelectedItem("종료 시간")
@@ -310,67 +310,117 @@ const handleSave = async () => {
         </View>
 
         {/* 리스트 + 버튼 */}
-        <View className="flex-col flex-1 bg-[#1C1F21]">
-          <View className="flex-col flex-1 justify-between">
-          {[
-            { label: '색상', action: '선택', type: 'bottomsheet' },
-            { label: '장소', action: '입력', type: 'navigate', screen: 'SetLocationPage' },
-            { label: '반복', action: '선택', type: 'navigate', screen: 'SetScheduleRepeatPage' },
-            { label: '리마인드', action: '선택', type: 'navigate', screen: 'SetRemindAlarmPage' },
-            { label: '메모', action: '입력', type: 'bottomsheet' },
-            ].map((item, idx) => (
-              <TouchableOpacity
-              key={idx}
-              onPress={() => {
-                if (item.type === 'bottomsheet') {
-                  setSelectedItem(item.label)
-                  bottomSheetModalRef.current?.present()
-                } else {
-                  const getOnSelect = () => {
-                    if (item.label === '반복') {
-                      return (repeatValue: string) => {
-                        setForm({ ...form, is_recurring: true, repeat: repeatValue })
-                      }
-                    } else if (item.label === '리마인드') {
-                      return (remindValue: string) => {
-                        setForm({ ...form, is_reminding: true, remind: remindValue })
-                      }
-                    }
-                    return undefined
-                  }
+        <View className="flex-col flex-1
+        
+        ">
+          <View className="flex-col justify-between items-center px-10">
+            <View className="flex-col p-4 border border-[#3A3A5F] bg-[#27273E] rounded-[20px] w-full">
+              <View className="flex-row items-center mb-3">
+                <CalendarIcon />
+                <Text className="ml-2 text-white text-[14px]">색상</Text>
+              </View>
               
-                  navigation.navigate(item.screen, {
-                    onSelect: getOnSelect(),
-                    currentValue: form[item.label === '반복' ? 'is_recurring' : 'is_reminding'],
-                  })
-                }}}
-                className="flex-row justify-between items-center py-5 px-4 pt-10"
-              >
-                <Text className="text-white text-[16px] pl-3">{item.label}</Text>
-                {item.label === '색상' ? (
+              <View className="flex-row flex-wrap justify-center items-center">
+                {colorOptions.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      setForm({ ...form, color }) // 선택한 색상을 schedule에 저장
+                      console.log('선택한 색상:', color) // 선택한 색상 확인
+                    }}
+                  >
                     <View
-                      style={{ backgroundColor: schedule.color }}
-                      className="w-5 h-5 rounded-full p-5 ml-3 mr-2"
+                      className={`w-[32px] h-[32px] rounded-full mr-3 mb-2 ${
+                        form.color === color ? 'border-2 border-white' : 'border-0'
+                      }`}
+                      style={{ backgroundColor: color }}
                     />
-                  ) : (
-                    <Text className="text-[#C9CDD1] text-[15px] pr-3">{item.action}</Text>
-                  )}
-              </TouchableOpacity>
-            ))}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            <View className="flex-row">
+              <View className="flex-col px-4 py-4 border border-[#3A3A5F] bg-[#27273E] rounded-[20px] p-3 w-1/2 m-2">
+                <View className="flex-row items-center mb-3">
+                  <BellIcon />
+                  <Text className="ml-2 text-white text-[14px]">리마인드</Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={(() => {
+                    navigation.navigate('SetRemindAlarmPage', {form: form, setForm: setForm}) // 폼 객체 보내기. 근데 보낼 필요가 있나 모르겠네
+                  })}
+                  className="m-4 justify-center items-center"
+                  >
+                  <Text className="text-white text-[14px]">{form.is_reminding ? '알림 설정됨' : '알림 설정 안함'}</Text>
+                  </TouchableOpacity>
+              </View>
+              <View className="flex-col px-4 py-4 border border-[#3A3A5F] bg-[#27273E] rounded-[20px] p-3 w-1/2 my-2">
+                <View className="flex-row items-center mb-3">
+                  <RepeatIcon />
+                  <Text className="ml-2 text-white text-[14px]">반복</Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={(() => {
+                    navigation.navigate('SetScheduleRepeatPage') // 폼 객체 보내기. 근데 보낼 필요가 있나 모르겠네
+                  })}
+                  className="m-4 justify-center items-center"
+                  >
+                  <Text className="text-white text-[14px]">{form.is_reminding ? '반복 설정함' : '반복 설정 안함'}</Text>
+                  </TouchableOpacity>
+              </View>
+
+
+            </View>
+            
+            <View className="flex-col px-4 py-4 border border-[#3A3A5F] bg-[#27273E] rounded-[20px] p-3 w-full mb-2">
+                <View className="flex-row items-center mb-3">
+                  <LocationIcon />
+                  <Text className="ml-2 text-white text-[14px]">장소</Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={(() => {
+                    navigation.navigate('SetLocationPage', {form: form, setForm: setForm}) // 폼 객체 보내기. 근데 보낼 필요가 있나 모르겠네
+                  })}
+                  className="m-4 justify-start"
+                  >
+                  <Text className="text-white text-[18px]">{form.place_name || '입력'}</Text>
+                  </TouchableOpacity>
+              </View>
+
+
+            <View className="flex-col px-4 py-4 border border-[#3A3A5F] bg-[#27273E] rounded-[20px] p-3 w-full">
+                <View className="flex-row items-center mb-3">
+                  <MemoIcon />
+                  <Text className="ml-2 text-white text-[14px]">메모</Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={(() => {
+                    setSelectedItem("메모")
+                    bottomSheetModalRef.current?.present() // 모달 오픈
+                  })}
+                  className="m-4 justify-start"
+                  >
+                  <Text className="text-white text-[18px]">{form.memo || '입력'}</Text>
+                  </TouchableOpacity>
+            </View>
 
             {/* 하단 버튼 */}
             <View className="flex-row justify-between mt-6 px-10 py-8">
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
-                className="w-[48%] bg-transparent py-3 rounded-lg items-center "
+                className="w-[45%] py-3 rounded-[20px] items-center bg-[#1C1F21] m-3"
               >
                 <Text className="text-white text-[18px]">취소</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleSave()}
-                className="w-[48%] bg-transparent py-3 rounded-lg items-center"
+                className="w-[45%] py-3 rounded-[20px] items-center bg-[#CCCCFF] m-3"
               >
-                <Text className="text-white text-[18px]">저장</Text>
+                <Text className="text-black text-[18px]">저장</Text>
               </TouchableOpacity>
             </View>
           </View>

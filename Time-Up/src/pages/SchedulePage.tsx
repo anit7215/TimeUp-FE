@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import { useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
+import { fetchDaySchedule } from '../apis/schedule';
 import ScheduleUI from '../components/SetSchedule/ScheduleUI';
 
 const SchedulePage = () => {
+  const route = useRoute();
+  const { selectedDate } = route.params as { selectedDate: string}
+  useEffect(() => {
+    fetchDaySchedule(selectedDate);
+  }, [selectedDate]);
+
+  
+
   const [events, setEvents] = useState([
     { 
       id: '1', 
@@ -28,18 +38,12 @@ const SchedulePage = () => {
     Alert.alert('시간 선택', `${time}시를 선택했습니다.`);
   };
 
-  const handleBackPress = () => {
-    // 네비게이션 뒤로가기 로직
-    console.log('뒤로가기');
-  };
-
   return (
     <ScheduleUI
-      date="5월 21일 일요일"
+      date={selectedDate}
       events={events}
       onEventPress={handleEventPress}
       onTimeSlotPress={handleTimeSlotPress}
-      onBackPress={handleBackPress}
     />
   );
 };

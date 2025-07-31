@@ -4,7 +4,7 @@
     "strict": true,
     "jsx": "react-native",             
     "types": ["nativewind/types"],
-    "lib": ["ES2015", "DOM"]    // API 호출에 사용
+    "lib": ["ES2015", "DOM"],
     "paths": {
       "@/*": ["./*"]
     }

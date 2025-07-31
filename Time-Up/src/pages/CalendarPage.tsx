@@ -7,50 +7,72 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PlusIcon from '../../assets/icons/plusIcon.svg';
+import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
 import { Schedule } from '../types/schedule';
 
-const route = useRoute();
 const { width } = Dimensions.get('window');
-const { newSchedule } = route.params as { newSchedule?: Schedule };
 
-const [selectMode, setSelectMode] = useState(false);
-const [selectedDate, setSelectedDate] = useState<string | null>(null)
-
-const CustomCalendar = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [events, setEvents] = useState({});
+const CalendarPage = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
 
-
-    const handleAddSchedule = (selectedDate: string) => {
-      
-    const initialSchedule: Schedule = {
-      scheduleId: '', // 등록 전에는 비워두기
-      name: '',
-      start_date: selectedDate,
-      end_date: selectedDate,
-      place_name: '',
-      address: '',
-      color: '#FFB366',
-      memo: '',
-      is_reminding: false,
-      remind_at: 0,
-      is_recurring: false,
-      is_important: false,
-    };
-
-    navigation.navigate('AddSchedule', { schedule: initialSchedule });
-  };
-
-  const handleDateSelect = (date: string) => {
-    navigation.navigate('AddSchedulePage', { date: selectedDate }) // 날짜 넘김
-  };
   
+  // 파라미터 받기
+  const { newSchedule } = (route.params as { newSchedule?: Schedule }) || {};
+  
+  // State 관리
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [events, setEvents] = useState<{[key: string]: number}>({});
+
   // 현재 연도와 월 가져오기
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  
+  // selectedMonth 형식 수정: 월은 1부터 시작하도록, 두 자리로 패딩
+  const [selectedMonth, setSelectedMonth] = useState(
+    `${year}-${String(month + 1).padStart(2, '0')}`
+  );
+  const [isModalVisible, setIsModalVisible] = useState(true); // 항상 표시되도록 true로 설정
+
+  // 더미 데이터 날짜를 현재 연도로 수정
+  const schedules = [
+    {
+      scheduleId: '1',
+      name: '옷 사기',
+      start_date: '2025-07-15T10:00:00',
+      end_date: '2025-07-15T12:00:00',
+      color: '#FF6B6B',
+      is_important: true,
+      place_name: '회의실 A',
+    },
+    {
+      scheduleId: '2',
+      name: '프로젝트 마감',
+      start_date: '2025-07-15T10:00:00',
+      end_date: '2025-07-15T12:00:00',
+      color: '#4ECDC4',
+      is_important: true,
+      place_name: '회의실 B'
+    }
+  ];
+
+  // 중요 일정 모달 열기 함수 추가
+  const openImportantScheduleModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeImportantScheduleModal = () => {
+    setIsModalVisible(false);
+  };
+
+  // selectedMonth 업데이트 (월이 변경될 때마다)
+  useEffect(() => {
+    setSelectedMonth(`${year}-${String(month + 1).padStart(2, '0')}`);
+  }, [year, month]);
   
   // 월 이름 배열
   const monthNames = [
@@ -60,16 +82,16 @@ const CustomCalendar = () => {
   
   // 요일 배열
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
-  // 백엔드에서 일정 데이터를 가져오는 함수 (예시)
-  const fetchEvents = async (year, month) => {
+
+  // 백엔드에서 일정 데이터를 가져오는 함수
+  const fetchEvents = async (year: number, month: number) => {
     try {
       // 실제 API 호출 예시
       // const response = await fetch(`/api/events?year=${year}&month=${month + 1}`);
       // const data = await response.json();
       
       // 임시 데이터 (실제로는 백엔드에서 받아올 데이터)
-      const mockData = {
+      const mockData: {[key: string]: number} = {
         '2025-7-3': 2,   // 7월 3일에 2개 일정
         '2025-7-15': 1,  // 7월 15일에 1개 일정
         '2025-7-20': 3,  // 7월 20일에 3개 일정
@@ -81,24 +103,72 @@ const CustomCalendar = () => {
       console.error('일정 데이터 가져오기 실패:', error);
     }
   };
+
+  // 새 일정이 추가되었을 때 events 업데이트
+  useEffect(() => {
+    if (newSchedule) {
+      const dateKey = newSchedule.start_date;
+      setEvents(prev => ({
+        ...prev,
+        [dateKey]: (prev[dateKey] || 0) + 1
+      }));
+    }
+  }, [newSchedule]);
   
   // 월이 변경될 때마다 일정 데이터 가져오기
   useEffect(() => {
     fetchEvents(year, month);
   }, [year, month]);
+
+  // 일정 추가 핸들러 수정
+  const handleAddSchedule = (selectedDate?: string) => {
+    const dateToUse = selectedDate || getCurrentDateString();
+    
+    const initialSchedule: Schedule = {
+      scheduleId: '', // 등록 전에는 비워두기
+      name: '',
+      start_date: dateToUse,
+      end_date: dateToUse,
+      place_name: '',
+      address: '',
+      color: '#FFB366',
+      memo: '',
+      is_reminding: false,
+      remind_at: 0,
+      is_recurring: false,
+      is_important: false,
+      repeat: '',
+      remind: ''
+    };
+
+    navigation.navigate('AddSchedulePage', { schedule: initialSchedule, date: dateToUse });
+  };
+
+  // 현재 날짜를 문자열로 반환
+  const getCurrentDateString = () => {
+    const today = new Date();
+    return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+  };
+
+  // 날짜 선택 핸들러
+  const handleDatePress = (day: any) => { // 이거 any타입이어도 될지 모르겠다...
+    const dateString = `${year}-${month + 1}-${day.date}`;
+    navigation.navigate('SchedulePage', { selectedDate: dateString})
+    
+  };
   
   // 특정 날짜의 일정 개수 가져오기
-  const getEventCount = (date) => {
+  const getEventCount = (date: number) => {
     const dateKey = `${year}-${month + 1}-${date}`;
     return events[dateKey] || 0;
   };
   
   // 일정 dot 렌더링
-  const renderEventDots = (eventCount) => {
+  const renderEventDots = (eventCount: number) => {
     if (eventCount === 0) return null;
     
     const dots = [];
-    const maxDots = 3; // 최대 3개까지만 표시
+    const maxDots = 6; // 최대 6개까지만 표시
     const actualDots = Math.min(eventCount, maxDots);
     
     for (let i = 0; i < actualDots; i++) {
@@ -114,6 +184,7 @@ const CustomCalendar = () => {
     }
     
     return (
+    
       <View style={styles.eventDotsContainer}>
         {dots}
         {eventCount > maxDots && (
@@ -123,79 +194,78 @@ const CustomCalendar = () => {
     );
   };
   
-  // 해당 월의 첫째 날과 마지막 날 구하기
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  
-  // 해당 월의 첫째 날이 무슨 요일인지 (0: 일요일, 1: 월요일, ...)
-  const firstDayOfWeek = firstDay.getDay();
-  
-  // 해당 월의 총 일수
-  const daysInMonth = lastDay.getDate();
-  
   // 캘린더 날짜 배열 생성
-  const calendarDays = [];
-  
-  // 이전 달의 마지막 날짜들 (빈 공간 채우기)
-  const prevMonthLastDay = new Date(year, month, 0).getDate();
-  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    calendarDays.push({
-      date: prevMonthLastDay - i,
-      isCurrentMonth: false,
-      isPrevMonth: true
-    });
-  }
-  
-  // 현재 달의 날짜들
-  for (let date = 1; date <= daysInMonth; date++) {
-    calendarDays.push({
-      date,
-      isCurrentMonth: true,
-      isPrevMonth: false
-    });
-  }
-  
-  // 다음 달의 첫 날짜들 (빈 공간 채우기)
-  const remainingCells = 42 - calendarDays.length; // 6주 * 7일 = 42칸
-  for (let date = 1; date <= remainingCells; date++) {
-    calendarDays.push({
-      date,
-      isCurrentMonth: false,
-      isPrevMonth: false
-    });
-  }
+  const generateCalendarDays = () => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const firstDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    
+    const calendarDays = [];
+    
+    // 이전 달의 마지막 날짜들 (빈 공간 채우기)
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      calendarDays.push({
+        date: prevMonthLastDay - i,
+        isCurrentMonth: false,
+        isPrevMonth: true
+      });
+    }
+    
+    // 현재 달의 날짜들
+    for (let date = 1; date <= daysInMonth; date++) {
+      calendarDays.push({
+        date,
+        isCurrentMonth: true,
+        isPrevMonth: false
+      });
+    }
+    
+    // 다음 달의 첫 날짜들 (빈 공간 채우기)
+    const remainingCells = 42 - calendarDays.length; // 6주 * 7일 = 42칸
+    for (let date = 1; date <= remainingCells; date++) {
+      calendarDays.push({
+        date,
+        isCurrentMonth: false,
+        isPrevMonth: false
+      });
+    }
+    
+    return calendarDays;
+  };
   
   // 이전/다음 달로 이동
   const goToPrevMonth = () => {
     setCurrentDate(new Date(year, month - 1));
+    setSelectedDate(null); // 선택된 날짜 초기화
   };
   
   const goToNextMonth = () => {
     setCurrentDate(new Date(year, month + 1));
+    setSelectedDate(null); // 선택된 날짜 초기화
   };
   
   // 오늘 날짜 확인
-  const today = new Date();
-  const isToday = (date) => {
+  const isToday = (date: number) => {
+    const today = new Date();
     return today.getFullYear() === year && 
            today.getMonth() === month && 
            today.getDate() === date;
   };
   
-  const handleDatePress = (day) => {
-      navigation.navigate('SchedulePage', { date: `${year}-${month + 1}-${day.date}` }); // 날짜 넘김
-      handleDateSelect(`${year}-${month + 1}-${day.date}`); // 날짜 넘김
-    
-  };
-  
+  // 캘린더 날짜 렌더링
   const renderCalendarDays = () => {
+    const calendarDays = generateCalendarDays();
     const weeks = [];
+    
     for (let i = 0; i < calendarDays.length; i += 7) {
       const week = calendarDays.slice(i, i + 7);
       weeks.push(
         <View key={i} style={styles.weekRow}>
           {week.map((day, index) => {
-            const isSelected = selectedDate === day.date && day.isCurrentMonth;
+            const dateString = `${year}-${month + 1}-${day.date}`;
+            const isSelected = selectedDate === dateString && day.isCurrentMonth;
             const isTodayDate = isToday(day.date) && day.isCurrentMonth;
             const dayIndex = (i / 7) * 7 + index;
             const eventCount = day.isCurrentMonth ? getEventCount(day.date) : 0;
@@ -205,13 +275,11 @@ const CustomCalendar = () => {
                 key={dayIndex}
                 style={[
                   styles.dayCell,
-                  isTodayDate && styles.todayCell,
                   isSelected && styles.selectedCell,
                 ]}
                 onPress={() => handleDatePress(day)}
                 activeOpacity={0.7}
               >
-              
                 <Text
                   style={[
                     styles.dayText,
@@ -235,16 +303,19 @@ const CustomCalendar = () => {
   };
   
   return (
+  <GestureHandlerRootView style={{ flex: 1 }}>
     <View style={styles.container}>
+      {/* 플러스 버튼 */}
       <View className="absolute top-0 left-0 right-0 z-10 mt-4 mb-4">
         <TouchableOpacity 
           style={{ position: 'absolute', top: 20, right: 20 }}
-          onPress={() => handleAddSchedule(`${year}-${month + 1}-${selectedDate}`)} // 날짜 불투명 설정하고 선택한 날짜는 동그라미 표시되도록 함
+          onPress={() => handleAddSchedule()}
           activeOpacity={0.7}
         >
           <PlusIcon width={36} height={36} />
         </TouchableOpacity>
       </View>
+
       {/* 헤더 */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
@@ -293,7 +364,18 @@ const CustomCalendar = () => {
       <View style={styles.calendarGrid}>
         {renderCalendarDays()}
       </View>
+
+      {/* 중요 일정 모아보기 버튼 제거 - 이제 모달이 항상 떠있으므로 불필요 */}
     </View>
+
+    {/* ImportantScheduleModal을 GestureHandlerRootView 내부로 이동 */}
+    <ImportantScheduleModal
+      selectedMonth={selectedMonth}
+      schedules={schedules}
+      isVisible={isModalVisible}
+      onClose={closeImportantScheduleModal}
+    />
+  </GestureHandlerRootView>
   );
 };
 
@@ -369,16 +451,13 @@ const styles = StyleSheet.create({
     margin: 1,
     position: 'relative',
   },
-  todayCell: {
-    backgroundColor: '#4dabf7',
-  },
   selectedCell: {
     borderWidth: 1,
     borderColor: '#ffffff',
   },
   dayText: {
     color: '#ffffff',
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: '400',
   },
   otherMonthText: {
@@ -407,14 +486,28 @@ const styles = StyleSheet.create({
   eventDot: {
     width: 10,
     height: 10,
-    borderRadius: '50%',
-    backgroundColor: '#4dabf7', // 색상 불러오기
+    borderRadius: 5,
+    backgroundColor: '#4dabf7',
   },
   moreEventsText: {
     color: '#4dabf7',
     fontSize: 8,
     marginLeft: 2,
   },
+  // 중요 일정 버튼 스타일 추가
+  importantScheduleButton: {
+    backgroundColor: '#6366F1',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  importantScheduleButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
 });
 
-export default CustomCalendar;
+export default CalendarPage;

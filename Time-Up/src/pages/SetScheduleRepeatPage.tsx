@@ -2,7 +2,6 @@ import {
   BottomSheetModal, BottomSheetView
 } from '@gorhom/bottom-sheet';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Text,
@@ -10,12 +9,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { Schedule } from '../../../types/schedule';
 import LeftArrowIcon from '../../assets/icons/LeftArrowIcon.svg';
 import CheckBox from '../components/common/CheckBox';
+import CustomCalendar from '../components/SetSchedule/CustomCalendar';
 
 
 export default function SetScheduleRepeatPage() {
+    
+      const { schedule } = route.params as { schedule: Schedule };
+      const form = schedule.form
+      const [selectedDate, setSelectedDate] = useState('');
       const [selectedItem, setSelectedItem] = useState<string | null>(null)
       const route=useRoute()
       const navigation=useNavigation() as any
@@ -29,7 +33,7 @@ export default function SetScheduleRepeatPage() {
       const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index)
       }, [])
-      const [currentDate, setCurrentDate] = useState(moment().format('YYYY-MM-DD'))
+    
     const [repeatType, setRepeatType] = useState<'weekly' | 'monthly' | 'none'>('none')
     const [selectedWeekdays, setSelectedWeekdays] = useState<{ [key: string]:boolean}>({
         Sun: false,
@@ -89,80 +93,15 @@ export default function SetScheduleRepeatPage() {
   <BottomSheetView style={{ flex: 1, padding: 16}}>
 
       {(selectedItem === '종료 날짜 설정') && (
-        <View>
-          <Calendar
-            key={currentDate}
-            current={currentDate}
-            theme={{
-              calendarBackground: '#33363B',
-              textDisabledColor: 'gray',
+        <CustomCalendar
+          initialDate={form.start_date}
+          onSelectDate={(date) => {
+            setSelectedDate(date);
+            form.end_dat = date; // 추후 리마인드 로직 생기면 그때 수정
+          }}
+          />
 
-            }}
-            markedDates={{
-              [currentDate]: {
-                selected: true,
-                selectedColor: 'blue',
-              },
-            }}
 
-            renderHeader={(date) => {
-              return (
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>
-                  {moment(date).format('M월 YYYY')}
-                </Text>
-              )
-            }}
-
-            dayComponent={({ date, state }) => {
-              if (!date) return null
-
-              const day = date.day
-              const dateString = date.dateString
-              const dayOfWeek = new Date(dateString).getDay()
-              const isSelected = dateString === currentDate
-
-              const getTextColor = () => {
-                if (state === 'disabled') return 'gray'
-                if (isSelected) return 'white'
-                if (dayOfWeek === 0) return '#FF3B30'
-                if (dayOfWeek === 6) return '#007AFF'
-                return 'white'
-              }
-
-              return (
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log('Pressed date:', dateString)
-                    setCurrentDate(dateString)
-                  }}
-                >
-                  <View
-                    className={`w-10 h-10 justify-center items-center rounded-full ${
-                      isSelected ? 'bg-blue-600' : ''
-                    }`}
-                  >
-                    <Text style={{ color: getTextColor(), fontSize: 16 }}>{day}</Text>
-                  </View>
-                </TouchableOpacity>
-              )
-            }}
-            />
-                <View className="flex-row justify-between mt-6 px-10 py-8">
-                  <TouchableOpacity
-                    onPress={() => console.log('취소')}
-                    className="w-[48%] bg-transparent py-3 rounded-lg items-center "
-                  >
-                    <Text className="text-white text-base text-[18px]">취소</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => console.log('선택')}
-                    className="w-[48%] bg-transparent py-3 rounded-lg items-center"
-                  >
-                    <Text className="text-white text-base text-[18px]">선택</Text>
-                     {/* 선택 버튼 누르면 저장되고 모달 자동으로 닫히는 로직 추후 추가 */}
-                  </TouchableOpacity>
-                            </View>
-                </View>
       )}
             </BottomSheetView>
         </BottomSheetModal>
