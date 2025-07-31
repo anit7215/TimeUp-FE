@@ -1,19 +1,10 @@
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
-import {
-  FlatList,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {
-  useRoute,
-  useNavigation,
-  RouteProp,
-} from '@react-navigation/native';
+import { FlatList, Text, TextInput, TouchableOpacity, View, } from 'react-native';
 import SearchIcon from '../../../assets/images/SearchIcon.svg';
-import BeforeHeader from '../../components/common/BeforeHeader';
 import { fetchAddress } from '../../apis/googleAddress';
+import BeforeHeader from '../../components/common/BeforeHeader';
+import AddressItemSkeleton from '../../components/skeleton/AddressItemSkeleton';
 import { AddressItem } from '../../types/address';
 import { RootStackParamList } from '../../types/navigation';
 
@@ -27,10 +18,14 @@ export default function AddressSearchPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const handleSearch = async () => {
     if (!searchText.trim()) return;
     setLoading(true);
+    setResults([]);
     const res = await fetchAddress(searchText);
+    await sleep(1000);
     setResults(res);
     setLoading(false);
   };
@@ -105,7 +100,11 @@ export default function AddressSearchPage() {
         </TouchableOpacity>
       </View>
       {loading && (
-        <Text className="text-white text-center mb-3">검색 중...</Text>
+        <View>
+          {[...Array(5)].map((_, idx) => (
+            <AddressItemSkeleton key={idx} />
+          ))}
+        </View>
       )}
       {!loading && results.length === 0 && (
         <View className="flex-1 justify-center items-center mt-10">
