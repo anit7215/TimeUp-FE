@@ -18,10 +18,6 @@ export default function OnboardingPage() {
     webClientId: process.env.GOOGLE_CLIENT_ID,
     iosClientId: process.env.GOOGLE_CLIENT_ID,
     androidClientId: process.env.GOOGLE_CLIENT_ID,
-    redirectUri: makeRedirectUri({
-      //native: 'timeup://oauth2redirect/google', 
-      useProxy: true, 
-    }),
     scopes: ['profile', 'email'],
   });
 
@@ -45,7 +41,7 @@ export default function OnboardingPage() {
             setRefreshToken(data.success.refreshToken);
           }
           if (data.success?.isNew) {
-            navigation.navigate('ProfileSettingPage');
+            navigation.navigate('ProfileSettingPage',{});
           } else {
             navigation.navigate('AlarmPage');
           }
