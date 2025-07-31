@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,11 +30,29 @@ import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
+import { GOOGLE_PLACES_API_KEY } from '@env';
 
 export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
+   useEffect(() => {
+    if (Platform.OS === 'web' && !window.google) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_API_KEY}&libraries=places`;
+      script.async = true;
+      script.onload = () => setMapsLoaded(true);
+      script.onerror = () => {
+        console.error('Google Maps JS API 로드 실패');
+        alert('주소 검색을 위한 Google Maps API 로드에 실패했습니다.');
+      };
+      document.head.appendChild(script);
+    }
+  }, []);
 
+  if (!mapsLoaded) {
+    return null; 
+  }
   const content = (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>

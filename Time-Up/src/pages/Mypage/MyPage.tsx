@@ -1,6 +1,7 @@
+import { logout } from '@/src/apis/auth';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useState } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import NextIcon from '../../../assets/images/NextIcon.svg';
 import ProfileImage from '../../../assets/images/ProfileImage.svg';
 import BottomLayout from '../../Layouts/BottomLayout';
@@ -9,9 +10,16 @@ import Modal from '../../components/common/Modal';
 export default function MyPage() {
   const navigation = useAppNavigation();
   const [openLogout, setOpenLogout] = useState(false);
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setOpenLogout(false);
-    alert('로그아웃 되었습니다!');
+    try {
+      await logout();
+      alert('로그아웃 되었습니다!');
+      navigation.navigate('OnboardingPage'); 
+    } catch (error) {
+      alert('로그아웃에 실패했습니다.');
+      console.error(error);
+    }
   };
   return (
   <>
