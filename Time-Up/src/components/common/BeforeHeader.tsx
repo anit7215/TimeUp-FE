@@ -17,18 +17,18 @@ export default function BeforeHeader({ title, rightLabel, onRightPress, onBackPr
     <TouchableOpacity onPress={onBackPress ?? (() => navigation.goBack())}>
         <BeforeArrowIcon />
     </TouchableOpacity>
-    <View style={{ position: 'absolute', left: 0, right: 0, top: 60, alignItems: 'center' }}>
-        <Text className="font-medium text-white text-xl leading-[28px] tracking-[-0.02em] font-pretendard">
+    <View style={{ position: 'absolute', left: 0, right: 0, alignItems: 'center' }}>
+        <Text className="font-medium text-white text-xl leading-7 font-pretendard">
         {title}
         </Text>
     </View>
 
     {rightLabel ? (
         <TouchableOpacity onPress={onRightPress}>
-        <Text className="text-white font-medium text-base leading-[24px] tracking-[-0.01em] font-pretendard">{rightLabel}</Text>
+        <Text className="text-white font-normal text-base leading-normal font-pretendard">{rightLabel}</Text>
         </TouchableOpacity>
     ) : (
-        <View className="w-8" />
+        <View className="w-7" />
     )}
     </View>
   );

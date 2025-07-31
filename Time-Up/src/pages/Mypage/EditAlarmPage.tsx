@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
+import TimeModal from '../../components/Onboarding/TimeModal';
 
 export default function EditrAlarmPage() {
   const [ringTone, setRingTone] = useState<string | null>(null);
@@ -10,8 +11,10 @@ export default function EditrAlarmPage() {
   const [backupSound, setBackupSound] = useState<string | null>(null);
   const [interval, setInterval] = useState<string | null>(null);
   const [repeat, setRepeat] = useState<string | null>(null);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(new Date());
+
+  const [open, setOpen] = useState(false);
+  const [isOptional, setIsOptional] = useState(false);
+  const [alarmTime, setAlarmTime] = useState<{ hour: string; minute: string } | null>(null);
 
   const alarmOptions = [
     { label: 'Ring Tone', value: 'ring' },
@@ -33,6 +36,11 @@ export default function EditrAlarmPage() {
     { label: '10분', value: '10' },
     { label: '30분', value: '30' },
   ];
+
+  const handleSelect = (hour: string, minute: string) => {
+    setAlarmTime({ hour, minute });
+    setOpen(false); 
+  };
 
   return (
     <ScrollView className="flex-1 bg-black px-4 py-4">
@@ -114,14 +122,23 @@ export default function EditrAlarmPage() {
 
         <TouchableOpacity
           className="bg-gray-800 rounded-2xl px-4 py-4 mb-2"
+          onPress={() => { setOpen(true); setIsOptional(true);}}
         >
           <View className="flex-row justify-between items-center">
             <Text className="text-white">자동 알람 확인 시간</Text>
             <Text className="text-light">
-              오후 10:00
+              {alarmTime ? `${alarmTime.hour}:${alarmTime.minute}` : '입력'}
             </Text>
           </View>
         </TouchableOpacity>
+        {open && (
+          <TimeModal
+            visible={open}
+            onClose={() => setOpen(false)}
+            onSelect={handleSelect}
+            choice={isOptional ? 'optional' : undefined}
+          />
+        )}
     </ScrollView>
   );
 }

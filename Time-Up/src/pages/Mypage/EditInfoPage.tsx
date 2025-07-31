@@ -1,12 +1,14 @@
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import BeforeHeader from '../../components/common/BeforeHeader';
-import DropDown3 from '../../components/common/DropDown3';
-import StepTransport from '../../components/Onboarding/StepTransport';
 import SignoutIcon from '../../../assets/images/signout.png';
+import BeforeHeader from '../../components/common/BeforeHeader';
 import CancelButton from '../../components/common/CancleButton';
 import ConfirmButton from '../../components/common/ConfirmButton';
+import DropDown3 from '../../components/common/DropDown3';
+import StepTransport from '../../components/Onboarding/StepTransport';
+import TimeModal from '../../components/Onboarding/TimeModal';
+import { AddressItem } from '../../types/address';
 
 export default function EditInfoPage() {
   const navigation = useAppNavigation();
@@ -16,11 +18,30 @@ export default function EditInfoPage() {
   const [homeAddress, setHomeAddress] = useState('-');
   const [workAddress, setWorkAddress] = useState('-');
   const [openSignout, setOpenSignout] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isOptional, setIsOptional] = useState(false);
+  const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
+  const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
+  
   const handleSignout = () => {
     setOpenSignout(false);
     alert('회원탈퇴 되었습니다!');
   };
-
+  const handleSelect = (hour: string, minute: string) => {
+    if (isOptional) {
+      setCommuteTime({ hour, minute });
+    } else {
+      setReadyTime({ hour, minute });
+    }
+    setOpen(false); 
+  };
+  const handleSelectAddress = (type: 'home' | 'work', address: AddressItem) => {
+    if (type === 'home') {
+      setHomeAddress(address.region); // 또는 원하는 주소 속성
+    } else {
+      setWorkAddress(address.region);
+    }
+  };
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 101 }, (_, i) => {
@@ -58,10 +79,10 @@ export default function EditInfoPage() {
   return (
     <ScrollView className="flex-1 bg-black px-4 py-6" contentContainerStyle={{ paddingBottom: 40 }}>
       <BeforeHeader title="개인정보" rightLabel="저장" onRightPress={()=>alert('저장됨')}/>
-        <View className="bg-gray-900 px-2 py-3 rounded-2xl mb-2">
+        <View className="bg-gray-900 px-2 py-3 rounded-lg mb-2">
           <View className="flex-row items-center justify-between">
-            <Text className="text-white text-base">출생연도</Text>
-            <View className="w-[150px]">
+            <Text className="text-white text-base text-normal leading-tight">출생연도</Text>
+            <View className="w-36">
               <DropDown3
                 data={yearOptions}
                 placeholder="출생연도 선택"
@@ -72,10 +93,10 @@ export default function EditInfoPage() {
           </View>
         </View>
 
-        <View className="bg-gray-900 px-2 py-3 rounded-2xl mb-2">
+        <View className="bg-gray-900 px-2 py-3 rounded-lg mb-2">
           <View className="flex-row items-center justify-between">
-            <Text className="text-white text-base">직업</Text>
-            <View className="w-[150px]">
+            <Text className="text-white text-base text-normal leading-tight">직업</Text>
+            <View className="w-36">
               <DropDown3
                 data={jobOptions}
                 placeholder="직업 선택"
@@ -86,9 +107,9 @@ export default function EditInfoPage() {
           </View>
         </View>
 
-        <View className="bg-gray-900 px-2 py-3 rounded-2xl mb-2">
+        <View className="bg-gray-900 px-2 py-3 rounded-lg mb-2">
           <View className="flex-row justify-between items-start gap-[71px] flex-wrap">
-            <Text className="text-white text-base pt-1">선호 이동 수단</Text>
+            <Text className="text-white text-base text-normal leading-tight">선호 이동 수단</Text>
             <View className="flex-1">
               <StepTransport
                 selected={transport}
@@ -100,44 +121,68 @@ export default function EditInfoPage() {
         </View>
 
         <View className="mb-2">
-          <View className="bg-gray-900 px-2 py-3 rounded-t-2xl">
+          <TouchableOpacity className="bg-gray-900 px-2 py-3 rounded-t-lg" 
+          onPress={() => {
+            setOpen(true);
+            setIsOptional(false);}}>
             <View className="flex-row items-center justify-between">
-              <Text className="text-white text-base">외출 준비 시간</Text>
-              <Text className="text-light">1시간</Text>
+              <Text className="text-white text-base text-normal leading-tight">외출 준비 시간</Text>
+              <Text className="text-light text-base text-normal leading-tight">{readyTime ? `${readyTime.hour}:${readyTime.minute}` : '입력'}</Text>
             </View>
-          </View>
-          <View className="bg-gray-900 px-2 pt-[6px] pb-3 rounded-b-2xl">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-gray-900 px-2 pt-1.5 pb-3 rounded-b-lg"
+          onPress={() => {
+            setOpen(true);
+            setIsOptional(true);}}>
             <View className="flex-row items-center justify-between">
                <View className="flex-col">
-                  <Text className="text-white font-regular text-base">직장/학교까지 이동 시간</Text>
-                  <Text className="text-gray-200 font-regular text-[10px]">*선택 사항</Text>
+                  <Text className="text-white text-base text-normal leading-tight">직장/학교까지 이동 시간</Text>
+                  <Text className="text-gray-200 font-normal leading-3 tracking-tight text-[10px]">*선택 사항</Text>
                 </View>
-              <Text className="text-light">1시간 30분</Text>
+              <Text className="text-light text-base text-normal leading-tight">{commuteTime ? `${commuteTime.hour}:${commuteTime.minute}` : '-'}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
+          {open && (
+                  <TimeModal
+                    visible={open}
+                    onClose={() => setOpen(false)}
+                    onSelect={handleSelect}
+                    choice={isOptional ? 'optional' : undefined}
+                  />
+          )}
         </View>
 
 
         <View>
-          <View className="bg-gray-900 px-2 py-3 rounded-t-2xl">
-            <TouchableOpacity onPress={() => navigation.navigate('AddressSearchPage')} className="flex-row items-center justify-between">
-              <Text className="text-white text-base">집</Text>
-              <Text className="text-light">{homeAddress}</Text>
+          <View className="bg-gray-900 px-2 py-3 rounded-t-lg">
+            <TouchableOpacity 
+            onPress={() => navigation.navigate('AddressSearchPage', {
+              type: 'home',
+              onSelectAddress: (address: AddressItem) => handleSelectAddress('home', address),
+            })} 
+            className="flex-row items-center justify-between">
+              <Text className="text-white text-base text-normal leading-tighte">집</Text>
+              <Text className="text-light text-base text-normal leading-tight">{homeAddress}</Text>
             </TouchableOpacity>
           </View>
 
-          <View className="bg-gray-900 px-2 pt-[6px] pb-3 rounded-b-2xl ">
-            <TouchableOpacity onPress={() => navigation.navigate('AddressSearchPage')} className="flex-row items-center justify-between">
+          <View className="bg-gray-900 px-2 pt-1.5 pb-3 rounded-b-lg ">
+            <TouchableOpacity 
+            onPress={() => navigation.navigate('AddressSearchPage', {
+              type: 'work',
+              onSelectAddress: (address: AddressItem) => handleSelectAddress('work', address),
+            })} 
+            className="flex-row items-center justify-between">
               <View className="flex-col">
-                <Text className="text-white font-regular text-base">직장/학교</Text>
-                <Text className="text-gray-200 font-regular text-[10px]">*선택 사항</Text>
+                <Text className="text-white text-base text-normal leading-tight">직장/학교</Text>
+                <Text className="text-gray-200 font-normal leading-3 tracking-tight text-[10px]">*선택 사항</Text>
               </View>
-              <Text className="text-light">{workAddress}</Text>
+              <Text className="text-light text-base text-normal leading-tight">{workAddress}</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity className="w-full px-[14px] mb-[38px]" onPress={() => setOpenSignout(true)}>
-          <Text className="text-gray-100 text-[12px] font-regular ">회원탈퇴</Text>
+        <TouchableOpacity className="w-full px-[14px] mt-9 items-end" onPress={() => setOpenSignout(true)}>
+          <Text className="text-gray-200 text-xs font-normal leading-none tracking-tight ">회원탈퇴</Text>
         </TouchableOpacity>
         { openSignout && (
             <View className="absolute inset-0 bg-black justify-center items-center px-[44px]">

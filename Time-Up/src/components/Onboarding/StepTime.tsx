@@ -9,7 +9,7 @@ export default function StepTime() {
   const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
   const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
 
-   const handleSelect = (hour: string, minute: string) => {
+  const handleSelect = (hour: string, minute: string) => {
     if (isOptional) {
       setCommuteTime({ hour, minute });
     } else {
@@ -42,7 +42,7 @@ export default function StepTime() {
         <TimeModal
           visible={open}
           onClose={() => setOpen(false)}
-           onSelect={handleSelect}
+          onSelect={handleSelect}
           choice={isOptional ? 'optional' : undefined}
         />
       )}

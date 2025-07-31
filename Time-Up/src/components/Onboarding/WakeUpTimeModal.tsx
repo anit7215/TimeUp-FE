@@ -15,10 +15,9 @@ export default function WakeUpTimeModal({ visible, onClose, onSelect, initialSel
   const [selectedTime, setSelectedTime] = useState({ hour: '00', minute: '00', period: '오전' });
   const [selectedDays, setSelectedDays] = useState<string[]>(initialSelectedDays);
   useEffect(() => {
-    if (visible) {
-      setSelectedDays(initialSelectedDays);
-    }
-  }, [visible, initialSelectedDays]);
+  setSelectedDays(initialSelectedDays);
+}, [initialSelectedDays]);
+
   const toggleDay = (day: string) => {
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]

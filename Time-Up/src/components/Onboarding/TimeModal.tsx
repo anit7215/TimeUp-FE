@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import TimeScrollPanel from '../common/TimeScrollPanel';
 
@@ -12,9 +12,9 @@ interface TimeModalProps {
 export default function TimeModal({ visible, onClose, onSelect, choice }: TimeModalProps) {
   const [selectedTime, setSelectedTime] = useState({ hour: '00', minute: '00' });
 
-  const handleTimeChange = (hour: string, minute: string) => {
+  const handleTimeChange = useCallback((hour: string, minute: string) => {
     setSelectedTime({ hour, minute });
-  };
+  }, []);
 
   const handleSelect = () => {
     onSelect(selectedTime.hour, selectedTime.minute);
