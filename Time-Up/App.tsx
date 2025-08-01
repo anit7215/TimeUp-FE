@@ -1,7 +1,8 @@
+import { GOOGLE_PLACES_API_KEY } from '@env';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -21,6 +22,9 @@ import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
+import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
+import EditInfoPage from './src/pages/Mypage/EditInfoPage';
+import FeedbackPage from './src/pages/Mypage/FeedbackPage';
 import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
@@ -29,13 +33,30 @@ import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
 export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
+  useEffect(() => {
+    if (Platform.OS === 'web' && !window.google) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_API_KEY}&libraries=places`;
+      script.async = true;
+      script.onload = () => setMapsLoaded(true);
+      script.onerror = () => {
+        console.error('Google Maps JS API 로드 실패');
+        alert('주소 검색을 위한 Google Maps API 로드에 실패했습니다.');
+      };
+      document.head.appendChild(script);
+    }
+  }, []);
 
+  if (!mapsLoaded) {
+    return null;
+  }
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
 
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="WakeUpAlarmPage" screenOptions={{ headerShown: false }}>
+          <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
             <Stack.Screen name="CalendarPage" component={CalendarPage} />
             <Stack.Screen name="MyPage" component={MyPage} />
@@ -53,9 +74,12 @@ export default function App() {
             <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
             <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
             <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
+            <Stack.Screen name="EditInfoPage" component={EditInfoPage} />
+            <Stack.Screen name="EditAlarmPage" component={EditAlarmPage} />
+            <Stack.Screen name="FeedbackPage" component={FeedbackPage} />
+
           </Stack.Navigator>
         </NavigationContainer>
-
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );

@@ -18,8 +18,8 @@ export const transformAlarmResponseToItem = (alarm: MyAlarmSummary): AlarmItem =
       minute,
     },
     date: {
-      fullDate: '2025-01-01', // 서버에서 날짜 정보 없으므로 기본값
-      dayOfWeek: '월', // 같은 이유로 기본값
+      fullDate: '2025-08-01',
+      dayOfWeek: '월',
     },
     sound: '선택',
     vibrate: '선택',
