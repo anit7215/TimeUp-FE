@@ -34,7 +34,10 @@ export default function TimeModal({ visible, onClose, onSelect, choice }: TimeMo
           onPress={() => {}}
         >
           {choice === 'optional'&& (
-            <TouchableOpacity className="w-full items-end" onPress={onClose}>
+            <TouchableOpacity className="w-full items-end" onPress={() => {
+              onSelect('00','00'); 
+              onClose();
+            }}>
               <Text className="text-gray-300 underline text-sm font-normal leading-tight">
                 나중에 입력할게요.
               </Text>

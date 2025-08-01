@@ -23,7 +23,17 @@ export default function ProfileSettingPage() {
   const [transport, setTransport] = useState<string[]>([]);
   const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
   const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
-  const [selectedTimes, setSelectedTimes] = useState<Record<string, { hour: string; minute: string; period: string }>>({});
+  const defaultTime = { period: '오전', hour: '08', minute: '00' };
+  const initialSelectedTimes: Record<string, { hour: string; minute: string; period: string }> = {
+    월요일: defaultTime,
+    화요일: defaultTime,
+    수요일: defaultTime,
+    목요일: defaultTime,
+    금요일: defaultTime,
+    토요일: defaultTime,
+    일요일: defaultTime,
+  };
+  const [selectedTimes, setSelectedTimes] = useState(initialSelectedTimes);
   const [homeAddress, setHomeAddress] = useState<AddressItem | null>(null);
   const [workAddress, setWorkAddress] = useState<AddressItem | null>(null);
 
@@ -148,7 +158,6 @@ export default function ProfileSettingPage() {
           (step === 2 && !job) ||
           (step === 3 && transport.length !== transportOptions.length)
           || (step === 4 && !readyTime)
-          || (step === 5 && Object.keys(selectedTimes).length === 0)
           || (step === 6 && (!homeAddress))
         }
       />

@@ -21,6 +21,14 @@ export default function StepTime({ readyTime, setReadyTime, commuteTime, setComm
     }
     setOpen(false); 
   };
+  const formatTime = (time: { hour: string; minute: string } | null) => {
+    if (!time || (time.hour === '00' && time.minute === '00')) {
+      return '입력';
+    }
+    const hourText = time.hour !== '00' ? `${parseInt(time.hour)}시간` : '';
+    const minuteText = time.minute !== '00' ? `${parseInt(time.minute)}분` : '';
+    return `${hourText} ${minuteText}`.trim();
+  };
 
   return (
     <>
@@ -31,7 +39,7 @@ export default function StepTime({ readyTime, setReadyTime, commuteTime, setComm
         setOpen(true);
         setIsOptional(false);}}>
         <Text className="text-white font-medium text-base leading-normal">외출 준비 시간</Text>
-        <Text className="text-gray-100 font-normal text-base leading-tight">{readyTime ? `${readyTime.hour}:${readyTime.minute}` : '입력'}</Text>
+        <Text className="text-gray-100 font-normal text-base leading-tight">{formatTime(readyTime)}</Text>
       </TouchableOpacity>
       <TouchableOpacity className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700" onPress={() => { setOpen(true);
       setIsOptional(true);}}>
@@ -40,7 +48,7 @@ export default function StepTime({ readyTime, setReadyTime, commuteTime, setComm
           <Text className="text-gray-200 font-normal leading-3 tracking-tight text-[10px]">*선택 사항</Text>
         </View>
         
-        <Text className="text-gray-100 font-normal text-base leading-tight">{commuteTime ? `${commuteTime.hour}:${commuteTime.minute}` : '입력'}</Text>
+        <Text className="text-gray-100 font-normal text-base leading-tight">{formatTime(commuteTime)}</Text>
       </TouchableOpacity>
       {open && (
         <TimeModal

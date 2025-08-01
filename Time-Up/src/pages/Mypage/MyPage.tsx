@@ -24,25 +24,25 @@ export default function MyPage() {
   return (
   <>
     <BottomLayout>
-      <View className="flex-1 items-center justify-between bg-black px-4 pt-6">
+      <View className="flex-1 justify-between bg-black px-4 pt-6 w-full">
         <View>
-          <View className="flex-row px-3 py-3 w-full items-center justify-between gap-[12px] bg-white rounded-[24px] mb-12">
+          <View className="flex-row px-3 py-3 w-full items-center justify-between gap-3 bg-white rounded-[20px] mb-12">
             <ProfileImage/>
-            <Text className="text-gray-800 text-lg font-regular">example@naver.com</Text>
-            <TouchableOpacity className="bg-[#CCCCFF] rounded-[6px] p-1" onPress={() => setOpenLogout(true)}>
-              <Text className="text-darkblue text-[12px]">로그아웃</Text>
+            <Text className="text-gray-900 text-lg font-normal leading-normal font-pretendard">example@naver.com</Text>
+            <TouchableOpacity className="bg-[#CCCCFF] rounded-md p-1 items-center" onPress={() => setOpenLogout(true)}>
+              <Text className="text-dark text-xs font-normal leading-none font-pretendard">로그아웃</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-900 rounded-[12px] mb-2" onPress={() => navigation.navigate('EditInfoPage')}>
-            <Text className="font-pretendard text-white text-[18px] text-medium">개인정보</Text>
+          <TouchableOpacity className="flex-row items-center justify-between w-full px-4 py-4 bg-gray-900 rounded-[20px] mb-2" onPress={() => navigation.navigate('EditInfoPage')}>
+            <Text className="font-pretendard text-white text-lg leading-relaxed text-medium font-pretendard">개인정보</Text>
             <NextIcon/>
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-900 rounded-[12px] mb-2" onPress={() => navigation.navigate('EditAlarmPage')}>
-            <Text className="font-pretendard text-white text-[18px] text-medium">리마인드 / 알람</Text>
+          <TouchableOpacity className="flex-row items-center justify-between w-full px-4 py-4 bg-gray-900 rounded-[20px] mb-2" onPress={() => navigation.navigate('EditAlarmPage')}>
+            <Text className="font-pretendard text-white text-lg leading-relaxed text-medium font-pretendard">리마인드 / 알람</Text>
             <NextIcon/>
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between w-full px-2 py-4 bg-gray-900 rounded-[12px]" onPress={() => navigation.navigate('FeedbackPage')}>
-            <Text className="font-pretendard text-white text-[18px] text-medium">자동 알람 피드백</Text>
+          <TouchableOpacity className="flex-row items-center justify-between w-full px-4 py-4 bg-gray-900 rounded-[20px]" onPress={() => navigation.navigate('FeedbackPage')}>
+            <Text className="font-pretendard text-white text-lg leading-relaxed text-medium">자동 알람 피드백</Text>
             <NextIcon/>
           </TouchableOpacity>
         </View>
