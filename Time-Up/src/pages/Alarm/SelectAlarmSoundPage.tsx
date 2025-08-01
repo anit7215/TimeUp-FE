@@ -1,5 +1,7 @@
 // src/pages/SelectAlarmSoundPage.tsx
-import React from 'react';
+import ToggleSwitch from '@/src/components/common/ToggleSwitch';
+import { useAlarmContext } from '@/src/contexts/AlarmContext';
+import React, { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import TransparentButton from '../../components/alarm/TransparentButton';
@@ -9,46 +11,55 @@ import useAppNavigation from '../../hooks/useAppNavigation';
 
 export default function SelectAlarmSoundPage() {
   const navigation = useAppNavigation();
+  const { selectedAlarmId, myAlarms, updateAlarmField } = useAlarmContext();
+  const alarm = myAlarms.find(a => a.id === selectedAlarmId);
+  const [selectedSound, setSelectedSound] = useState<string | null>(alarm?.sound ?? null);
+  const [on, setOn] = useState(false);
+
+  const handleToggleSwitch = useCallback(() => {
+    setOn((prev) => !prev);
+  }, []);
+
+  const soundOptions = ['Heavy Raindrop', 'Basic Ring', 'Ocean Wave', 'Bird Chirp', 'Classic Bell'];
 
   const handleConfirm = () => {
-    console.log('확인 버튼 클릭됨');
+    if (selectedAlarmId && selectedSound) {
+      updateAlarmField(selectedAlarmId, 'sound', selectedSound);
+      console.log('알람음 저장됨:', selectedSound);
+    }
+    navigation.goBack();
   };
-
-  const [checked, setChecked] = React.useState(false);
-  const handleCheckBoxChange = (val: boolean) => {
-    setChecked(val);
-    console.log(`체크박스 상태: ${val ? '선택됨' : '선택되지 않음'}`);
-  }
 
   return (
     <BottomLayout>
-        <View className="flex-row mt-3 items-center justify-between">
-          <PageBackButton />
+      <View className="flex-row mt-3 mb-3 items-center justify-start">
+        <PageBackButton />
+        <View className="ml-auto -mr-6">
           <TransparentButton title="확인" onPress={handleConfirm} />
         </View>
-        <Text className="text-xl text-white ml-9 mt-8">알람음</Text>
+      </View>
 
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>
-        <View className="flex-row ml-9 mt-6">
-          <CheckBox isChecked={checked} onValueChangeHandler={handleCheckBoxChange} disabled={false}></CheckBox>
-          <Text className="text-white text-xl ml-4">Heavy Raindrop</Text>
-        </View>        
+      <View className="flex-row w-[93%] mb-[3%] items-center justify-between">
+        <Text className='text-white text-2xl ml-[7%]'>알람음</Text>
+        <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false} />
+      </View>
 
+      {soundOptions.map((sound) => (
+        <View key={sound} className="flex-row ml-9 mt-6">
+          <CheckBox
+            isChecked={selectedSound === sound}
+            onValueChangeHandler={() => {
+              if (selectedSound === sound) {
+                console.log('이미 선택된 알람음입니다. 중복 선택을 방지합니다.');
+                return;
+              }
+              setSelectedSound(sound);
+            }}
+            disabled={false}
+          />
+          <Text className="text-white text-xl ml-4">{sound}</Text>
+        </View>
+      ))}
     </BottomLayout>
   );
 }

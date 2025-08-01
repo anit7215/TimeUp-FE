@@ -1,3 +1,4 @@
+// src/components/common/HalfTimeScrollPanel.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 
@@ -11,9 +12,14 @@ const minutes = generateRange(0, 59);
 const periods = Platform.OS === 'web'
   ? ['오전', '오후']
   : [' ', ' ', '오전', '오후', ' ', ' '];
-
+  
 interface HalfTimeScrollPanelProps {
-  onTimeChange?: (hour: string, minute: string, period:string) => void;
+  initialTime?: {
+    hour: string;
+    minute: string;
+    period: '오전' | '오후';
+  };
+  onTimeChange?: (hour: string, minute: string, period: string) => void;
 }
 
 export default function HalfTimeScrollPanel({ onTimeChange }: HalfTimeScrollPanelProps)

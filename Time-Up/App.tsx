@@ -1,26 +1,25 @@
+import { GOOGLE_PLACES_API_KEY } from '@env';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
 import { AlarmProvider } from './src/contexts/AlarmContext';
-import AlarmMemoPage from './src/pages/Alarm/AlarmMemoPage';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
 import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
 import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
 import MyAlarmDetailPage from './src/pages/Alarm/MyAlarmDetailPage';
 import MyAlarmPage from './src/pages/Alarm/MyAlarmPage';
 import PushAlarmPage from './src/pages/Alarm/PushAlarmPage';
-import SelectAlarmDatePage from './src/pages/Alarm/SelectAlarmDatePage';
 import SelectAlarmReplayPage from './src/pages/Alarm/SelectAlarmReplayPage';
 import SelectAlarmSoundPage from './src/pages/Alarm/SelectAlarmSoundPage';
-import SelectAlarmTimePage from './src/pages/Alarm/SelectAlarmTimePage';
 import SelectAlarmVibratePage from './src/pages/Alarm/SelectAlarmVibratePage';
 import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
-import WakeUpAlarmPageNotAuto from './src/pages/Alarm/WakeUpAlarmPageNotAuto';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
 import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
@@ -30,13 +29,12 @@ import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
-import { GOOGLE_PLACES_API_KEY } from '@env';
 
 export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
-   useEffect(() => {
+  useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_API_KEY}&libraries=places`;
@@ -51,39 +49,39 @@ export default function App() {
   }, []);
 
   if (!mapsLoaded) {
-    return null; 
+    return null;
   }
   const content = (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
-        <Stack.Screen name="CalendarPage" component={CalendarPage} />
-        <Stack.Screen name="MyPage" component={MyPage} />
-        <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
-        <Stack.Screen name="WakeUpAlarmPageNotAuto" component={WakeUpAlarmPageNotAuto} />
-        <Stack.Screen name="AlarmPage" component={AlarmPage} />
-        <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
-        <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
-        <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
-        <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
-        <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
-        <Stack.Screen name="AlarmMemoPage" component={AlarmMemoPage} />
-        <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
-        <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
-        <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
-        <Stack.Screen name="EditMyAlarmPage" component={EditMyAlarmPage} />
-        <Stack.Screen name="SelectAlarmDatePage" component={SelectAlarmDatePage} />
-        <Stack.Screen name="SelectAlarmTimePage" component={SelectAlarmTimePage} />
-        <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
-        <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
-        <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
-        <Stack.Screen name="EditInfoPage" component={EditInfoPage} />
-        <Stack.Screen name="EditAlarmPage" component={EditAlarmPage} />
-        <Stack.Screen name="FeedbackPage" component={FeedbackPage} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
 
-        
-      </Stack.Navigator>
-    </NavigationContainer>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
+            <Stack.Screen name="CalendarPage" component={CalendarPage} />
+            <Stack.Screen name="MyPage" component={MyPage} />
+            <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
+            <Stack.Screen name="AlarmPage" component={AlarmPage} />
+            <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
+            <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
+            <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
+            <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
+            <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
+            <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
+            <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
+            <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
+            <Stack.Screen name="EditMyAlarmPage" component={EditMyAlarmPage} />
+            <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
+            <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
+            <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
+            <Stack.Screen name="EditInfoPage" component={EditInfoPage} />
+            <Stack.Screen name="EditAlarmPage" component={EditAlarmPage} />
+            <Stack.Screen name="FeedbackPage" component={FeedbackPage} />
+
+          </Stack.Navigator>
+        </NavigationContainer>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 
   return (

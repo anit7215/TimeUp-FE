@@ -23,10 +23,8 @@ export type RootStackParamList = {
   MyAlarmDetailPage: undefined;
   MyAlarmPage: undefined;
   PushAlarmPage: undefined;
-  SelectAlarmDatePage: undefined;
   SelectAlarmReplayPage: undefined;
   SelectAlarmSoundPage: undefined;
-  SelectAlarmTimePage: undefined;
   SelectAlarmVibratePage: undefined;
   WakeUpAlarmDetailPage: undefined;
   WakeUpAlarmPage: undefined;
