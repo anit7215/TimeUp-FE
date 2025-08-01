@@ -30,14 +30,14 @@ export default function MyAlarmPage() {
     navigation.navigate('WakeUpAlarmPage');
   };
 
-  const handleGoToAlarmDetail = (id: string, title: string) => {
+  const handleGoToAlarmDetail = (id: number, title: string) => {
     setSelectedAlarmId(id);
     console.log(`${title} 알람 디테일 페이지로 이동합니다.`);
     navigation.navigate('MyAlarmDetailPage');
   };
 
 
-  const handleToggleAlarm = (id: string) => {
+  const handleToggleAlarm = (id: number) => {
     setMyAlarms((prev) =>
       prev.map((alarm) => {
         if (alarm.id === id) {

@@ -27,7 +27,7 @@ interface AlarmContextProps {
   setSelectedAlarmDate: (date: string) => void;
 
   updateAlarmField: <K extends keyof AlarmItem>(
-    alarmId: string,
+    alarmId: number,
     field: K,
     value: AlarmItem[K]
   ) => void;
@@ -50,7 +50,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [myAlarms, setMyAlarms] = useState<AlarmItem[]>([
     {
-      id: '1',
+      id: 1,
       title: '딥러닝 과제 제출',
       time: {
         period: '오후',
@@ -68,7 +68,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       isActive: true,
     },
     {
-      id: '2',
+      id: 2,
       title: '딥러닝 과제 제출 후에 꼭 확인 할 것',
       time: {
         period: '오후',
@@ -88,7 +88,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   ]);
 
   const updateAlarmField = <K extends keyof AlarmItem>(
-    alarmId: string,
+    alarmId: number,
     field: K,
     value: AlarmItem[K]
   ) => {
@@ -127,4 +127,3 @@ export const useAlarmContext = () => {
   if (!context) throw new Error('useAlarmContext must be used within AlarmProvider');
   return context;
 };
-

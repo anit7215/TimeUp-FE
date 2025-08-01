@@ -15,14 +15,11 @@ import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
 import MyAlarmDetailPage from './src/pages/Alarm/MyAlarmDetailPage';
 import MyAlarmPage from './src/pages/Alarm/MyAlarmPage';
 import PushAlarmPage from './src/pages/Alarm/PushAlarmPage';
-import SelectAlarmDatePage from './src/pages/Alarm/SelectAlarmDatePage';
 import SelectAlarmReplayPage from './src/pages/Alarm/SelectAlarmReplayPage';
 import SelectAlarmSoundPage from './src/pages/Alarm/SelectAlarmSoundPage';
-import SelectAlarmTimePage from './src/pages/Alarm/SelectAlarmTimePage';
 import SelectAlarmVibratePage from './src/pages/Alarm/SelectAlarmVibratePage';
 import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
-import WakeUpAlarmPageNotAuto from './src/pages/Alarm/WakeUpAlarmPageNotAuto';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
 import MyPage from './src/pages/Mypage/MyPage';
@@ -44,7 +41,6 @@ export default function App() {
             <Stack.Screen name="CalendarPage" component={CalendarPage} />
             <Stack.Screen name="MyPage" component={MyPage} />
             <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
-            <Stack.Screen name="WakeUpAlarmPageNotAuto" component={WakeUpAlarmPageNotAuto} />
             <Stack.Screen name="AlarmPage" component={AlarmPage} />
             <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
             <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
@@ -56,8 +52,6 @@ export default function App() {
             <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
             <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
             <Stack.Screen name="EditMyAlarmPage" component={EditMyAlarmPage} />
-            <Stack.Screen name="SelectAlarmDatePage" component={SelectAlarmDatePage} />
-            <Stack.Screen name="SelectAlarmTimePage" component={SelectAlarmTimePage} />
             <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
             <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
             <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />

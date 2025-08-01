@@ -71,7 +71,7 @@ export default function EditMyAlarmPage() {
     } else {
       // 새 알람 생성
       const newAlarm: AlarmItem = {
-        id: Date.now().toString(),
+        id: Date.now(),
         title,
         time,
         date,

@@ -4,7 +4,7 @@ export type VibrationType = 'Basic Ring' | 'Soft Buzz' | 'Sharp Pulse' | 'Heartb
 
 // 화면 출력용 타입
 export interface AlarmItem {
-  id: string;
+  id: number;
   title: string;
   time: {
     period: '오전' | '오후';

@@ -2,7 +2,7 @@ import { AlarmItem } from '@/src/types/alarm';
 
 // 임시 기상알람 테스트 상태
 export const createDefaultWakeupAlarm = (dayOfWeek: string): AlarmItem => ({
-  id: `wakeup-${dayOfWeek}`,
+  id: Date.now(),
   title: `${dayOfWeek}요일 기상 알람`,
   time: {
     period: '오전',
