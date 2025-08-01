@@ -1,14 +1,17 @@
+import { onboarding } from '@/src/apis/auth';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
+import { buildOnboardingPayload } from '@/src/utils/onboardingPayload';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
-import BeforeButton from '../../components/Onboarding/BeforeButton';
-import NextButton from '../../components/Onboarding/NextButton';
+import BeforeHeader from '../../components/common/BeforeHeader';
+import Modal from '../../components/common/Modal';
+import NextButton from '../../components/common/NextButton';
 import StepAddress from '../../components/Onboarding/StepAddress';
 import StepForm from '../../components/Onboarding/StepForm';
 import StepTime from '../../components/Onboarding/StepTime';
 import StepTransport from '../../components/Onboarding/StepTransport';
 import StepWakeUp from '../../components/Onboarding/StepWakeUp';
-import Modal from '../../components/common/Modal';
+import { AddressItem } from '../../types/address';
 
 export default function ProfileSettingPage() {
   const navigation = useAppNavigation();
@@ -18,6 +21,11 @@ export default function ProfileSettingPage() {
   const [birthYear, setBirthYear] = useState<string | null>(null);
   const [job, setJob] = useState<string | null>(null);
   const [transport, setTransport] = useState<string[]>([]);
+  const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
+  const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
+  const [selectedTimes, setSelectedTimes] = useState<Record<string, { hour: string; minute: string; period: string }>>({});
+  const [homeAddress, setHomeAddress] = useState<AddressItem | null>(null);
+  const [workAddress, setWorkAddress] = useState<AddressItem | null>(null);
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 101 }, (_, i) => {
@@ -43,12 +51,18 @@ export default function ProfileSettingPage() {
   ];
 
   const onSelectTransport = (value: string) => {
-    setTransport((prev) => {
-      if (prev.includes(value)) {
-        return prev.filter((v) => v !== value);
-      } else {
-        return [...prev, value];
-      }
+    setTransport((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
+  const handleSelectAddress = (type: 'home' | 'work') => {
+    navigation.navigate('AddressSearchPage', {
+      type,
+      onSelectAddress: (address: AddressItem) => {
+        if (type === 'home') setHomeAddress(address);
+        else setWorkAddress(address);
+      },
     });
   };
 
@@ -75,21 +89,36 @@ export default function ProfileSettingPage() {
           />
         );
       case 3:
-        return (<StepTransport
-          selected={transport}
-          options={transportOptions}
-          onSelect={onSelectTransport}/>);
+        return (
+          <>
+            <Text className="font-pretendard font-medium text-2xl leading-loose text-white mb-8">
+              선호하는 이동 수단을 알려주세요
+            </Text>
+            <StepTransport
+              selected={transport}
+              options={transportOptions}
+              onSelect={onSelectTransport}
+            />
+          </>
+        );
       case 4:
-        return (
-          <StepTime/>
-        );
+        return <StepTime 
+        readyTime={readyTime}
+        setReadyTime={setReadyTime}
+        commuteTime={commuteTime}
+        setCommuteTime={setCommuteTime}
+        />;
       case 5:
-        return (
-          <StepWakeUp/>
-        );
+        return <StepWakeUp 
+        selectedTimes={selectedTimes}
+        setSelectedTimes={setSelectedTimes}/>;
       case 6:
         return (
-          <StepAddress/>
+          <StepAddress
+            homeAddress={homeAddress}
+            workAddress={workAddress}
+            onSelect={handleSelectAddress}
+          />
         );
       default:
         return (
@@ -101,35 +130,53 @@ export default function ProfileSettingPage() {
   };
 
   return (
-    <View className="flex-1 pt-[88px] bg-black p-4 pb-[80px] justify-between">
-      <View>{renderStepContent()}</View>
-
-      <View className="flex-row justify-between">
-        {step > 1 ? (
-          <BeforeButton onPress={() => setStep(step - 1)} />
-        ) : (
-          <View />
-        )}
-
-        {step < 6 ? (
-          <NextButton
-            onPress={() => setStep(step + 1)}
-            disabled={
-              (step === 1 && !birthYear) ||
-              (step === 2 && !job) ||
-              (step === 3 && transport.length !== transportOptions.length)
-              // step 4, 5, 6 추가 예정
-            }
-          />
-        ) : (
-            <NextButton title="제출" onPress={() => setOpen(true)} />
-        )}
-      </View>
+    <View className="flex-1 bg-black p-4 pt-6 pb-[80px] justify-between">
+      {step > 1 ? (
+        <BeforeHeader onBackPress={() => setStep(step - 1)} />
+      ) : (
+        <View className="mb-[72px]" />
+      )}
+      <View className="flex-1 justify-start">{renderStepContent()}</View>
+      <NextButton
+        title={step < 6 ? '다음' : '제출'}
+        onPress={() => {
+          if (step < 6) setStep(step + 1);
+          else setOpen(true);
+        }}
+        disabled={
+          (step === 1 && !birthYear) ||
+          (step === 2 && !job) ||
+          (step === 3 && transport.length !== transportOptions.length)
+          || (step === 4 && !readyTime)
+          || (step === 5 && Object.keys(selectedTimes).length === 0)
+          || (step === 6 && (!homeAddress))
+        }
+      />
       {open && (
-        // 확인 시 로직 추가 예정
-        <Modal onClose={() => setOpen(false)} onConfirm={()=>navigation.navigate('MyPage')} >
-          {"지금까지 입력하신 내용을 \n제출하시겠습니까?"}
-        </Modal>
+          <Modal
+            onClose={() => setOpen(false)}
+            onConfirm={async () => {
+              try {
+                const payload = buildOnboardingPayload({
+                  birthYear: birthYear!,
+                  job: job!,
+                  transport,
+                  readyTime: readyTime!,
+                  commuteTime,
+                  selectedTimes,
+                  homeAddress,
+                  workAddress,
+                });
+                await onboarding(payload);
+                navigation.navigate('MyPage');
+              } catch (err) {
+                console.error('온보딩 제출 실패', err);
+                alert('제출 중 오류가 발생했습니다.');
+              }
+            }}
+          >
+            {'지금까지 입력하신 내용을 \n제출하시겠습니까?'}
+          </Modal>
       )}
     </View>
   );

@@ -1,10 +1,21 @@
+import { AddressItem } from './address';
+
 export type RootStackParamList = {
   CalendarPage: undefined;
   OnboardingPage: undefined;
   LoginPage: undefined;
   MyPage: undefined;
-  ProfileSettingPage: undefined;
-  AddressSearchPage: undefined;
+  ProfileSettingPage: {
+    homeAddress?: AddressItem;
+    workAddress?: AddressItem;
+  };
+  AddressSearchPage: {
+    type: 'home' | 'work';
+    onSelectAddress: (address: AddressItem) => void;
+  };
+  EditInfoPage: undefined;
+  EditAlarmPage: undefined;
+  FeedbackPage: undefined;
   AlarmMemoPage: undefined;
   AlarmPage: undefined;
   EditMyAlarmPage: undefined;
@@ -17,4 +28,4 @@ export type RootStackParamList = {
   SelectAlarmVibratePage: undefined;
   WakeUpAlarmDetailPage: undefined;
   WakeUpAlarmPage: undefined;
-}
+};
