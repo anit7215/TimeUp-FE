@@ -2,7 +2,7 @@
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import { formatDate } from '@/src/utils/AlarmFormat';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
 import PageBackButton from '../../components/common/PageBackButton';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
@@ -17,15 +17,16 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 
 export default function MyAlarmDetailPage() {
   const navigation = useAppNavigation();
-  const [on, setOn] = useState(false);
   const { height } = Dimensions.get('window');
   const { selectedAlarmId, myAlarms, setMyAlarms } = useAlarmContext();
+  const { updateAlarmField } = useAlarmContext();
 
   const alarm = myAlarms.find((a) => a.id === selectedAlarmId);
 
   const handleToggleSwitch = useCallback(() => {
-    setOn((prev) => !prev);
-  }, []);
+    if (!alarm) return;
+    updateAlarmField(alarm.id, 'isActive', !alarm.isActive);
+  }, [alarm]);
 
   const handleEdit = () => {
     console.log(`${alarm!.title} 알람 설정을 편집합니다`);

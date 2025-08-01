@@ -21,7 +21,6 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
-  const [on, setOn] = useState(false);
   const { height } = Dimensions.get('window');
   const { selectedAlarmId, myAlarms, setMyAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
@@ -31,10 +30,6 @@ export default function EditMyAlarmPage() {
   const snapPoints = useMemo(() => ['65%'], [])
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index)
-  }, [])
-
-  const handleToggleSwitch = useCallback(() => {
-    setOn((prev) => !prev);
   }, [])
 
   const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
@@ -85,6 +80,13 @@ export default function EditMyAlarmPage() {
       navigation.navigate('MyAlarmPage');
     }
   };
+
+  const handleToggleSwitch = useCallback(() => {
+    if (!selectedAlarmId) return;
+    const newState = !isActive;
+    setIsActive(newState);
+    updateAlarmField(selectedAlarmId, 'isActive', newState);
+  }, [isActive, selectedAlarmId]);
 
   const handleSelectSound = () => {
     navigation.navigate('SelectAlarmSoundPage');
@@ -315,7 +317,7 @@ export default function EditMyAlarmPage() {
                 </Text>
               </TouchableOpacity>
             )}
-            <ToggleSwitch isOn={on} onToggle={handleToggleSwitch} disabled={false} />
+            <ToggleSwitch isOn={alarmToEdit?.isActive ?? false} onToggle={handleToggleSwitch} disabled={false} />
           </View>
         </View>
 

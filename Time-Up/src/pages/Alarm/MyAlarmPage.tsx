@@ -15,6 +15,7 @@ export default function MyAlarmPage() {
   const { autoAlarmOn, setAutoAlarmOn } = useAlarmContext();
   const { myAlarms, setMyAlarms } = useAlarmContext();
   const { setSelectedAlarmId } = useAlarmContext();
+  const { updateAlarmField } = useAlarmContext();
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -37,11 +38,12 @@ export default function MyAlarmPage() {
   };
 
 
-  const handleToggleAlarm = (id: number) => {
+  const handleToggleAlarm = (id: number, currentState: boolean) => {
     setMyAlarms((prev) =>
       prev.map((alarm) => {
         if (alarm.id === id) {
-          const newState = !alarm.isActive;
+          const newState = !currentState;
+          updateAlarmField(id, 'isActive', newState);
           console.log(`${alarm.title} 알람이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
           return { ...alarm, isActive: newState };
         }
@@ -61,7 +63,7 @@ export default function MyAlarmPage() {
         colors={['#F7F7FE', '#4D4DFF']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        style={{ borderRadius: 57, padding: 1 }}
+        style={{ borderRadius: 70, padding: 1 }}
       >
         <View className="h-[8.5rem] w-full bg-dark rounded-full self-center flex-row items-center justify-between px-[4%]">
           <View className="flex-1 items-center justify-center">
@@ -121,7 +123,7 @@ export default function MyAlarmPage() {
               </View>
               <ToggleSwitch
                 isOn={alarm.isActive}
-                onToggle={() => handleToggleAlarm(alarm.id)}
+                onToggle={() => handleToggleAlarm(alarm.id, alarm.isActive)}
                 disabled={false}
               />
             </View>

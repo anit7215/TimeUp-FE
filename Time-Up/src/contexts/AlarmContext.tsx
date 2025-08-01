@@ -65,7 +65,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       vibrate: '선택',
       repeat: '선택',
       memo: '',
-      isActive: true,
+      isActive: false,
     },
     {
       id: 2,
@@ -83,7 +83,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       vibrate: '선택',
       repeat: '선택',
       memo: '',
-      isActive: true,
+      isActive: false,
     },
   ]);
 
