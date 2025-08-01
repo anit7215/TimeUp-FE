@@ -8,7 +8,6 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
 import { AlarmProvider } from './src/contexts/AlarmContext';
-import AlarmMemoPage from './src/pages/Alarm/AlarmMemoPage';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
 import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
 import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
@@ -47,7 +46,6 @@ export default function App() {
             <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
             <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
             <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
-            <Stack.Screen name="AlarmMemoPage" component={AlarmMemoPage} />
             <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
             <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
             <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />

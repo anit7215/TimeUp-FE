@@ -23,6 +23,20 @@ export interface AlarmItem {
 }
 
 // 내 알람 등록 요청용 타입 (POST)
+export interface PostMyAlarmRequest {
+  my_alarm_name: string;
+  my_alarm_time: string;
+  is_active: boolean;
+  is_repeating: boolean;
+  is_sound: boolean;
+  is_vibrating: boolean;
+  vibration_type: VibrationType;
+  sound_id: number;
+  repeat_interval: number;
+  repeat_count: number;
+  memo: string;
+}
+
 // 내 알람 수정 요청용 타입 (PUT / PATCH)
 export interface PatchMyAlarmRequest {
   my_alarm_name: string;

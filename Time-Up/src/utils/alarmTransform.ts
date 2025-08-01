@@ -1,5 +1,5 @@
 // src/utils/alarmTransform.ts
-import { AlarmItem, MyAlarmSummary, PatchMyAlarmRequest } from '@/src/types/alarm';
+import { AlarmItem, MyAlarmSummary, PatchMyAlarmRequest, PostMyAlarmRequest } from '@/src/types/alarm';
 
 /**
  * 서버 응답(MyAlarmSummary) → 화면용 알람(AlarmItem)으로 변환
@@ -28,6 +28,25 @@ export const transformAlarmResponseToItem = (alarm: MyAlarmSummary): AlarmItem =
     isActive: alarm.is_active,
   };
 };
+
+/**
+ * AlarmItem → PostMyAlarmRequest 변환
+ */
+export function toPostMyAlarmRequest(alarm: AlarmItem): PostMyAlarmRequest {
+  return {
+    my_alarm_name: alarm.title,
+    my_alarm_time: convertTimeTo24Hour(alarm.time),
+    is_active: alarm.isActive,
+    is_repeating: alarm.repeat !== '선택',
+    is_sound: alarm.sound !== '선택',
+    is_vibrating: alarm.vibrate !== '선택',
+    vibration_type: mapVibrationType(alarm.vibrate),
+    sound_id: 1, // TODO: 실제 sound ID 매핑 필요
+    repeat_interval: extractInterval(alarm.repeat),
+    repeat_count: extractCount(alarm.repeat),
+    memo: alarm.memo,
+  };
+}
 
 /**
  * 화면용 알람(AlarmItem) → 등록 요청(PatchMyAlarmRequest)

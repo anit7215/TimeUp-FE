@@ -79,13 +79,15 @@ export default function WakeUpAlarmDetailPage() {
       </View>
 
       <View className="w-full h-[55%] items-center gap-3 space-y-3">
-        <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
+        <View className="w-[91%] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3"
+                    style={{ height: Platform.OS === 'web' ? height * 0.10 : height * 0.10 }}>
           <View className="flex-row items-center">
             <IconCalendar width={20} height={20} />
             <Text className="font-pretendard text-gray-200 text-xl ml-2">반복요일</Text>
           </View>
 
-          <View className="flex-row items-center justify-center gap-x-4 mt-[4%] mx-4">
+          <View className="flex-row items-center justify-center gap-x-4 mt-[4%] mx-4"
+          style={{ marginLeft: Platform.OS === 'web' ? 45 : undefined }}>
             {weekdays.map((day) => {
               const isSelected = selectedDay === day;
               return (

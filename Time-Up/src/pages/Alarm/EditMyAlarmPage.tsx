@@ -1,9 +1,11 @@
 // src/pages/EditMyAlarmPage.tsx
+import { postMyAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate } from '@/src/utils/AlarmFormat';
+import { toPostMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -57,7 +59,7 @@ export default function EditMyAlarmPage() {
     navigation.goBack();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log('내 알람을 저장합니다.');
 
     if (selectedAlarmId) {
@@ -81,8 +83,18 @@ export default function EditMyAlarmPage() {
         memo,
         isActive: true,
       };
-      setMyAlarms((prev) => [...prev, newAlarm]);
-      navigation.navigate('MyAlarmPage');
+      try {
+        const requestBody = toPostMyAlarmRequest(newAlarm);
+        console.log('보낼 요청 데이터:', requestBody); // 실제 보낸 데이터 확인
+
+        const response = await postMyAlarm(requestBody);
+        console.log('서버 응답:', response); // 응답이 왔는지 확인
+
+        setMyAlarms((prev) => [...prev, newAlarm]);
+        navigation.navigate('MyAlarmPage');
+      } catch (e) {
+        console.error('알람 저장 실패:', e);
+      }
     }
   };
 
@@ -358,7 +370,7 @@ export default function EditMyAlarmPage() {
                 <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
               </View>
               <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
-                <Text className="font-pretendard text-gray-200 text-xl">
+                <Text className="font-pretendard text-gray-200 font-semibold text-xl">
                   {alarmToEdit?.sound ?? '선택'}
                 </Text>
               </View>
@@ -373,7 +385,7 @@ export default function EditMyAlarmPage() {
                 <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
               </View>
               <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
-                <Text className="font-pretendard text-gray-200 text-xl">
+                <Text className="font-pretendard text-gray-200 font-semibold text-xl">
                   {alarmToEdit?.vibrate ?? '선택'}
                 </Text>
               </View>
@@ -389,7 +401,7 @@ export default function EditMyAlarmPage() {
               <IconRepeat width={20} height={20} />
               <Text className="font-pretendard text-gray-200 text-xl ml-2">다시 울림</Text>
             </View>
-            <Text className="font-pretendard text-gray-200 text-xl mt-2">
+            <Text className="font-pretendard text-gray-200 font-semibold text-xl mt-2">
               {alarmToEdit?.repeat ?? '선택'}
             </Text>
           </TouchableOpacity>
