@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text } from 'react-native';
+import { onboarding } from '@/src/apis/auth';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
+import { buildOnboardingPayload } from '@/src/utils/onboardingPayload';
+import React, { useState } from 'react';
+import { Text, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import Modal from '../../components/common/Modal';
 import NextButton from '../../components/common/NextButton';
@@ -19,6 +21,9 @@ export default function ProfileSettingPage() {
   const [birthYear, setBirthYear] = useState<string | null>(null);
   const [job, setJob] = useState<string | null>(null);
   const [transport, setTransport] = useState<string[]>([]);
+  const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
+  const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
+  const [selectedTimes, setSelectedTimes] = useState<Record<string, { hour: string; minute: string; period: string }>>({});
   const [homeAddress, setHomeAddress] = useState<AddressItem | null>(null);
   const [workAddress, setWorkAddress] = useState<AddressItem | null>(null);
 
@@ -97,9 +102,16 @@ export default function ProfileSettingPage() {
           </>
         );
       case 4:
-        return <StepTime />;
+        return <StepTime 
+        readyTime={readyTime}
+        setReadyTime={setReadyTime}
+        commuteTime={commuteTime}
+        setCommuteTime={setCommuteTime}
+        />;
       case 5:
-        return <StepWakeUp />;
+        return <StepWakeUp 
+        selectedTimes={selectedTimes}
+        setSelectedTimes={setSelectedTimes}/>;
       case 6:
         return (
           <StepAddress
@@ -135,15 +147,36 @@ export default function ProfileSettingPage() {
           (step === 1 && !birthYear) ||
           (step === 2 && !job) ||
           (step === 3 && transport.length !== transportOptions.length)
+          || (step === 4 && !readyTime)
+          || (step === 5 && Object.keys(selectedTimes).length === 0)
+          || (step === 6 && (!homeAddress))
         }
       />
       {open && (
-        <Modal
-          onClose={() => setOpen(false)}
-          onConfirm={() => navigation.navigate('MyPage')}
-        >
-          {'지금까지 입력하신 내용을 \n제출하시겠습니까?'}
-        </Modal>
+          <Modal
+            onClose={() => setOpen(false)}
+            onConfirm={async () => {
+              try {
+                const payload = buildOnboardingPayload({
+                  birthYear: birthYear!,
+                  job: job!,
+                  transport,
+                  readyTime: readyTime!,
+                  commuteTime,
+                  selectedTimes,
+                  homeAddress,
+                  workAddress,
+                });
+                await onboarding(payload);
+                navigation.navigate('MyPage');
+              } catch (err) {
+                console.error('온보딩 제출 실패', err);
+                alert('제출 중 오류가 발생했습니다.');
+              }
+            }}
+          >
+            {'지금까지 입력하신 내용을 \n제출하시겠습니까?'}
+          </Modal>
       )}
     </View>
   );

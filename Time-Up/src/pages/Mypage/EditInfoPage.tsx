@@ -1,3 +1,4 @@
+import { signout } from '@/src/apis/auth';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -23,9 +24,16 @@ export default function EditInfoPage() {
   const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
   const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
   
-  const handleSignout = () => {
+  const handleSignout = async () => {
     setOpenSignout(false);
-    alert('회원탈퇴 되었습니다!');
+    try {
+      await signout();
+      alert('회원탈퇴 되었습니다!');
+      navigation.navigate('OnboardingPage'); 
+    } catch (error) {
+      alert('회원탈퇴에 실패했습니다.');
+      console.error(error);
+    }
   };
   const handleSelect = (hour: string, minute: string) => {
     if (isOptional) {
@@ -37,7 +45,7 @@ export default function EditInfoPage() {
   };
   const handleSelectAddress = (type: 'home' | 'work', address: AddressItem) => {
     if (type === 'home') {
-      setHomeAddress(address.region); // 또는 원하는 주소 속성
+      setHomeAddress(address.region); 
     } else {
       setWorkAddress(address.region);
     }

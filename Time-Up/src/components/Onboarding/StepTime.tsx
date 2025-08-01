@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import TimeModal from './TimeModal';
 
-export default function StepTime() {
+type StepTimeProps = {
+  readyTime: { hour: string; minute: string } | null;
+  setReadyTime: React.Dispatch<React.SetStateAction<{ hour: string; minute: string } | null>>;
+  commuteTime: { hour: string; minute: string } | null;
+  setCommuteTime: React.Dispatch<React.SetStateAction<{ hour: string; minute: string } | null>>;
+};
+
+export default function StepTime({ readyTime, setReadyTime, commuteTime, setCommuteTime }: StepTimeProps) {
   const [open, setOpen] = useState(false);
   const [isOptional, setIsOptional] = useState(false);
-
-  const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
-  const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
 
   const handleSelect = (hour: string, minute: string) => {
     if (isOptional) {

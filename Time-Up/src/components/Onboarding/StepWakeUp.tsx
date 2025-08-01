@@ -6,9 +6,13 @@ const days = ['월요일', '화요일', '수요일', '목요일', '금요일', '
 
 type TimeData = { period: string; hour: string; minute: string };
 
-export default function StepWakeUp() {
+type StepWakeUpProps = {
+  selectedTimes: Record<string, TimeData>;
+  setSelectedTimes: React.Dispatch<React.SetStateAction<Record<string, TimeData>>>;
+};
+
+export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWakeUpProps) {
   const [open, setOpen] = useState(false);
-  const [selectedTimes, setSelectedTimes] = useState<Record<string, TimeData>>({});
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const handleSelect = (hour: string, minute: string, period: string, selectedDays: string[]) => {
     const timeData = { hour, minute, period };
