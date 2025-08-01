@@ -20,8 +20,8 @@ interface AlarmContextProps {
   myAlarms: AlarmItem[];
   setMyAlarms: React.Dispatch<React.SetStateAction<AlarmItem[]>>;
 
-  selectedAlarmId: string | null;
-  setSelectedAlarmId: (id: string | null) => void;
+  selectedAlarmId: number | null;
+  setSelectedAlarmId: (id: number | null) => void;
 
   selectedAlarmDate: string;
   setSelectedAlarmDate: (date: string) => void;
@@ -46,7 +46,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [weekdaySwitchStates, setWeekdaySwitchStates] = useState<Record<Day, boolean>>(initialSwitchStates);
   const [autoAlarmOn, setAutoAlarmOn] = useState<boolean>(false);
   const [selectedAlarmDate, setSelectedAlarmDate] = useState<string>(moment().format('YYYY-MM-DD'));
-  const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null);
+  const [selectedAlarmId, setSelectedAlarmId] = useState<number | null>(null);
 
   const [myAlarms, setMyAlarms] = useState<AlarmItem[]>([
     {
@@ -58,12 +58,12 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         minute: 0,
       },
       date: {
-        fullDate: '2025-06-27',
+        fullDate: '2025-08-01',
         dayOfWeek: '토',
       },
-      sound: 'Heavy Raindrop',
-      vibrate: 'Basic Ring',
-      repeat: '10분, 5회',
+      sound: '선택',
+      vibrate: '선택',
+      repeat: '선택',
       memo: '',
       isActive: true,
     },
@@ -76,12 +76,12 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         minute: 5,
       },
       date: {
-        fullDate: '2025-06-27',
+        fullDate: '2025-08-01',
         dayOfWeek: '토',
       },
-      sound: 'Basic Ring',
-      vibrate: 'Basic Ring',
-      repeat: '5분, 3회',
+      sound: '선택',
+      vibrate: '선택',
+      repeat: '선택',
       memo: '',
       isActive: true,
     },
