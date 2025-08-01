@@ -1,11 +1,11 @@
 // src/pages/EditMyAlarmPage.tsx
-import { postMyAlarm } from '@/src/apis/alarmApi';
+import { patchMyAlarm, postMyAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate } from '@/src/utils/AlarmFormat';
-import { toPostMyAlarmRequest } from '@/src/utils/alarmTransform';
+import { toPatchMyAlarmRequest, toPostMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -16,6 +16,7 @@ import ToggleSwitch from '../../components/common/ToggleSwitch';
 import useAppNavigation from '../../hooks/useAppNavigation';
 import BottomLayout from '../../Layouts/BottomLayout';
 
+
 import IconBiv from '../../../assets/images/AlarmBiv.svg';
 import IconMemo from '../../../assets/images/AlarmMemo.svg';
 import IconMusic from '../../../assets/images/AlarmMusic.svg';
@@ -24,7 +25,7 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, setMyAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, setSelectedAlarmId } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
@@ -55,42 +56,79 @@ export default function EditMyAlarmPage() {
   };
 
   const handleSave = async () => {
-    console.log('내 알람을 저장합니다.');
-
     if (selectedAlarmId) {
       // 기존 알람 수정
-      updateAlarmField(selectedAlarmId, 'title', title);
-      updateAlarmField(selectedAlarmId, 'time', time);
-      updateAlarmField(selectedAlarmId, 'date', date);
-      updateAlarmField(selectedAlarmId, 'memo', memo);
-      updateAlarmField(selectedAlarmId, 'isActive', isActive);
-      navigation.navigate('MyAlarmDetailPage');
-    } else {
-      // 새 알람 생성
-      const newAlarm: AlarmItem = {
-        id: Date.now(),
+      console.log('내 알람을 저장합니다.');
+      const alarmToEdit = myAlarms.find((a) => a.id === selectedAlarmId);
+    if (!alarmToEdit) return;
+
+updateAlarmField(selectedAlarmId, 'title', title);
+    updateAlarmField(selectedAlarmId, 'time', time);
+    updateAlarmField(selectedAlarmId, 'date', date);
+    updateAlarmField(selectedAlarmId, 'memo', memo);
+    updateAlarmField(selectedAlarmId, 'isActive', isActive);
+
+    try {
+      const patchBody = toPatchMyAlarmRequest({
+        ...alarmToEdit,
         title,
         time,
         date,
-        sound: '선택',
-        vibrate: 'Basic Ring',
-        repeat: '10분, 5회',
         memo,
-        isActive: true,
-      };
-      try {
-        const requestBody = toPostMyAlarmRequest(newAlarm);
-        console.log('보낼 요청 데이터:', requestBody); // 실제 보낸 데이터 확인
-
-        const response = await postMyAlarm(requestBody);
-        console.log('서버 응답:', response); // 응답이 왔는지 확인
-
-        setMyAlarms((prev) => [...prev, newAlarm]);
-        navigation.navigate('MyAlarmPage');
-      } catch (e) {
-        console.error('알람 저장 실패:', e);
-      }
+        isActive,
+      });
+      console.log('PATCH 요청 바디:', JSON.stringify(patchBody, null, 2));
+      console.log('수정 요청할 alarm_id:', selectedAlarmId);
+      const res = await patchMyAlarm(selectedAlarmId, patchBody);
+      console.log('알람 수정 성공:', res);
+    } catch (error) {
+      console.error('알람 수정 실패:', error);
     }
+
+    navigation.navigate('MyAlarmPage');
+  } else {
+      // 새 알람 생성
+      console.log('새 알람을 생성합니다.');
+try {
+  const requestBody = toPostMyAlarmRequest({
+    id: 0, // 또는 이 필드를 생략하세요
+    title,
+    time,
+    date,
+    sound: '선택',
+    vibrate: 'Basic Ring',
+    repeat: '10분, 5회',
+    memo,
+    isActive: true,
+  });
+
+  console.log('보낼 요청 데이터:', requestBody);
+
+  const response = await postMyAlarm(requestBody);
+  console.log('서버 응답:', response);
+
+  const serverId = response.success?.alarm_id;
+  if (!serverId) throw new Error('서버 응답에 alarm_id가 없습니다.');
+
+  const newAlarm: AlarmItem = {
+    id: serverId, // 서버에서 받은 진짜 ID
+    title,
+    time,
+    date,
+    sound: '선택',
+    vibrate: 'Basic Ring',
+    repeat: '10분, 5회',
+    memo,
+    isActive: true,
+  };
+
+  setMyAlarms((prev) => [...prev, newAlarm]);
+  setSelectedAlarmId(serverId);
+  navigation.navigate('MyAlarmPage');
+} catch (e) {
+  console.error('알람 저장 실패:', e);
+}
+}
   };
 
   const handleToggleSwitch = useCallback(() => {
