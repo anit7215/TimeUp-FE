@@ -8,11 +8,16 @@ export type RootStackParamList = {
   AddressSearchPage: undefined;
   TestTimeScrollPage: undefined;
   TestHalfTimeScrollPage: undefined;
+
   ViewScheduleDetailPage: { schedule: Schedule };
-  AddSchedulePage: { selectedDate: string };
+  AddSchedulePage: { 
+    schedule: Schedule;
+    date: string;
+   };
   SetLocationPage: undefined;
-  SetScheduleRepeatPage: { selectedDate: string };
+
+  SetScheduleRepeatPage: undefined;
+
   SetRemindAlarmPage: undefined;
-  SchedulePage: { selectedDate: string };
 
 };

@@ -11,26 +11,35 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PlusIcon from '../../assets/icons/plusIcon.svg';
 import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
 import { Schedule } from '../types/schedule';
+import Modal from '../components/common/Modal';
+import { formatKoreanDate, formatMonthDay } from '../components/SetSchedule/formatDate';
+import { useSchedule } from '../context/ScheduleContext'
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const CalendarPage = () => {
   const navigation = useNavigation<any>();
-  const route = useRoute();
-
-  
-  // 파라미터 받기
-  const { newSchedule } = (route.params as { newSchedule?: Schedule }) || {};
+  const { dispatch } = useSchedule();
   
   // State 관리
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectMode, setSelectMode] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [isDaySelected, setIsDaySelected] = useState(false);
   const [events, setEvents] = useState<{[key: string]: number}>({});
+  const [isPlusButtonPressed, setIsPlusButtonPressed] = useState(false);
+  const [ModalOpen, setModalOpen] = useState(false);
 
   // 현재 연도와 월 가져오기
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+
+  useEffect(() => {
+    if (selectedDate && isPlusButtonPressed) {
+      setModalOpen(true);
+      setIsPlusButtonPressed(false);
+     }
+    }, [selectedDate, isPlusButtonPressed]);
+  
   
   // selectedMonth 형식 수정: 월은 1부터 시작하도록, 두 자리로 패딩
   const [selectedMonth, setSelectedMonth] = useState(
@@ -104,26 +113,15 @@ const CalendarPage = () => {
     }
   };
 
-  // 새 일정이 추가되었을 때 events 업데이트
-  useEffect(() => {
-    if (newSchedule) {
-      const dateKey = newSchedule.start_date;
-      setEvents(prev => ({
-        ...prev,
-        [dateKey]: (prev[dateKey] || 0) + 1
-      }));
-    }
-  }, [newSchedule]);
   
   // 월이 변경될 때마다 일정 데이터 가져오기
   useEffect(() => {
     fetchEvents(year, month);
   }, [year, month]);
 
-  // 일정 추가 핸들러 수정
-  const handleAddSchedule = (selectedDate?: string) => {
-    const dateToUse = selectedDate || getCurrentDateString();
-    
+  const handleAddSchedule = (date: string) => { // 이건 모달창 뜨고 확인 버튼 누르고 나서 이뤄져야 할 로직
+    const dateToUse = selectedDate;
+    console.log('선택된 날짜:', dateToUse);
     const initialSchedule: Schedule = {
       scheduleId: '', // 등록 전에는 비워두기
       name: '',
@@ -131,29 +129,24 @@ const CalendarPage = () => {
       end_date: dateToUse,
       place_name: '',
       address: '',
-      color: '#FFB366',
+      color: '#F7A1A1',
       memo: '',
       is_reminding: false,
       remind_at: 0,
       is_recurring: false,
       is_important: false,
-      repeat: '',
-      remind: ''
+      repeat: ''
     };
 
-    navigation.navigate('AddSchedulePage', { schedule: initialSchedule, date: dateToUse });
-  };
-
-  // 현재 날짜를 문자열로 반환
-  const getCurrentDateString = () => {
-    const today = new Date();
-    return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    dispatch({ type: 'RESET_DRAFT'});
+    dispatch({ type: 'UPDATE_DRAFT', payload: { start_date: date, end_date: date}})
+    navigation.navigate('AddSchedulePage');
   };
 
   // 날짜 선택 핸들러
   const handleDatePress = (day: any) => { // 이거 any타입이어도 될지 모르겠다...
     const dateString = `${year}-${month + 1}-${day.date}`;
-    navigation.navigate('SchedulePage', { selectedDate: dateString})
+    navigation.navigate('SchedulePage', { selectedDate: dateString}) // selectedDate 삭제
     
   };
   
@@ -238,12 +231,12 @@ const CalendarPage = () => {
   // 이전/다음 달로 이동
   const goToPrevMonth = () => {
     setCurrentDate(new Date(year, month - 1));
-    setSelectedDate(null); // 선택된 날짜 초기화
+    setSelectedDate(''); // 선택된 날짜 초기화
   };
   
   const goToNextMonth = () => {
     setCurrentDate(new Date(year, month + 1));
-    setSelectedDate(null); // 선택된 날짜 초기화
+    setSelectedDate(''); // 선택된 날짜 초기화
   };
   
   // 오늘 날짜 확인
@@ -277,13 +270,24 @@ const CalendarPage = () => {
                   styles.dayCell,
                   isSelected && styles.selectedCell,
                 ]}
-                onPress={() => handleDatePress(day)}
+
+                // 날짜 클릭 시
+                onPress={() => {
+                  if (isPlusButtonPressed) {
+                    setSelectedDate(dateString); // 1. 날짜 저장
+                  } else {
+                    handleDatePress(day); // 상세조회
+                  }
+                }}
+
                 activeOpacity={0.7}
               >
                 <Text
                   style={[
                     styles.dayText,
+                    {opacity: isPlusButtonPressed ? 0.5 : 1},
                     !day.isCurrentMonth && styles.otherMonthText,
+                    isDaySelected && styles.selectedCircle,
                     isTodayDate && styles.todayText,
                     isSelected && styles.selectedText,
                     day.isCurrentMonth && index === 0 && styles.sundayText,
@@ -309,7 +313,7 @@ const CalendarPage = () => {
       <View className="absolute top-0 left-0 right-0 z-10 mt-4 mb-4">
         <TouchableOpacity 
           style={{ position: 'absolute', top: 20, right: 20 }}
-          onPress={() => handleAddSchedule()}
+          onPress={() => setIsPlusButtonPressed(true)}
           activeOpacity={0.7}
         >
           <PlusIcon width={36} height={36} />
@@ -365,8 +369,20 @@ const CalendarPage = () => {
         {renderCalendarDays()}
       </View>
 
-      {/* 중요 일정 모아보기 버튼 제거 - 이제 모달이 항상 떠있으므로 불필요 */}
+    
     </View>
+        {ModalOpen && (
+          <Modal
+            onClose={() => {
+              setModalOpen(false);
+              setIsDaySelected(false);
+              setSelectedDate(''); // 모달 닫을 때 선택된 날짜 초기화
+            }}
+            onConfirm={() => handleAddSchedule(selectedDate)}
+          >
+            {`${formatMonthDay(selectedDate)}에 일정을 추가하시겠습니까?`}
+          </Modal>
+        )}
 
     {/* ImportantScheduleModal을 GestureHandlerRootView 내부로 이동 */}
     <ImportantScheduleModal
@@ -408,7 +424,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#ffffff',
-    fontSize: 24,
+    fontSize: width > 400 ? 24 : 20, // 화면 크기에 따라 폰트 크기 조정
     fontWeight: '500',
   },
   borderLine: {
@@ -427,7 +443,7 @@ const styles = StyleSheet.create({
   },
   weekHeaderText: {
     color: '#F7F7FE',
-    fontSize: 20,
+    fontSize: width > 400 ? 16 : 14, // 화면 크기에 따라 폰트 크기 조정
     fontWeight: '500',
   },
   sundayHeaderText: {
@@ -437,19 +453,21 @@ const styles = StyleSheet.create({
     color: '#224CF1',
   },
   calendarGrid: {
+    flex: 1, // 남은 공간을 모두 사용
     marginBottom: 20,
   },
   weekRow: {
     flexDirection: 'row',
+    flex: 1, // 각 주가 균등하게 공간을 차지
   },
   dayCell: {
     flex: 1,
-    aspectRatio: 0.5,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
     margin: 1,
     position: 'relative',
+    minHeight: (height - 300) / 7, // 화면 높이에 따라 최소 높이 설정
   },
   selectedCell: {
     borderWidth: 1,
@@ -457,8 +475,13 @@ const styles = StyleSheet.create({
   },
   dayText: {
     color: '#ffffff',
-    fontSize: 25,
-    fontWeight: '400',
+    fontSize: width > 400 ? 18 : 16, // 화면 크기에 따라 폰트 크기 조정
+    fontWeight: '400'
+  },
+  selectedCircle: {
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
   otherMonthText: {
     color: '#121212',
@@ -484,14 +507,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   eventDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: width > 400 ? 8 : 6, // 화면 크기에 따라 dot 크기 조정
+    height: width > 400 ? 8 : 6,
+    borderRadius: width > 400 ? 4 : 3,
     backgroundColor: '#4dabf7',
   },
   moreEventsText: {
     color: '#4dabf7',
-    fontSize: 8,
+    fontSize: width > 400 ? 8 : 6, // 화면 크기에 따라 폰트 크기 조정
     marginLeft: 2,
   },
   // 중요 일정 버튼 스타일 추가

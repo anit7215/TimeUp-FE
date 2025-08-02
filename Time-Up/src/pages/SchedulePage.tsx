@@ -16,14 +16,14 @@ const SchedulePage = () => {
   const [events, setEvents] = useState([
     { 
       id: '1', 
-      title: '대학 탐방 회의', 
+      title: 'UMC 회의', 
       startTime: 9, 
       duration: 1, 
       color: '#FFB366' 
     },
     { 
       id: '2', 
-      title: '머리 2차 과제', 
+      title: '머러 2차 과제', 
       startTime: 15, 
       duration: 1, 
       color: '#90EE90' // 목데이터

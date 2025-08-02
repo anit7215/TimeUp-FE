@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
+import PageBackButton from '@/src/components/common/PageBackButton';
 import StarIcon from '../../assets/icons/StarIcon.svg';
 import HalfTimeScrollPanel from '../../components/common/HalfTimeScrollPanel';
   
@@ -488,7 +488,7 @@ import HalfTimeScrollPanel from '../../components/common/HalfTimeScrollPanel';
               </TouchableOpacity>
             </View>
             <View className="m-8">
-              <RightArrowIcon fill="white" />
+              <PageBackButton />
             </View>
             <View className="flex-col space-between items-center justify-center">
               <TouchableOpacity 

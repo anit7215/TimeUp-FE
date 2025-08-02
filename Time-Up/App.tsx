@@ -22,7 +22,7 @@ import TestHalfTimeScrollPage from './src/pages/TestHalfTimeScrollPage';
 import TestTimeScrollPage from './src/pages/TestTimeScrollPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
 import { RootStackParamList } from './src/types/navigation';
-
+import { ScheduleProvider } from './src/context/ScheduleContext';
 
 export default function App() {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -31,7 +31,8 @@ export default function App() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <BottomSheetModalProvider>
-      <PaperProvider>
+      <ScheduleProvider>
+      <PaperProvider> 
         <NavigationContainer>
       <Stack.Navigator initialRouteName="CalendarPage" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
@@ -73,6 +74,7 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
     </PaperProvider>
+    </ScheduleProvider>
   </BottomSheetModalProvider>
   </GestureHandlerRootView>
   );

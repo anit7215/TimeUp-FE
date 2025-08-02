@@ -1,9 +1,17 @@
 // src/components/HalfTimeScrollPanel.tsx
-import React, { useRef, useState } from 'react';
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const ITEM_HEIGHT = 40;
-
 const generateRange = (start: number, end: number) =>
   Array.from({ length: end - start + 1 }, (_, i) => String(i + start).padStart(2, '0'));
 
@@ -13,14 +21,26 @@ const periods = Platform.OS === 'web'
   ? ['오전', '오후']
   : [' ', ' ', '오전', '오후', ' ', ' '];
 
-export default function HalfTimeScrollPanel() {
+interface HalfTimeScrollPanelProps {
+  onTimeChange?: (hour: number, minute: number, period: '오전' | '오후') => void;
+}
+
+export default function HalfTimeScrollPanel({ onTimeChange }: HalfTimeScrollPanelProps) {
   const [selectedHour, setSelectedHour] = useState('01');
   const [selectedMinute, setSelectedMinute] = useState('00');
-  const [selectedPeriod, setSelectedPeriod] = useState('오전');
+  const [selectedPeriod, setSelectedPeriod] = useState<'오전' | '오후'>('오전');
 
   const hourRef = useRef<FlatList<string> | null>(null);
   const minuteRef = useRef<FlatList<string> | null>(null);
   const periodRef = useRef<FlatList<string> | null>(null);
+
+  useEffect(() => {
+    const hour = parseInt(selectedHour, 10);
+    const minute = parseInt(selectedMinute, 10);
+    if (onTimeChange) {
+      onTimeChange(hour, minute, selectedPeriod);
+    }
+  }, [selectedHour, selectedMinute, selectedPeriod]);
 
   const onScrollEnd = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
@@ -49,28 +69,21 @@ export default function HalfTimeScrollPanel() {
           });
         }
       } else {
-        if (items[index]) {
-          onSelect(items[index]);
-        }
+        if (items[index]) onSelect(items[index]);
       }
     }
   };
 
   const renderItem = (item: string, selected: string) => (
     <View className="h-[40px] items-center justify-center">
-      <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>
-        {item}
-      </Text>
+      <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>{item}</Text>
     </View>
   );
 
   const scrollToValue = (value: string, list: string[], ref: React.RefObject<FlatList<string> | null>) => {
     const index = list.findIndex((v) => v === value);
     if (index !== -1) {
-      ref?.current?.scrollToOffset({
-        offset: ITEM_HEIGHT * index,
-        animated: true,
-      });
+      ref?.current?.scrollToOffset({ offset: ITEM_HEIGHT * index, animated: true });
     }
   };
 
@@ -92,8 +105,8 @@ export default function HalfTimeScrollPanel() {
     setSelected: (val: string) => void,
     ref: React.RefObject<FlatList<string> | null>,
     listName: 'periods' | 'hours' | 'minutes'
-    ) => {
-      const handleIncrease = () => {
+  ) => {
+    const handleIncrease = () => {
       const next = increase(selected, items);
       setSelected(next);
       scrollToValue(next, items, ref);
@@ -108,26 +121,19 @@ export default function HalfTimeScrollPanel() {
     return (
       <View className="items-center">
         {Platform.OS === 'web' && (
-          <TouchableOpacity onPress={handleIncrease}>
-            <Text className="text-white text-lg">▲</Text>
-          </TouchableOpacity>
+          <TouchableOpacity onPress={handleIncrease}><Text className="text-white text-lg">▲</Text></TouchableOpacity>
         )}
-
         {Platform.OS === 'web' ? (
           <FlatList
-            nestedScrollEnabled={true}
-            scrollEnabled={true}
+            nestedScrollEnabled
+            scrollEnabled
             ref={ref}
             data={items}
             keyExtractor={(item) => item}
             snapToInterval={ITEM_HEIGHT}
             decelerationRate="fast"
             showsVerticalScrollIndicator={false}
-            getItemLayout={(_, index) => ({
-              length: ITEM_HEIGHT,
-              offset: ITEM_HEIGHT * index,
-              index,
-            })}
+            getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
             contentContainerStyle={{ paddingVertical: 80 }}
             style={{ height: ITEM_HEIGHT * 5 }}
             onMomentumScrollEnd={(e) => onScrollEnd(e, items, setSelected, ref, listName)}
@@ -135,32 +141,27 @@ export default function HalfTimeScrollPanel() {
             extraData={selected}
           />
         ) : (
-        <View style={{ height: ITEM_HEIGHT * 5, overflow: 'hidden' }}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            scrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            snapToInterval={ITEM_HEIGHT}
-            snapToAlignment="center"
-            decelerationRate="fast"
-            contentContainerStyle={{ paddingVertical: 80 }}
-            onMomentumScrollEnd={(e) => onScrollEnd(e, items, setSelected, ref, listName)}
-          >
-            {items.map((item, index) => (
-              <View key={index} className="h-[40px] items-center justify-center">
-                <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>
-                  {item}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+          <View style={{ height: ITEM_HEIGHT * 5, overflow: 'hidden' }}>
+            <ScrollView
+              nestedScrollEnabled
+              scrollEnabled
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_HEIGHT}
+              snapToAlignment="center"
+              decelerationRate="fast"
+              contentContainerStyle={{ paddingVertical: 80 }}
+              onMomentumScrollEnd={(e) => onScrollEnd(e, items, setSelected, ref, listName)}
+            >
+              {items.map((item, index) => (
+                <View key={index} className="h-[40px] items-center justify-center">
+                  <Text className={`${item === selected ? 'text-3xl text-white font-bold' : 'text-2xl text-gray-300'}`}>{item}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         )}
-
         {Platform.OS === 'web' && (
-          <TouchableOpacity onPress={handleDecrease}>
-            <Text className="text-white text-lg">▼</Text>
-          </TouchableOpacity>
+          <TouchableOpacity onPress={handleDecrease}><Text className="text-white text-lg">▼</Text></TouchableOpacity>
         )}
       </View>
     );

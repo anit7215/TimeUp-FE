@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import PlusIcon from '../../../assets/icons/plusIcon.svg';
 import PageBackButton from '../common/PageBackButton';
+import { formatKoreanDate } from './formatDate';
 
 interface Event {
   id: string;
@@ -98,7 +99,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       {/* Header */}
       <View style={styles.header}>
         <PageBackButton/>
-        <Text style={styles.headerTitle}>{date}</Text>
+        <Text style={styles.headerTitle}>{formatKoreanDate(date)}</Text>
         <TouchableOpacity style={styles.addButton}>
           <PlusIcon />
         </TouchableOpacity>
@@ -130,19 +131,25 @@ const styles = StyleSheet.create({
 
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between', // 가로 방향 가운데 정렬
+    alignItems: 'center',     // 세로 방향 가운데 정렬
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#121212',
+    position: 'relative',
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
     color: '#FFFFFF',
+    position: 'absolute',
+    left: 0,
+    right: 0,
     fontSize: 20,
     fontWeight: '600',
+    textAlign: 'center',
+    justifyContent: 'center',
   },
   addButton: {
     padding: 8,
