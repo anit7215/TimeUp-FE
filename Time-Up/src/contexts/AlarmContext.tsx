@@ -48,44 +48,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedAlarmDate, setSelectedAlarmDate] = useState<string>(moment().format('YYYY-MM-DD'));
   const [selectedAlarmId, setSelectedAlarmId] = useState<number | null>(null);
 
-  const [myAlarms, setMyAlarms] = useState<AlarmItem[]>([
-    {
-      id: 1,
-      title: '딥러닝 과제 제출',
-      time: {
-        period: '오후',
-        hour: 10,
-        minute: 0,
-      },
-      date: {
-        fullDate: '2025-08-01',
-        dayOfWeek: '토',
-      },
-      sound: '선택',
-      vibrate: '선택',
-      repeat: '선택',
-      memo: '',
-      isActive: false,
-    },
-    {
-      id: 2,
-      title: '딥러닝 과제 제출 후에 꼭 확인 할 것',
-      time: {
-        period: '오후',
-        hour: 10,
-        minute: 5,
-      },
-      date: {
-        fullDate: '2025-08-01',
-        dayOfWeek: '토',
-      },
-      sound: '선택',
-      vibrate: '선택',
-      repeat: '선택',
-      memo: '',
-      isActive: false,
-    },
-  ]);
+  const [myAlarms, setMyAlarms] = useState<AlarmItem[]>([]);
 
   const updateAlarmField = <K extends keyof AlarmItem>(
     alarmId: number,

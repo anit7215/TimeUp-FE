@@ -21,6 +21,9 @@ export interface AlarmItem {
   repeat: string;
   memo: string;
   isActive: boolean;
+  isSound: boolean;
+  isVibrating: boolean;
+  isRepeating: boolean;
 }
 
 // 내 알람 등록 요청용 타입 (POST)
@@ -54,7 +57,6 @@ export interface PostMyAlarmResponse {
   } | null;
 }
 
-
 // 내 알람 수정 요청용 타입 (PUT / PATCH)
 export interface PutMyAlarmRequest {
   my_alarm_name: string;
@@ -85,9 +87,8 @@ export interface PutMyAlarmResponse {
   } | null;
 }
 
-// 내 알람 알람 비/활성화 요청: PATCH /my-alarms/activate?alarm_id=1
-// 요청 body는 없음
-// 응답 타입
+// 내 알람 비/활성화 요청 body는 필요 없음
+// 내 알람 비/활성화 응답 타입 (PATCH)
 export interface ToggleMyAlarmActivationResponse {
   result: 'Success' | 'Fail';
   status: number;

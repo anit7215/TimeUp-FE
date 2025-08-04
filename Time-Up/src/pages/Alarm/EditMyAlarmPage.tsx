@@ -1,11 +1,11 @@
 // src/pages/EditMyAlarmPage.tsx
-import { postMyAlarm, putMyAlarm } from '@/src/apis/alarmApi';
+import { putMyAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate } from '@/src/utils/AlarmFormat';
-import { toPostMyAlarmRequest, toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
+import { toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -25,7 +25,7 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, setSelectedAlarmId } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
@@ -34,11 +34,9 @@ export default function EditMyAlarmPage() {
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index)
   }, [])
-
+  //debugger;
   const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
 
-  // 테스트 초기값 설정. 알람 상세 설정 상태 관리 구현 후 제거하기.
-  // 제목, 시간, 날짜, 사운드, 진동, 반복, 메모 구현 완료. 알람 온오프 상태 관리 추가 필요.
   const [title, setTitle] = useState(alarmToEdit?.title ?? '');
   const [time, setTime] = useState<AlarmItem['time']>(
     alarmToEdit?.time ?? { period: '오전', hour: 7, minute: 0 }
@@ -46,7 +44,6 @@ export default function EditMyAlarmPage() {
   const [date, setDate] = useState<AlarmItem['date']>(
     alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
   );
-  const [repeat, setRepeat] = useState(alarmToEdit?.repeat ?? '10분, 5회');
   const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
   const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
 
@@ -57,78 +54,41 @@ export default function EditMyAlarmPage() {
 
   const handleSave = async () => {
     if (selectedAlarmId) {
-      // 기존 알람 수정
       console.log('내 알람을 저장합니다.');
       const alarmToEdit = myAlarms.find((a) => a.id === selectedAlarmId);
-    if (!alarmToEdit) return;
+      if (!alarmToEdit) return;
 
-updateAlarmField(selectedAlarmId, 'title', title);
-    updateAlarmField(selectedAlarmId, 'time', time);
-    updateAlarmField(selectedAlarmId, 'date', date);
-    updateAlarmField(selectedAlarmId, 'memo', memo);
-    updateAlarmField(selectedAlarmId, 'isActive', isActive);
+      updateAlarmField(selectedAlarmId, 'title', title);
+      updateAlarmField(selectedAlarmId, 'time', time);
+      updateAlarmField(selectedAlarmId, 'date', date);
+      updateAlarmField(selectedAlarmId, 'memo', memo);
+      updateAlarmField(selectedAlarmId, 'isActive', isActive);
 
-    try {
-      const patchBody = toPutMyAlarmRequest({
-        ...alarmToEdit,
-        title,
-        time,
-        date,
-        memo,
-        isActive,
-      });
-      console.log('PATCH 요청 바디:', JSON.stringify(patchBody, null, 2));
-          if (!selectedAlarmId) throw new Error('서버 응답에 alarm_id가 없습니다.');
-      console.log('수정 요청할 alarm_id:', selectedAlarmId);
-      const res = await putMyAlarm(selectedAlarmId, patchBody);
-      console.log('알람 수정 성공:', res);
-    } catch (error) {
-      console.error('알람 수정 실패:', error);
+      try {
+        const patchBody = toPutMyAlarmRequest({
+          ...alarmToEdit,
+          title,
+          time,
+          date,
+          memo,
+          isActive,
+          isSound: alarmToEdit.isSound,
+          isVibrating: alarmToEdit.isVibrating,
+          isRepeating: alarmToEdit.isRepeating,
+        });
+        console.log('PATCH 요청 바디:', JSON.stringify(patchBody, null, 2));
+        if (!selectedAlarmId) throw new Error('서버 응답에 alarm_id가 없습니다.');
+        console.log('수정 요청할 alarm_id:', selectedAlarmId);
+        const res = await putMyAlarm(selectedAlarmId, patchBody);
+        console.log('알람 수정 성공:', res);
+      } catch (error) {
+        console.error('알람 수정 실패:', error);
+      }
+
+      navigation.navigate('MyAlarmPage');
     }
-
-    navigation.navigate('MyAlarmPage');
-} else {
-  // 새 알람 생성
-  console.log('새 알람을 생성합니다.');
-  try {
-    // AlarmItem에서 id는 제외하고 넘기기 (Omit으로 타입 좁히거나 명시적 제거)
-    const partialAlarm = {
-      title,
-      time,
-      date,
-      sound: '선택',
-      vibrate: '선택',
-      repeat: '선택',
-      memo,
-      isActive: true,
-    };
-
-    const requestBody = toPostMyAlarmRequest(partialAlarm);
-    console.log('보낼 요청 데이터:', requestBody);
-
-    const response = await postMyAlarm(requestBody);
-    console.log('서버 응답:', response);
-
-    const serverAlarmId = response.success?.alarm_id;
-    if (!serverAlarmId) throw new Error('서버 응답에 alarm_id가 없습니다.');
-    console.log('받은 alarm_id:', serverAlarmId);
-
-    const newAlarm: AlarmItem = {
-      id: serverAlarmId,
-      ...partialAlarm,
-    };
-
-    setMyAlarms(prev => [...prev, newAlarm]);
-
-setSelectedAlarmId(serverAlarmId);
-
-    navigation.navigate('MyAlarmPage');
-  } catch (e) {
-    console.error('알람 저장 실패:', e);
   }
-}
-  }
-  
+
   const handleToggleSwitch = useCallback(() => {
     if (!selectedAlarmId) return;
     const newState = !isActive;

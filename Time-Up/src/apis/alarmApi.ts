@@ -12,6 +12,7 @@ import {
 import { getAccessToken } from '@/src/utils/storage';
 import { axiosInstance } from './axiosInstance';
 
+// 내 알람 등록
 export const postMyAlarm = async (data: PostMyAlarmRequest): Promise<PostMyAlarmResponse> => {
   const token = await getAccessToken();
   const response = await axiosInstance.post('/alarm/my', data, {
@@ -22,6 +23,7 @@ export const postMyAlarm = async (data: PostMyAlarmRequest): Promise<PostMyAlarm
   return response.data;
 };
 
+// 내 알람 수정
 export const putMyAlarm = async (
   id: number,
   data: PutMyAlarmRequest
@@ -39,6 +41,7 @@ export const putMyAlarm = async (
   return res.data;
 };
 
+// 내 알람 활성/비활성화
 export const toggleMyAlarmActivation = async (
   id: number
 ): Promise<ToggleMyAlarmActivationResponse> => {
@@ -55,6 +58,7 @@ export const toggleMyAlarmActivation = async (
   return res.data;
 };
 
+// 내 알람 삭제
 export const deleteMyAlarm = async (id: number): Promise<DeleteMyAlarmResponse> => {
   const token = await getAccessToken();
   const res = await axiosInstance.delete<DeleteMyAlarmResponse>(
@@ -68,6 +72,7 @@ export const deleteMyAlarm = async (id: number): Promise<DeleteMyAlarmResponse> 
   return res.data;
 };
 
+// 알람 조회. 나중에 내 알람(myAlams), 기상알람, 자동 알람 연결?
 export const getMyAlarms = async (): Promise<MyAlarmSummary[]> => {
   const res = await axiosInstance.get<GetAllAlarmsResponse>('/alarm/alarmlist');
   if (res.data.result === 'Success' && res.data.success !== null) {
@@ -77,13 +82,3 @@ export const getMyAlarms = async (): Promise<MyAlarmSummary[]> => {
   throw new Error(res.data.error?.message ?? '알람 목록을 불러오지 못했습니다.');
 };
 
-export const fetchMyAlarms = async (): Promise<GetAllAlarmsResponse> => {
-  const token = await getAccessToken();
-  const response = await axiosInstance.get('/alarm/alarmlist', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-    },
-  });
-  return response.data;
-};
