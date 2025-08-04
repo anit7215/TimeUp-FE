@@ -56,7 +56,7 @@ export interface PostMyAlarmResponse {
 
 
 // 내 알람 수정 요청용 타입 (PUT / PATCH)
-export interface PatchMyAlarmRequest {
+export interface PutMyAlarmRequest {
   my_alarm_name: string;
   my_alarm_time: string;
   is_active: boolean;
@@ -71,7 +71,7 @@ export interface PatchMyAlarmRequest {
 }
 
 // 내 알람 수정 응답 타입
-export interface PatchMyAlarmResponse {
+export interface PutMyAlarmResponse {
   result: 'Success' | 'Fail';
   status: number;
   success: {

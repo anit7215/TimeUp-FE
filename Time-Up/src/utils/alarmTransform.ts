@@ -1,6 +1,8 @@
 // src/utils/alarmTransform.ts
-import { AlarmItem, MyAlarmSummary, PatchMyAlarmRequest, PostMyAlarmRequest } from '@/src/types/alarm';
+import { AlarmItem, MyAlarmSummary, PostMyAlarmRequest, PutMyAlarmRequest } from '@/src/types/alarm';
 import moment from 'moment-timezone';
+
+type AlarmWithoutId = Omit<AlarmItem, 'id'>;
 
 // 서버 응답(MyAlarmSummary) → 화면용 알람(AlarmItem)으로 변환
 export const transformAlarmResponseToItem = (alarm: MyAlarmSummary): AlarmItem => {
@@ -30,18 +32,16 @@ export const transformAlarmResponseToItem = (alarm: MyAlarmSummary): AlarmItem =
 
 
 //AlarmItem → PostMyAlarmRequest 변환
-export const toPostMyAlarmRequest = (alarm: AlarmItem): PostMyAlarmRequest => {
-  const { date, time, title, memo, isActive, sound, vibrate, repeat } = alarm;
+export const toPostMyAlarmRequest = (alarm: AlarmWithoutId): PostMyAlarmRequest => {  const { date, time, title, memo, isActive, sound, vibrate, repeat } = alarm;
 
   // 1. 날짜/시간 정보 추출
   const [year, month, day] = date.fullDate.split('-').map(Number);
   const hour = time.period === '오전' ? time.hour : time.hour + 12;
 
-  // 2. moment-timezone으로 KST 기준 포맷 지정 → UTC 변환 X
   const alarmTime = moment.tz(
     {
       year,
-      month: month - 1, // month는 0-indexed
+      month: month - 1,
       day,
       hour,
       minute: time.minute,
@@ -49,10 +49,19 @@ export const toPostMyAlarmRequest = (alarm: AlarmItem): PostMyAlarmRequest => {
     'Asia/Seoul'
   ).format('YYYY-MM-DDTHH:mm:ss');
 
-  // 3. 반복 정보 파싱
-  const [intervalStr, countStr] = repeat.split(',').map(s => s.trim());
-  const repeat_interval = parseInt(intervalStr.replace('분', ''), 10);
-  const repeat_count = parseInt(countStr.replace('회', ''), 10);
+  // 2. 반복 정보 파싱 (예: "10분, 5회" → 10, 5)
+  let repeat_interval = 10;
+  let repeat_count = 5;
+
+  if (repeat) {
+    const [intervalStr, countStr] = repeat.split(',').map(s => s.trim());
+    if (intervalStr?.includes('분')) {
+      repeat_interval = parseInt(intervalStr.replace('분', ''), 10);
+    }
+    if (countStr?.includes('회')) {
+      repeat_count = parseInt(countStr.replace('회', ''), 10);
+    }
+  }
 
   return {
     my_alarm_name: title,
@@ -70,8 +79,8 @@ export const toPostMyAlarmRequest = (alarm: AlarmItem): PostMyAlarmRequest => {
 };
 
 
-// 화면용 알람(AlarmItem) → 등록 요청(PatchMyAlarmRequest)
-export const transformAlarmToPostRequest = (alarm: AlarmItem): PatchMyAlarmRequest => {
+// 화면용 알람(AlarmItem) → 등록 요청(PutMyAlarmRequest)
+export const transformAlarmToPostRequest = (alarm: AlarmItem): PutMyAlarmRequest => {
   return {
     my_alarm_name: alarm.title,
     my_alarm_time: convertTimeTo24Hour(alarm.time),
@@ -87,8 +96,8 @@ export const transformAlarmToPostRequest = (alarm: AlarmItem): PatchMyAlarmReque
   };
 };
 
-// AlarmItem → PatchMyAlarmRequest 변환 (PUT용)
-export const toPatchMyAlarmRequest = (alarm: AlarmItem): PatchMyAlarmRequest => {
+// AlarmItem → PutMyAlarmRequest 변환 (PUT용)
+export const toPutMyAlarmRequest = (alarm: AlarmItem): PutMyAlarmRequest => {
   const { date, time, title, memo, isActive, sound, vibrate, repeat } = alarm;
 
   const [year, month, day] = date.fullDate.split('-').map(Number);
@@ -130,7 +139,7 @@ export const toPatchMyAlarmRequest = (alarm: AlarmItem): PatchMyAlarmRequest => 
   };
 };
 
-// 화면용 알람(AlarmItem) → 수정 요청(PatchMyAlarmRequest)
+// 화면용 알람(AlarmItem) → 수정 요청(PutMyAlarmRequest)
 export const transformAlarmToPatchRequest = transformAlarmToPostRequest;
 
 // 유틸 함수들

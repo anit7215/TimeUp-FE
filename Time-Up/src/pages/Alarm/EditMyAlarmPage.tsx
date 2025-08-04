@@ -1,11 +1,11 @@
 // src/pages/EditMyAlarmPage.tsx
-import { patchMyAlarm, postMyAlarm } from '@/src/apis/alarmApi';
+import { postMyAlarm, putMyAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate } from '@/src/utils/AlarmFormat';
-import { toPatchMyAlarmRequest, toPostMyAlarmRequest } from '@/src/utils/alarmTransform';
+import { toPostMyAlarmRequest, toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -69,7 +69,7 @@ updateAlarmField(selectedAlarmId, 'title', title);
     updateAlarmField(selectedAlarmId, 'isActive', isActive);
 
     try {
-      const patchBody = toPatchMyAlarmRequest({
+      const patchBody = toPutMyAlarmRequest({
         ...alarmToEdit,
         title,
         time,
@@ -78,59 +78,57 @@ updateAlarmField(selectedAlarmId, 'title', title);
         isActive,
       });
       console.log('PATCH 요청 바디:', JSON.stringify(patchBody, null, 2));
+          if (!selectedAlarmId) throw new Error('서버 응답에 alarm_id가 없습니다.');
       console.log('수정 요청할 alarm_id:', selectedAlarmId);
-      const res = await patchMyAlarm(selectedAlarmId, patchBody);
+      const res = await putMyAlarm(selectedAlarmId, patchBody);
       console.log('알람 수정 성공:', res);
     } catch (error) {
       console.error('알람 수정 실패:', error);
     }
 
     navigation.navigate('MyAlarmPage');
-  } else {
-      // 새 알람 생성
-      console.log('새 알람을 생성합니다.');
-try {
-  const requestBody = toPostMyAlarmRequest({
-    id: 0, // 또는 이 필드를 생략하세요
-    title,
-    time,
-    date,
-    sound: '선택',
-    vibrate: 'Basic Ring',
-    repeat: '10분, 5회',
-    memo,
-    isActive: true,
-  });
+} else {
+  // 새 알람 생성
+  console.log('새 알람을 생성합니다.');
+  try {
+    // AlarmItem에서 id는 제외하고 넘기기 (Omit으로 타입 좁히거나 명시적 제거)
+    const partialAlarm = {
+      title,
+      time,
+      date,
+      sound: '선택',
+      vibrate: '선택',
+      repeat: '선택',
+      memo,
+      isActive: true,
+    };
 
-  console.log('보낼 요청 데이터:', requestBody);
+    const requestBody = toPostMyAlarmRequest(partialAlarm);
+    console.log('보낼 요청 데이터:', requestBody);
 
-  const response = await postMyAlarm(requestBody);
-  console.log('서버 응답:', response);
+    const response = await postMyAlarm(requestBody);
+    console.log('서버 응답:', response);
 
-  const serverId = response.success?.alarm_id;
-  if (!serverId) throw new Error('서버 응답에 alarm_id가 없습니다.');
+    const serverAlarmId = response.success?.alarm_id;
+    if (!serverAlarmId) throw new Error('서버 응답에 alarm_id가 없습니다.');
+    console.log('받은 alarm_id:', serverAlarmId);
 
-  const newAlarm: AlarmItem = {
-    id: serverId, // 서버에서 받은 진짜 ID
-    title,
-    time,
-    date,
-    sound: '선택',
-    vibrate: 'Basic Ring',
-    repeat: '10분, 5회',
-    memo,
-    isActive: true,
-  };
+    const newAlarm: AlarmItem = {
+      id: serverAlarmId,
+      ...partialAlarm,
+    };
 
-  setMyAlarms((prev) => [...prev, newAlarm]);
-  setSelectedAlarmId(serverId);
-  navigation.navigate('MyAlarmPage');
-} catch (e) {
-  console.error('알람 저장 실패:', e);
+    setMyAlarms(prev => [...prev, newAlarm]);
+
+setSelectedAlarmId(serverAlarmId);
+
+    navigation.navigate('MyAlarmPage');
+  } catch (e) {
+    console.error('알람 저장 실패:', e);
+  }
 }
-}
-  };
-
+  }
+  
   const handleToggleSwitch = useCallback(() => {
     if (!selectedAlarmId) return;
     const newState = !isActive;

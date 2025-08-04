@@ -3,17 +3,14 @@ import {
   DeleteMyAlarmResponse,
   GetAllAlarmsResponse,
   MyAlarmSummary,
-  PatchMyAlarmRequest,
-  PatchMyAlarmResponse,
   PostMyAlarmRequest,
   PostMyAlarmResponse,
+  PutMyAlarmRequest,
+  PutMyAlarmResponse,
   ToggleMyAlarmActivationResponse,
 } from '@/src/types/alarm';
 import { getAccessToken } from '@/src/utils/storage';
 import { axiosInstance } from './axiosInstance';
-
-// base 설정
-const API_BASE_URL = 'https://timeup-server.o-r.kr/api';
 
 export const postMyAlarm = async (data: PostMyAlarmRequest): Promise<PostMyAlarmResponse> => {
   const token = await getAccessToken();
@@ -25,12 +22,12 @@ export const postMyAlarm = async (data: PostMyAlarmRequest): Promise<PostMyAlarm
   return response.data;
 };
 
-export const patchMyAlarm = async (
+export const putMyAlarm = async (
   id: number,
-  data: PatchMyAlarmRequest
-): Promise<PatchMyAlarmResponse> => {
+  data: PutMyAlarmRequest
+): Promise<PutMyAlarmResponse> => {
   const token = await getAccessToken();
-  const res = await axiosInstance.patch<PatchMyAlarmResponse>(
+  const res = await axiosInstance.put<PutMyAlarmResponse>(
     `/alarm/${id}/my`,
     data,
     {
