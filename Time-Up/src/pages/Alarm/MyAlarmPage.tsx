@@ -19,6 +19,7 @@ export default function MyAlarmPage() {
   const { myAlarms, setMyAlarms } = useAlarmContext();
   const { setSelectedAlarmId } = useAlarmContext();
   const { updateAlarmField } = useAlarmContext();
+  const { toggleAlarmActivation } = useAlarmContext();
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -41,19 +42,16 @@ export default function MyAlarmPage() {
   };
 
 
-  const handleToggleAlarm = (id: number, currentState: boolean) => {
-    setMyAlarms((prev) =>
-      prev.map((alarm) => {
-        if (alarm.id === id) {
-          const newState = !currentState;
-          updateAlarmField(id, 'isActive', newState);
-          console.log(`${alarm.title} 알람이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
-          return { ...alarm, isActive: newState };
-        }
-        return alarm;
-      })
-    );
-  };
+const handleToggleAlarm = async (id: number, currentState: boolean) => {
+  try {
+    await toggleAlarmActivation(id);
+    const newState = !currentState;
+    updateAlarmField(id, 'isActive', newState);
+    console.log(`알람 ${id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+  } catch (error) {
+    console.error(`알람 ${id}번 토글 실패:`, error);
+  }
+};
 
   const handleNewAlarm = async () => {
     try {
@@ -80,6 +78,7 @@ export default function MyAlarmPage() {
       };
 
       const requestBody = toPostMyAlarmRequest(defaultAlarm);
+      console.log('보낼 요청 데이터:', requestBody);
       const response = await postMyAlarm(requestBody);
 
       const newAlarmId = response.success?.alarm_id;

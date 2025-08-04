@@ -1,4 +1,5 @@
 // src/contexts/AlarmContext.tsx
+import { toggleMyAlarmActivation } from '@/src/apis/alarmApi';
 import moment from 'moment';
 import React, { createContext, useContext, useState } from 'react';
 import { AlarmItem } from '../types/alarm';
@@ -31,6 +32,8 @@ interface AlarmContextProps {
     field: K,
     value: AlarmItem[K]
   ) => void;
+
+  toggleAlarmActivation: (alarmId: number) => Promise<void>;
 }
 
 const AlarmContext = createContext<AlarmContextProps | undefined>(undefined);
@@ -62,6 +65,26 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
+const toggleAlarmActivation = async (alarmId: number) => {
+  try {
+    // 서버에 활성/비활성 요청
+    await toggleMyAlarmActivation(alarmId);
+
+    // 클라이언트 상태도 토글
+    setMyAlarms((prevAlarms) =>
+      prevAlarms.map((alarm) =>
+        alarm.id === alarmId
+          ? { ...alarm, isActive: !alarm.isActive }
+          : alarm
+      )
+    );
+
+    console.log(`알람 ${alarmId}의 상태를 토글했습니다.`);
+  } catch (error) {
+    console.error(`알람 ${alarmId} 토글 실패:`, error);
+  }
+};
+
   return (
     <AlarmContext.Provider
       value={{
@@ -78,6 +101,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         selectedAlarmDate,
         setSelectedAlarmDate,
         updateAlarmField,
+        toggleAlarmActivation,
       }}
     >
       {children}

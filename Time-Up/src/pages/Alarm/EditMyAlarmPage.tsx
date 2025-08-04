@@ -25,7 +25,7 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, toggleAlarmActivation } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
@@ -89,12 +89,20 @@ export default function EditMyAlarmPage() {
     }
   }
 
-  const handleToggleSwitch = useCallback(() => {
+  const handleToggleSwitch = useCallback(async () => {
     if (!selectedAlarmId) return;
-    const newState = !isActive;
-    setIsActive(newState);
-    updateAlarmField(selectedAlarmId, 'isActive', newState);
-  }, [isActive, selectedAlarmId]);
+
+    try {
+      await toggleAlarmActivation(selectedAlarmId);
+      const newState = !isActive;
+      setIsActive(newState);
+      updateAlarmField(selectedAlarmId, 'isActive', newState);
+      console.log(`알람 ${selectedAlarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${selectedAlarmId} 상태 토글 실패:`, error);
+    }
+  }, [selectedAlarmId, isActive]);
+
 
   const handleSelectSound = () => {
     navigation.navigate('SelectAlarmSoundPage');

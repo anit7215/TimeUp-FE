@@ -2,7 +2,7 @@
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import { formatDate } from '@/src/utils/AlarmFormat';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
 import PageBackButton from '../../components/common/PageBackButton';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
@@ -18,15 +18,23 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 export default function MyAlarmDetailPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms } = useAlarmContext();
-  const { updateAlarmField } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, setMyAlarms, toggleAlarmActivation, updateAlarmField } = useAlarmContext();
 
-  const alarm = myAlarms.find((a) => a.id === selectedAlarmId);
+  const alarm = myAlarms.find(a => a.id === selectedAlarmId);
+  const isActive = alarm?.isActive ?? false;
 
-  const handleToggleSwitch = useCallback(() => {
+  const handleToggleSwitch = async () => {
     if (!alarm) return;
-    updateAlarmField(alarm.id, 'isActive', !alarm.isActive);
-  }, [alarm]);
+
+    try {
+      await toggleAlarmActivation(alarm.id);
+      const newState = !alarm.isActive;
+      updateAlarmField(alarm.id, 'isActive', newState);
+      console.log(`알람 ${alarm.id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${alarm.id} 토글 실패:`, error);
+    }
+  };
 
   const handleEdit = () => {
     console.log(`${alarm!.title} 알람 설정을 편집합니다`);

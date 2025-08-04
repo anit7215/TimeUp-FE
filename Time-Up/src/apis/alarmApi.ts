@@ -43,11 +43,11 @@ export const putMyAlarm = async (
 
 // 내 알람 활성/비활성화
 export const toggleMyAlarmActivation = async (
-  id: number
+  alarmId: number,
 ): Promise<ToggleMyAlarmActivationResponse> => {
   const token = await getAccessToken();
   const res = await axiosInstance.patch<ToggleMyAlarmActivationResponse>(
-    `/alarm/${id}/my-active`,
+    `/alarm/${alarmId}/my-active`,
     null,
     {
       headers: {
