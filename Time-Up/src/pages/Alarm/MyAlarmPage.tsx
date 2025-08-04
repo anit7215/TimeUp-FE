@@ -42,30 +42,34 @@ export default function MyAlarmPage() {
   };
 
 
-const handleToggleAlarm = async (id: number, currentState: boolean) => {
-  try {
-    await toggleAlarmActivation(id);
-    const newState = !currentState;
-    updateAlarmField(id, 'isActive', newState);
-    console.log(`알람 ${id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
-  } catch (error) {
-    console.error(`알람 ${id}번 토글 실패:`, error);
-  }
-};
+  const handleToggleAlarm = async (id: number, currentState: boolean) => {
+    try {
+      await toggleAlarmActivation(id);
+      const newState = !currentState;
+      updateAlarmField(id, 'isActive', newState);
+      console.log(`알람 ${id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${id}번 토글 실패:`, error);
+    }
+  };
 
   const handleNewAlarm = async () => {
+    // 날짜-시간 조정하기. 오전 오후 시간 계산? 우선 안전하게 하루 뒤로 지정해 둠.
     try {
       const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
       const defaultAlarm: AlarmWithoutId = {
         title: '',
         time: {
-          period: now.getHours() < 12 ? '오전' : '오후',
-          hour: now.getHours() % 12 || 12,
-          minute: now.getMinutes(),
+          period: tomorrow.getHours() < 12 ? '오전' : '오후',
+          hour: tomorrow.getHours() % 12 || 12,
+          minute: tomorrow.getMinutes(),
         },
         date: {
-          fullDate: now.toISOString().split('T')[0],
-          dayOfWeek: ['일', '월', '화', '수', '목', '금', '토'][now.getDay()],
+          fullDate: tomorrow.toISOString().split('T')[0],
+          dayOfWeek: ['일', '월', '화', '수', '목', '금', '토'][tomorrow.getDay()],
         },
         sound: '선택',
         vibrate: '선택',

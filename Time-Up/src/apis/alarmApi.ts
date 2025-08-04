@@ -81,4 +81,3 @@ export const getMyAlarms = async (): Promise<MyAlarmSummary[]> => {
   }
   throw new Error(res.data.error?.message ?? '알람 목록을 불러오지 못했습니다.');
 };
-
