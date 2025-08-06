@@ -58,14 +58,20 @@ export const toggleMyAlarmActivation = async (
   return res.data;
 };
 
-// 내 알람 삭제
-export const deleteMyAlarm = async (id: number): Promise<DeleteMyAlarmResponse> => {
+// 내 알람 삭제 응답
+// 이중 삭제 문제??
+export const deleteMyAlarm = async (
+  alarmId: number
+): Promise<DeleteMyAlarmResponse> => {
   const token = await getAccessToken();
   const res = await axiosInstance.delete<DeleteMyAlarmResponse>(
-    `/alarm/${id}/my-delete`,
+    `/alarm/${alarmId}/my-delete`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+      params: {
+        alarm_id: alarmId,
       },
     }
   );

@@ -1,5 +1,5 @@
 // src/contexts/AlarmContext.tsx
-import { toggleMyAlarmActivation } from '@/src/apis/alarmApi';
+import { deleteMyAlarm, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
 import moment from 'moment';
 import React, { createContext, useContext, useState } from 'react';
 import { AlarmItem } from '../types/alarm';
@@ -34,6 +34,7 @@ interface AlarmContextProps {
   ) => void;
 
   toggleAlarmActivation: (alarmId: number) => Promise<void>;
+  deleteAlarmById: (alarmId: number) => Promise<void>;
 }
 
 const AlarmContext = createContext<AlarmContextProps | undefined>(undefined);
@@ -67,10 +68,8 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 const toggleAlarmActivation = async (alarmId: number) => {
   try {
-    // 서버에 활성/비활성 요청
     await toggleMyAlarmActivation(alarmId);
 
-    // 클라이언트 상태도 토글
     setMyAlarms((prevAlarms) =>
       prevAlarms.map((alarm) =>
         alarm.id === alarmId
@@ -84,6 +83,17 @@ const toggleAlarmActivation = async (alarmId: number) => {
     console.error(`알람 ${alarmId} 토글 실패:`, error);
   }
 };
+
+const deleteAlarmById = async (alarmId: number) => {
+  try {
+    await deleteMyAlarm(alarmId);
+    setMyAlarms(prev => prev.filter(alarm => alarm.id !== alarmId));
+    console.log(`알람 ${alarmId} 삭제 완료`);
+  } catch (error) {
+    console.error(`알람 ${alarmId} 삭제 실패:`, error);
+  }
+};
+
 
   return (
     <AlarmContext.Provider
@@ -102,6 +112,7 @@ const toggleAlarmActivation = async (alarmId: number) => {
         setSelectedAlarmDate,
         updateAlarmField,
         toggleAlarmActivation,
+        deleteAlarmById
       }}
     >
       {children}
