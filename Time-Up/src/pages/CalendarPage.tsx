@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PlusIcon from '../../assets/icons/plusIcon.svg';
-import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
-import { Schedule } from '../types/schedule';
 import Modal from '../components/common/Modal';
-import { formatKoreanDate, formatMonthDay } from '../components/SetSchedule/formatDate';
-import { useSchedule } from '../context/ScheduleContext'
+import { formatMonthDay } from '../components/SetSchedule/formatDate';
+import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
+import { useSchedule } from '../context/ScheduleContext';
+import { Schedule } from '../types/schedule';
 
 const { width, height } = Dimensions.get('window');
 

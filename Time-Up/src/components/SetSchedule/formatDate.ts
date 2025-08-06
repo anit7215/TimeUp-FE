@@ -20,6 +20,6 @@ export const formatMonthDay = (dateString: string): string => {
 }
 
 export const timeOnly = (dateString: string) : string => {
-    const time = dayjs('2023-10-01T15:00:00').format('HH:mm')
+    const time = dayjs(dateString ).format('HH:mm')
     return time;
 };

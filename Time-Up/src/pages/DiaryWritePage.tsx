@@ -2,8 +2,10 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import BottomLayout from '../Layouts/BottomLayout';
+import useAppNavigation from '../hooks/useAppNavigation';
 
 export default function DiaryWritePage() {
+  const navigation = useAppNavigation();
   return (
     <BottomLayout>
       <View className="flex-1 items-center justify-center bg-white">

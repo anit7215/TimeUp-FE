@@ -4,17 +4,16 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Dimensions,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  ScrollView,
-  Dimensions
+  View
 } from 'react-native';
-import CustomCalendar from '../components/SetSchedule/CustomCalendar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BellIcon from '../../assets/icons/addSchedulePage/BellIcon.svg';
 import CalendarIcon from '../../assets/icons/addSchedulePage/CalendarIcon.svg';
@@ -25,6 +24,7 @@ import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
 import StarIcon from '../../assets/icons/StarIcon.svg';
 import { createSchedule } from '../apis/schedule';
 import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
+import CustomCalendar from '../components/SetSchedule/CustomCalendar';
 import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
 import { useSchedule } from '../context/ScheduleContext';
 
@@ -57,6 +57,14 @@ export default function AddSchedulePage() {
   const gotoRemindPage = () => navigation.navigate('SetRemindAlarmPage');
   const gotoRepeatPage = () => navigation.navigate('SetScheduleRepeatPage');
   const gotoLocationPage = () => navigation.navigate('SetLocationPage');
+  // 12시간 형식을 24시간 형식으로 변환하는 함수
+const convertTo24Hour = (hour: number, period: string): number => {
+  if (period === '오전') {
+    return hour === 12 ? 0 : hour;
+  } else { // PM
+    return hour === 12 ? 12 : hour + 12;
+  }
+};
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -109,12 +117,14 @@ export default function AddSchedulePage() {
 
           {['시작 시간', '종료 시간'].includes(selectedItem || '') && (
           <HalfTimeScrollPanel
-          onTimeChange={(hour: number, minute: number) => {
+          onTimeChange={(hour: number, minute: number, period ) => {
             const targetField = selectedItem === '시작 시간' ? 'start_date' : 'end_date';
             const currentDate = moment(form[targetField]);
 
+            const convertedHour = convertTo24Hour(hour, period)
+
             const updatedDate = currentDate
-              .set({ hour, minute, second: 0, millisecond: 0 })
+              .set({ hour: convertedHour, minute, second: 0, millisecond: 0 })
               .format('YYYY-MM-DDTHH:mm:ss'); // 예: 2025-08-01T14:30:00
 
             console.log('수정된 날짜시간:', updatedDate); // 확인용

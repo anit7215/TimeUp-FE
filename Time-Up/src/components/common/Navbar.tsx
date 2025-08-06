@@ -1,8 +1,8 @@
-// src/components/Navbar.tsx
+
+// src/components/common/Navbar.tsx
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import { Image, Platform, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconAlarm from '../../../assets/images/IconAlarm.png';
 import IconCalendar from '../../../assets/images/IconCalendar.png';
@@ -14,7 +14,10 @@ type TabName = 'DiaryWritePage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
 // 탭의 소속 페이지 그룹 정의. 페이지 만들 때마다 여기에 추가!!
 const tabGroups: Record<TabName, string[]> = {
   DiaryWritePage: ['DiaryWritePage'],
-  AlarmPage: ['WakeUpAlarmPage', 'WakeUpAlarmPageNotAuto', 'TestTimeScrollPage', 'TestHalfTimeScrollPage', 'AlarmDetailPage'],
+  AlarmPage: ['WakeUpAlarmPage', 'MyAlarmDetailPage', 'MyAlarmPage',
+     'WakeUpAlarmDetailPage', 'SelectAlarmSoundPage', 'SelectAlarmReplayPage',
+     'SelectAlarmVibratePage', 'EditWakeUpAlarmPage', 'EditMyAlarmPage',
+     'PushAlarmPage',],
   CalendarPage: ['CalendarPage'],
   MyPage: ['MyPage'],
 };
@@ -61,9 +64,9 @@ export default function Navbar() {
   );
 
   return (
-    <SafeAreaView edges={['bottom']} className="bg-black items-center">
+    <View className="bg-black items-center">
       <View className="w-full h-[2px] bg-gray-500" />
       {renderTabs()}
-    </SafeAreaView>
+    </View>
   );
 }
