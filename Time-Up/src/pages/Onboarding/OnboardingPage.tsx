@@ -1,5 +1,7 @@
 import useAppNavigation from '@/src/hooks/useAppNavigation';
+import { useProfileStore } from '@/src/stores/useProfileStore';
 import { setAccessToken, setRefreshToken } from '@/src/utils/storage';
+import { axiosInstance } from '@/src/apis/axiosInstance'; 
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useRef } from 'react';
@@ -12,6 +14,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function OnboardingPage() {
   const navigation = useAppNavigation();
+  const { setField } = useProfileStore();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: process.env.GOOGLE_CLIENT_ID,
@@ -32,6 +35,16 @@ export default function OnboardingPage() {
         }
 
         try {
+          const userInfoRes = await axiosInstance.get('https://www.googleapis.com/userinfo/v2/me', {
+            headers: {
+              Authorization: `Bearer ${authentication.accessToken}`,
+            },
+          });
+          const userInfo = userInfoRes.data;
+          if (userInfo?.picture) {
+            setField('profileImage', userInfo.picture);
+          }
+
           const data = await login(authentication.accessToken);
 
           if (data.success?.accessToken) {
@@ -53,7 +66,7 @@ export default function OnboardingPage() {
     };
 
     fetchLogin();
-  }, [response, navigation]);
+  }, [response, navigation, setField]);
 
   useEffect(() => {
     Animated.timing(opacityAnim, {
@@ -66,8 +79,7 @@ export default function OnboardingPage() {
   return (
     <View className="flex-1 items-center pt-[208px] bg-black gap-3">
       <IconImage/>
-        <Animated.View style={{ opacity: opacityAnim,position: 'absolute',
-    bottom: 50, }}>
+      <Animated.View style={{ opacity: opacityAnim,position: 'absolute', bottom: 50 }}>
       <TouchableOpacity
         disabled={!request}
         onPress={() => promptAsync()}

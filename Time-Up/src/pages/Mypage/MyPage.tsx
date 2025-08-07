@@ -1,7 +1,9 @@
 import { logout } from '@/src/apis/auth';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
-import React, { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { useGetUserInfo } from '@/src/hooks/users/useGetUserInfo';
+import { useProfileStore } from '@/src/stores/useProfileStore';
+import React, { useEffect, useState } from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import NextIcon from '../../../assets/images/NextIcon.svg';
 import ProfileImage from '../../../assets/images/ProfileImage.svg';
 import BottomLayout from '../../Layouts/BottomLayout';
@@ -10,6 +12,16 @@ import Modal from '../../components/common/Modal';
 export default function MyPage() {
   const navigation = useAppNavigation();
   const [openLogout, setOpenLogout] = useState(false);
+  const [email, setEmail]=useState<string|null>(null);
+  const { data: userInfo, isLoading, error } = useGetUserInfo();
+  const { profileImage } = useProfileStore();
+
+  useEffect(()=>{
+    if(userInfo){
+      setEmail(userInfo.email);
+    }
+  });
+
   const handleLogout = async () => {
     setOpenLogout(false);
     try {
@@ -27,8 +39,17 @@ export default function MyPage() {
       <View className="flex-1 justify-between bg-black px-4 pt-6 w-full">
         <View>
           <View className="flex-row px-3 py-3 w-full items-center justify-between gap-3 bg-white rounded-[20px] mb-12">
-            <ProfileImage/>
-            <Text className="text-gray-900 text-lg font-normal leading-normal font-pretendard">example@naver.com</Text>
+            {
+              profileImage ? (
+                <Image
+                  source={{ uri: profileImage }}
+                  style={{ width: 40, height: 40, borderRadius: 20 }}
+                />
+              ) : (
+                <ProfileImage/>
+              )
+            }
+            <Text className="text-gray-900 text-lg font-normal leading-normal font-pretendard">{email}</Text>
             <TouchableOpacity className="bg-[#CCCCFF] rounded-md p-1 items-center" onPress={() => setOpenLogout(true)}>
               <Text className="text-dark text-xs font-normal leading-none font-pretendard">로그아웃</Text>
             </TouchableOpacity>
@@ -50,7 +71,7 @@ export default function MyPage() {
        { openLogout && (
             <Modal onClose={() => setOpenLogout(false)} onConfirm={handleLogout}>
               로그아웃 하시겠습니까? {`\n`}
-              <Text className="text-gray-700 text-sm">언제든 돌아올 수 있습니다!</Text>
+              <Text className="text-gray-800 text-sm">언제든 돌아올 수 있습니다!</Text>
             </Modal>
         )}
     </BottomLayout>
