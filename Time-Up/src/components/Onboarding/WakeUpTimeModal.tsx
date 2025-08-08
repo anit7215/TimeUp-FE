@@ -62,7 +62,7 @@ export default function WakeUpTimeModal({ visible, onClose, onSelect, initialSel
           <View className="flex-row justify-between gap-6 items-center w-full px-6 mt-16">
             <TouchableOpacity
               onPress={onClose}
-              className="px-[46px] py-2 rounded-[20px] justify-center items-center bg-gray-750"
+              className="px-[46px] py-2 rounded-[20px] justify-center items-center bg-gray-700"
             >
               <Text className="text-gray-100 text-base font-medium leading-normal">취소</Text>
             </TouchableOpacity>

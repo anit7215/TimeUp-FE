@@ -2,6 +2,7 @@ import { GOOGLE_PLACES_API_KEY } from '@env';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -35,6 +36,8 @@ import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ScheduleDetailEditPage from './src/pages/SetPage/ScheduleDetail';
 import SetLocationPage from './src/pages/SetLocationPage';
+
+const queryClient = new QueryClient();
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -97,20 +100,22 @@ export default function App() {
   );
 
   return (
-    <PaperProvider>
-      <AlarmProvider>
-        <SafeAreaView
-          edges={['top', 'bottom']}
-          className="flex-1 bg-black"
-          style={{
-            width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
-            height: screenHeight,
-            alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
-          }}
-        >
-          {content}
-        </SafeAreaView>
-      </AlarmProvider>
-    </PaperProvider>
+    <QueryClientProvider client={queryClient}>
+      <PaperProvider>
+        <AlarmProvider>
+          <SafeAreaView
+            edges={['top', 'bottom']}
+            className="flex-1 bg-black"
+            style={{
+              width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
+              height: screenHeight,
+              alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
+            }}
+          >
+            {content}
+          </SafeAreaView>
+        </AlarmProvider>
+      </PaperProvider>
+    </QueryClientProvider>
   );
 }
