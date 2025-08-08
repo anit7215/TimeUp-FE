@@ -1,5 +1,5 @@
-import { AddressItem } from './address';
 
+import { AddressItem } from './address';
 export type RootStackParamList = {
   CalendarPage: undefined;
   OnboardingPage: undefined;

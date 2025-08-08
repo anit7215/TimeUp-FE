@@ -1,65 +1,536 @@
-import React, { useCallback, useState } from 'react';
-import { Text, View } from 'react-native';
-import CancleButton from '../components/common/CancleButton';
-import CheckBox from '../components/common/CheckBox';
-import ConfirmButton from '../components/common/ConfirmButton'; // 확인 버튼 테스트용 임포트
-import Dropdown from '../components/common/DropDown'; // 드롭다운 컴포넌트 임포트
-import ToggleSwitch from '../components/common/ToggleSwitch';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import PlusIcon from '../../assets/icons/plusIcon.svg';
+import Modal from '../components/common/Modal';
+import { formatMonthDay } from '../components/SetSchedule/formatDate';
+import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
+import { useSchedule } from '../context/ScheduleContext';
+import { Schedule } from '../types/schedule';
 
+const { width, height } = Dimensions.get('window');
 
-export default function CalendarPage() {
-  const handleConfirm = () => {
-    console.log('버튼이 눌렸습니다')
-  }
+const CalendarPage = () => {
+  const navigation = useNavigation<any>();
+  const { dispatch } = useSchedule();
+  
+  // State 관리
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [isDaySelected, setIsDaySelected] = useState(false);
+  const [events, setEvents] = useState<{[key: string]: number}>({});
+  const [isPlusButtonPressed, setIsPlusButtonPressed] = useState(false);
+  const [ModalOpen, setModalOpen] = useState(false);
 
-  const [checked, setChecked] = React.useState(false);
-  const handleCheckBoxChange = (val: boolean) => {
-    setChecked(val);
-    console.log(`체크박스 상태: ${val ? '선택됨' : '선택되지 않음'}`);
-  }
+  // 현재 연도와 월 가져오기
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
 
-  const [on, setOn] = useState(false);
-
-  const handleToggleSwitch = useCallback(() => {
-    setOn((prev) => !prev);
-  }, [])
-
-  const jobOptions = [
-    { label: '직장인', value: 'office_worker' },
-    { label: '공무원/군인', value: 'public_officer' },
-    { label: '자영업자', value: 'self_employed' },
-    { label: '프리랜서', value: 'freelancer' },
-    { label: '학생', value: 'student' },
-    { label: '무직', value: 'unemployed' },
-  ]
-
-  const [selectedJob, setSelectedJob] = useState<string | null>(null);
-
-  return (
-    <View className="flex-1 items-center justify-center bg-[#121212] p-20">
-      <Text className="text-xl text-white font-bold">테스트</Text>
-      <ConfirmButton title="확인" onPress = {handleConfirm}/>
-
-      <CheckBox
-        isChecked={checked}
-        onValueChangeHandler={handleCheckBoxChange}
-        disabled={false}
-        >
-        </CheckBox>
-
-      <Dropdown
-      data={jobOptions}
-      placeholder="직업 선택"
-      value={selectedJob}
-      onChange={setSelectedJob}
-        />
-
-      <ToggleSwitch
-        isOn={on} onToggle={handleToggleSwitch} disabled={false}
-        ></ToggleSwitch>
-
-      <CancleButton title="취소" onPress = {handleConfirm}/>
-
-    </View>
+  useEffect(() => {
+    if (selectedDate && isPlusButtonPressed) {
+      setModalOpen(true);
+      setIsPlusButtonPressed(false);
+     }
+    }, [selectedDate, isPlusButtonPressed]);
+  
+  
+  // selectedMonth 형식 수정: 월은 1부터 시작하도록, 두 자리로 패딩
+  const [selectedMonth, setSelectedMonth] = useState(
+    `${year}-${String(month + 1).padStart(2, '0')}`
   );
-}
+  const [isModalVisible, setIsModalVisible] = useState(true); // 항상 표시되도록 true로 설정
+
+  // 더미 데이터 날짜를 현재 연도로 수정
+  const schedules = [
+    {
+      scheduleId: '1',
+      name: '옷 사기',
+      start_date: '2025-07-15T10:00:00',
+      end_date: '2025-07-15T12:00:00',
+      color: '#FF6B6B',
+      is_important: true,
+      place_name: '회의실 A',
+    },
+    {
+      scheduleId: '2',
+      name: '프로젝트 마감',
+      start_date: '2025-07-15T10:00:00',
+      end_date: '2025-07-15T12:00:00',
+      color: '#4ECDC4',
+      is_important: true,
+      place_name: '회의실 B'
+    }
+  ];
+
+  // 중요 일정 모달 열기 함수 추가
+  const openImportantScheduleModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeImportantScheduleModal = () => {
+    setIsModalVisible(false);
+  };
+
+  // selectedMonth 업데이트 (월이 변경될 때마다)
+  useEffect(() => {
+    setSelectedMonth(`${year}-${String(month + 1).padStart(2, '0')}`);
+  }, [year, month]);
+  
+  // 월 이름 배열
+  const monthNames = [
+    '1월', '2월', '3월', '4월', '5월', '6월',
+    '7월', '8월', '9월', '10월', '11월', '12월'
+  ];
+  
+  // 요일 배열
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // 백엔드에서 일정 데이터를 가져오는 함수
+  const fetchEvents = async (year: number, month: number) => {
+    try {
+      // 실제 API 호출 예시
+      // const response = await fetch(`/api/events?year=${year}&month=${month + 1}`);
+      // const data = await response.json();
+      
+      // 임시 데이터 (실제로는 백엔드에서 받아올 데이터)
+      const mockData: {[key: string]: number} = {
+        '2025-7-3': 2,   // 7월 3일에 2개 일정
+        '2025-7-15': 1,  // 7월 15일에 1개 일정
+        '2025-7-20': 3,  // 7월 20일에 3개 일정
+        '2025-7-25': 1,  // 7월 25일에 1개 일정
+      };
+      
+      setEvents(mockData);
+    } catch (error) {
+      console.error('일정 데이터 가져오기 실패:', error);
+    }
+  };
+
+  
+  // 월이 변경될 때마다 일정 데이터 가져오기
+  useEffect(() => {
+    fetchEvents(year, month);
+  }, [year, month]);
+
+  const handleAddSchedule = (date: string) => { // 이건 모달창 뜨고 확인 버튼 누르고 나서 이뤄져야 할 로직
+    const dateToUse = selectedDate;
+    console.log('선택된 날짜:', dateToUse);
+    const initialSchedule: Schedule = {
+      scheduleId: '', // 등록 전에는 비워두기
+      name: '',
+      start_date: dateToUse,
+      end_date: dateToUse,
+      place_name: '',
+      address: '',
+      color: '#F7A1A1',
+      memo: '',
+      is_reminding: false,
+      remind_at: 0,
+      is_recurring: false,
+      is_important: false,
+      repeat: ''
+    };
+
+    dispatch({ type: 'RESET_DRAFT'});
+    dispatch({ type: 'UPDATE_DRAFT', payload: { start_date: date, end_date: date}})
+    navigation.navigate('AddSchedulePage');
+  };
+
+  // 날짜 선택 핸들러
+  const handleDatePress = (day: any) => { // 이거 any타입이어도 될지 모르겠다...
+    const dateString = `${year}-${month + 1}-${day.date}`;
+    navigation.navigate('SchedulePage', { selectedDate: dateString}) // selectedDate 삭제
+    
+  };
+  
+  // 특정 날짜의 일정 개수 가져오기
+  const getEventCount = (date: number) => {
+    const dateKey = `${year}-${month + 1}-${date}`;
+    return events[dateKey] || 0;
+  };
+  
+  // 일정 dot 렌더링
+  const renderEventDots = (eventCount: number) => {
+    if (eventCount === 0) return null;
+    
+    const dots = [];
+    const maxDots = 6; // 최대 6개까지만 표시
+    const actualDots = Math.min(eventCount, maxDots);
+    
+    for (let i = 0; i < actualDots; i++) {
+      dots.push(
+        <View
+          key={i}
+          style={[
+            styles.eventDot,
+            { marginLeft: i > 0 ? 2 : 0 }
+          ]}
+        />
+      );
+    }
+    
+    return (
+    
+      <View style={styles.eventDotsContainer}>
+        {dots}
+        {eventCount > maxDots && (
+          <Text style={styles.moreEventsText}>+{eventCount - maxDots}</Text>
+        )}
+      </View>
+    );
+  };
+  
+  // 캘린더 날짜 배열 생성
+  const generateCalendarDays = () => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const firstDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    
+    const calendarDays = [];
+    
+    // 이전 달의 마지막 날짜들 (빈 공간 채우기)
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      calendarDays.push({
+        date: prevMonthLastDay - i,
+        isCurrentMonth: false,
+        isPrevMonth: true
+      });
+    }
+    
+    // 현재 달의 날짜들
+    for (let date = 1; date <= daysInMonth; date++) {
+      calendarDays.push({
+        date,
+        isCurrentMonth: true,
+        isPrevMonth: false
+      });
+    }
+    
+    // 다음 달의 첫 날짜들 (빈 공간 채우기)
+    const remainingCells = 42 - calendarDays.length; // 6주 * 7일 = 42칸
+    for (let date = 1; date <= remainingCells; date++) {
+      calendarDays.push({
+        date,
+        isCurrentMonth: false,
+        isPrevMonth: false
+      });
+    }
+    
+    return calendarDays;
+  };
+  
+  // 이전/다음 달로 이동
+  const goToPrevMonth = () => {
+    setCurrentDate(new Date(year, month - 1));
+    setSelectedDate(''); // 선택된 날짜 초기화
+  };
+  
+  const goToNextMonth = () => {
+    setCurrentDate(new Date(year, month + 1));
+    setSelectedDate(''); // 선택된 날짜 초기화
+  };
+  
+  // 오늘 날짜 확인
+  const isToday = (date: number) => {
+    const today = new Date();
+    return today.getFullYear() === year && 
+           today.getMonth() === month && 
+           today.getDate() === date;
+  };
+  
+  // 캘린더 날짜 렌더링
+  const renderCalendarDays = () => {
+    const calendarDays = generateCalendarDays();
+    const weeks = [];
+    
+    for (let i = 0; i < calendarDays.length; i += 7) {
+      const week = calendarDays.slice(i, i + 7);
+      weeks.push(
+        <View key={i} style={styles.weekRow}>
+          {week.map((day, index) => {
+            const dateString = `${year}-${month + 1}-${day.date}`;
+            const isSelected = selectedDate === dateString && day.isCurrentMonth;
+            const isTodayDate = isToday(day.date) && day.isCurrentMonth;
+            const dayIndex = (i / 7) * 7 + index;
+            const eventCount = day.isCurrentMonth ? getEventCount(day.date) : 0;
+            
+            return (
+              <TouchableOpacity
+                key={dayIndex}
+                style={[
+                  styles.dayCell,
+                  isSelected && styles.selectedCell,
+                ]}
+
+                // 날짜 클릭 시
+                onPress={() => {
+                  if (isPlusButtonPressed) {
+                    setSelectedDate(dateString); // 1. 날짜 저장
+                  } else {
+                    handleDatePress(day); // 상세조회
+                  }
+                }}
+
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.dayText,
+                    {opacity: isPlusButtonPressed ? 0.5 : 1},
+                    !day.isCurrentMonth && styles.otherMonthText,
+                    isDaySelected && styles.selectedCircle,
+                    isTodayDate && styles.todayText,
+                    isSelected && styles.selectedText,
+                    day.isCurrentMonth && index === 0 && styles.sundayText,
+                    day.isCurrentMonth && index === 6 && styles.saturdayText,
+                  ]}
+                >
+                  {day.date}
+                </Text>
+                {renderEventDots(eventCount)}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      );
+    }
+    return weeks;
+  };
+  
+  return (
+  <GestureHandlerRootView style={{ flex: 1 }}>
+    <View style={styles.container}>
+      {/* 플러스 버튼 */}
+      <View className="absolute top-0 left-0 right-0 z-10 mt-4 mb-4">
+        <TouchableOpacity 
+          style={{ position: 'absolute', top: 20, right: 20 }}
+          onPress={() => setIsPlusButtonPressed(true)}
+          activeOpacity={0.7}
+        >
+          <PlusIcon width={36} height={36} />
+        </TouchableOpacity>
+      </View>
+
+      {/* 헤더 */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>
+          {year}년 {monthNames[month]}
+        </Text>
+        <View style={styles.navButtonContainer}>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={goToPrevMonth}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navButtonText}>{'<'}</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={goToNextMonth}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navButtonText}>{'>'}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* border */}
+      <View style={styles.borderLine} />
+
+      {/* 요일 헤더 */}
+      <View style={styles.weekHeaderRow}>
+        {dayNames.map((day, index) => (
+          <View key={day} style={styles.weekHeaderCell}>
+            <Text 
+              style={[
+                styles.weekHeaderText,
+                index === 0 && styles.sundayHeaderText,
+                index === 6 && styles.saturdayHeaderText,
+              ]}
+            >
+              {day}
+            </Text>
+          </View>
+        ))}
+      </View>
+      
+      {/* 날짜 그리드 */}
+      <View style={styles.calendarGrid}>
+        {renderCalendarDays()}
+      </View>
+
+    
+    </View>
+        {ModalOpen && (
+          <Modal
+            onClose={() => {
+              setModalOpen(false);
+              setIsDaySelected(false);
+              setSelectedDate(''); // 모달 닫을 때 선택된 날짜 초기화
+            }}
+            onConfirm={() => handleAddSchedule(selectedDate)}
+          >
+            {`${formatMonthDay(selectedDate)}에 일정을 추가하시겠습니까?`}
+          </Modal>
+        )}
+
+    {/* ImportantScheduleModal을 GestureHandlerRootView 내부로 이동 */}
+    <ImportantScheduleModal
+      selectedMonth={selectedMonth}
+      schedules={schedules}
+      isVisible={isModalVisible}
+      onClose={closeImportantScheduleModal}
+    />
+  </GestureHandlerRootView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#121212',
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 30,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 2
+  },
+  navButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  navButton: {
+    padding: 10,
+    borderRadius: 20,
+  },
+  navButtonText: {
+    color: '#ffffff',
+    fontSize: 30,
+  },
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: width > 400 ? 24 : 20, // 화면 크기에 따라 폰트 크기 조정
+    fontWeight: '500',
+  },
+  borderLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffffff',
+    marginBottom: 16,
+  },
+  weekHeaderRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  weekHeaderCell: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  weekHeaderText: {
+    color: '#F7F7FE',
+    fontSize: width > 400 ? 16 : 14, // 화면 크기에 따라 폰트 크기 조정
+    fontWeight: '500',
+  },
+  sundayHeaderText: {
+    color: '#E50000',
+  },
+  saturdayHeaderText: {
+    color: '#224CF1',
+  },
+  calendarGrid: {
+    flex: 1, // 남은 공간을 모두 사용
+    marginBottom: 20,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    flex: 1, // 각 주가 균등하게 공간을 차지
+  },
+  dayCell: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    margin: 1,
+    position: 'relative',
+    minHeight: (height - 300) / 7, // 화면 높이에 따라 최소 높이 설정
+  },
+  selectedCell: {
+    borderWidth: 1,
+    borderColor: '#ffffff',
+  },
+  dayText: {
+    color: '#ffffff',
+    fontSize: width > 400 ? 18 : 16, // 화면 크기에 따라 폰트 크기 조정
+    fontWeight: '400'
+  },
+  selectedCircle: {
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  otherMonthText: {
+    color: '#121212',
+  },
+  todayText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  selectedText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  sundayText: {
+    color: '#E50000',
+  },
+  saturdayText: {
+    color: '#224CF1',
+  },
+  eventDotsContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 4,
+    alignItems: 'center',
+  },
+  eventDot: {
+    width: width > 400 ? 8 : 6, // 화면 크기에 따라 dot 크기 조정
+    height: width > 400 ? 8 : 6,
+    borderRadius: width > 400 ? 4 : 3,
+    backgroundColor: '#4dabf7',
+  },
+  moreEventsText: {
+    color: '#4dabf7',
+    fontSize: width > 400 ? 8 : 6, // 화면 크기에 따라 폰트 크기 조정
+    marginLeft: 2,
+  },
+  // 중요 일정 버튼 스타일 추가
+  importantScheduleButton: {
+    backgroundColor: '#6366F1',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  importantScheduleButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});
+
+export default CalendarPage;
