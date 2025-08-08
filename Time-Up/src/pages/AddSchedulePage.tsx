@@ -21,7 +21,7 @@ import LocationIcon from '../../assets/icons/addSchedulePage/LocationIcon.svg';
 import MemoIcon from '../../assets/icons/addSchedulePage/MemoIcon.svg';
 import RepeatIcon from '../../assets/icons/addSchedulePage/RepeatIcon.svg';
 import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
-import StarIcon from '../../assets/icons/StarIcon.svg';
+// import StarIcon from '../../assets/icons/StarIcon.svg';
 import { createSchedule } from '../apis/schedule';
 import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
 import CustomCalendar from '../components/SetSchedule/CustomCalendar';
@@ -192,9 +192,9 @@ const convertTo24Hour = (hour: number, period: string): number => {
               onPress={()=>dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important }})}
               style={{ marginLeft: 18}}
             >
-              <StarIcon 
+              {/* <StarIcon 
                 fill={form.is_important ? 'white' : 'none'}
-              />
+              /> */}
             </TouchableOpacity>
           </View>
 

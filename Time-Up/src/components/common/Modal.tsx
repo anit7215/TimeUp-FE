@@ -34,9 +34,13 @@ const Modal = ({ onClose, onConfirm, children }: ModalProps) =>{
           </Text>
         </View>
 
-        <View style={{ paddingHorizontal: 34 }} className="pb-4 flex-row justify-between gap-4">
-          <CancelButton onPress={onClose} />
-          <ConfirmButton title="확인" onPress = {handleConfirm}/>
+        <View className="flex-row px-[34px] pb-4 gap-4">
+          <View className="flex-1">
+            <CancelButton onPress={onClose} />
+          </View>
+          <View className="flex-1">
+            <ConfirmButton title="확인" onPress = {handleConfirm}/>
+          </View>
         </View>
       </View>
     </View>

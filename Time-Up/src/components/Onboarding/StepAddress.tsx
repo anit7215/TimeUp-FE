@@ -25,7 +25,7 @@ export default function StepAddress({ homeAddress, workAddress, onSelect }: Prop
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700"
+        className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-800"
         onPress={() => onSelect('work')}
       >
         <View className="flex-col">

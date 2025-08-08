@@ -20,7 +20,7 @@ import LocationIcon from '../../assets/icons/addSchedulePage/LocationIcon.svg';
 import MemoIcon from '../../assets/icons/addSchedulePage/MemoIcon.svg';
 import RepeatIcon from '../../assets/icons/addSchedulePage/RepeatIcon.svg';
 import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
-import StarIcon from '../../assets/icons/StarIcon.svg';
+// import StarIcon from '../../assets/icons/StarIcon.svg';
 import { createSchedule } from '../apis/schedule';
 import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
 import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
@@ -261,7 +261,7 @@ import { Schedule } from '../types/schedule';
             <TouchableOpacity onPress={()=>{setForm({...form, is_important: !form.is_important})}
   
           }>
-              <StarIcon fill={form.is_important ? 'white' : 'none'}/>
+              {/* <StarIcon fill={form.is_important ? 'white' : 'none'}/> */}
             </TouchableOpacity>
           </View>
   

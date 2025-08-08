@@ -34,7 +34,10 @@ export default function TimeModal({ visible, onClose, onSelect, choice }: TimeMo
           onPress={() => {}}
         >
           {choice === 'optional'&& (
-            <TouchableOpacity className="w-full items-end" onPress={onClose}>
+            <TouchableOpacity className="w-full items-end" onPress={() => {
+              onSelect('00','00'); 
+              onClose();
+            }}>
               <Text className="text-gray-300 underline text-sm font-normal leading-tight">
                 나중에 입력할게요.
               </Text>
@@ -46,7 +49,7 @@ export default function TimeModal({ visible, onClose, onSelect, choice }: TimeMo
           <View className="flex-row justify-between gap-6 items-center w-full px-6 mt-16">
             <TouchableOpacity 
               onPress={onClose} 
-              className='px-[46px] py-2 rounded-[20px] justify-center items-center bg-gray-750'
+              className='px-[46px] py-2 rounded-[20px] justify-center items-center bg-gray-700'
             >
               <Text className="text-gray-100 text-base font-medium leading-normal">취소</Text>
             </TouchableOpacity>

@@ -1,144 +1,163 @@
-import React, { useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
 import TimeModal from '../../components/Onboarding/TimeModal';
+import { putAutoAlarmCheckTime, getAutoAlarmCheckTime, updateAutoAlarm, getAlarmList } from '@/src/apis/users';
+import { remindSoundOptions, remindVibrationOptions, alarmSoundOptions, vibrationTypeOptions, intervalOptions, repeatCountOptions } from '@/src/constants/userOptions';
 
 export default function EditrAlarmPage() {
-  const [ringTone, setRingTone] = useState<string | null>(null);
-  const [vibration, setVibration] = useState<string | null>(null);
+  const [remindSound, setRemindSound] = useState<string | null>(null);
+  const [remindVibration, setRemindVibration] = useState<string | null>(null);
   const [alarmSound, setAlarmSound] = useState<string | null>(null);
-  const [backupSound, setBackupSound] = useState<string | null>(null);
+  const [vibrationType, setVibrationType] = useState<string | null>(null);
   const [interval, setInterval] = useState<string | null>(null);
-  const [repeat, setRepeat] = useState<string | null>(null);
+  const [repeatCount, setRepeatCount] = useState<string | null>(null);
 
   const [open, setOpen] = useState(false);
   const [isOptional, setIsOptional] = useState(false);
   const [alarmTime, setAlarmTime] = useState<{ hour: string; minute: string } | null>(null);
 
-  const alarmOptions = [
-    { label: 'Ring Tone', value: 'ring' },
-    { label: 'Vibration', value: 'vibrate' },
-  ];
-
-  const soundOptions = [
-    { label: 'Heavy Raindrop', value: 'rain' },
-    { label: 'Basic Ring', value: 'basic' },
-  ];
-
-  const repeatOptions = [
-    { label: '3회', value: '3' },
-    { label: '5회', value: '5' },
-  ];
-
-  const intervalOptions = [
-    { label: '5분', value: '5' },
-    { label: '10분', value: '10' },
-    { label: '30분', value: '30' },
-  ];
+  const [autoAlarmId, setAutoAlarmId] = useState<number | null>(null);
 
   const handleSelect = (hour: string, minute: string) => {
     setAlarmTime({ hour, minute });
-    setOpen(false); 
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    const fetchAlarmData = async () => {
+      try {
+        const response = await getAutoAlarmCheckTime();
+        const timeStr = response?.alarm_check_time;
+        if (timeStr) {
+          const date = new Date(timeStr);
+          const hour = date.getUTCHours().toString().padStart(2, '0');
+          const minute = date.getUTCMinutes().toString().padStart(2, '0');
+          setAlarmTime({ hour, minute });
+        }
+
+        const alarmList = await getAlarmList();
+        if (alarmList?.auto_alarms?.length > 0) {
+          setAutoAlarmId(alarmList.auto_alarms[0].auto_alarm_id);
+        } else {
+          console.warn('자동 알람이 없습니다.');
+        }
+      } catch (error) {
+        console.error('알람 데이터 불러오기 실패:', error);
+      }
+    };
+    fetchAlarmData();
+  }, []);
+
+  const handleSave = async () => {
+    if (!alarmTime) {
+      Alert.alert('시간을 설정해주세요.');
+      return;
+    }
+    if (!autoAlarmId) {
+      Alert.alert('자동 알람 ID를 불러오지 못했습니다.');
+      return;
+    }
+
+    try {
+      const timePayload = {
+        alarm_check_time: new Date(
+          Date.UTC(1970, 0, 1, Number(alarmTime.hour), Number(alarmTime.minute), 0)
+        ).toISOString(),
+      };
+      await putAutoAlarmCheckTime(timePayload);
+
+      const alarmPayload = {
+        is_repeating: interval !== '0',
+        is_sound: alarmSound !== 'no',
+        is_vibrating: vibrationType !== 'no',
+        vibration_type: vibrationType || 'default',
+        sound_id: alarmSound === 'no' ? null : 2,
+        repeat_interval: Number(interval) || 0,
+        repeat_count: Number(repeatCount) || 0,
+      };
+
+      await updateAutoAlarm(autoAlarmId, alarmPayload);
+
+      Alert.alert('저장 완료', '자동 알람 설정이 저장되었습니다.');
+    } catch (error) {
+      console.error('자동 알람 저장 실패:', error);
+      Alert.alert('저장 실패', '다시 시도해주세요.');
+    }
   };
 
   return (
     <ScrollView className="flex-1 bg-black px-4 py-4">
-      <BeforeHeader title="리마인드 / 알람" rightLabel="저장" onRightPress={() => alert('저장됨')} />
-        <View className="bg-gray-800 rounded-2xl p-4 mb-2">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white">리마인드 알람 설정</Text>
-            <View className="w-[150px]">
-              <DropDown3
-                data={alarmOptions}
-                value={ringTone}
-                onChange={setRingTone}
-                placeholder="알림음 선택"
-              />
-            </View>
-          </View>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-white">진동 설정</Text>
-            <View className="w-[150px]">
-              <DropDown3
-                data={alarmOptions}
-                value={vibration}
-                onChange={setVibration}
-                placeholder="진동 선택"
-              />
-            </View>
+      <BeforeHeader title="리마인드 / 알람" rightLabel="저장" onRightPress={handleSave} />
+      <View className="bg-gray-900 rounded-lg px-2 py-3 mb-2">
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-white text-base">리마인드 알람 설정</Text>
+          <View className="w-1/2">
+            <DropDown3 data={remindSoundOptions} value={remindSound} onChange={setRemindSound} placeholder="알림음 선택" />
           </View>
         </View>
-
-        <View className="bg-gray-800 rounded-2xl p-4 mb-2">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white">자동 알람 설정</Text>
-            <View className="w-[150px]">
-              <DropDown3
-                data={soundOptions}
-                value={alarmSound}
-                onChange={setAlarmSound}
-                placeholder="자동 알람"
-              />
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white"></Text>
-            <View className="w-[150px]">
-              <DropDown3
-                data={soundOptions}
-                value={backupSound}
-                onChange={setBackupSound}
-                placeholder="알람"
-              />
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-white"></Text>
-            <View className="w-[150px]">
-              <DropDown3
-                data={intervalOptions}
-                value={interval}
-                onChange={setInterval}
-                placeholder="간격 선택"
-              />
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            <Text className="text-white"></Text>
-            <View className="w-[150px]">
-              <DropDown3
-                data={repeatOptions}
-                value={repeat}
-                onChange={setRepeat}
-                placeholder="반복 횟수 선택"
-              />
-            </View>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-white"></Text>
+          <View className="w-1/2">
+            <DropDown3 data={remindVibrationOptions} value={remindVibration} onChange={setRemindVibration} placeholder="진동 유형 선택" />
           </View>
         </View>
+      </View>
 
-        <TouchableOpacity
-          className="bg-gray-800 rounded-2xl px-4 py-4 mb-2"
-          onPress={() => { setOpen(true); setIsOptional(true);}}
-        >
-          <View className="flex-row justify-between items-center">
-            <Text className="text-white">자동 알람 확인 시간</Text>
-            <Text className="text-light">
-              {alarmTime ? `${alarmTime.hour}:${alarmTime.minute}` : '입력'}
-            </Text>
+      <View className="bg-gray-900 rounded-lg px-2 py-3 mb-2">
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-white text-base">자동 알람 설정</Text>
+          <View className="w-1/2">
+            <DropDown3 data={alarmSoundOptions} value={alarmSound} onChange={setAlarmSound} placeholder="알람음 선택" />
           </View>
-        </TouchableOpacity>
-        {open && (
-          <TimeModal
-            visible={open}
-            onClose={() => setOpen(false)}
-            onSelect={handleSelect}
-            choice={isOptional ? 'optional' : undefined}
-          />
-        )}
+        </View>
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-white"></Text>
+          <View className="w-1/2">
+            <DropDown3 data={vibrationTypeOptions} value={vibrationType} onChange={setVibrationType} placeholder="진동 유형 선택" />
+          </View>
+        </View>
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-white"></Text>
+          <View className="w-1/2">
+            <DropDown3 data={intervalOptions} value={interval} onChange={setInterval} placeholder="반복 간격 선택" />
+          </View>
+        </View>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-white"></Text>
+          <View className="w-1/2">
+            <DropDown3 data={repeatCountOptions} value={repeatCount} onChange={setRepeatCount} placeholder="반복 횟수 선택" />
+          </View>
+        </View>
+      </View>
+
+      <TouchableOpacity
+        className="bg-gray-900 rounded-lg px-2 py-3 mb-2"
+        onPress={() => { setOpen(true); setIsOptional(true); }}
+      >
+        <View className="flex-row justify-between items-center">
+          <Text className="text-white text-base">자동 알람 확인 시간</Text>
+          <Text className="text-light">
+            {alarmTime ? (() => {
+              const hour24 = Number(alarmTime.hour);
+              const minute = alarmTime.minute;
+              const isAM = hour24 < 12;
+              const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+              const ampm = isAM ? '오전' : '오후';
+              return `${ampm} ${hour12.toString().padStart(2, '0')} : ${minute}`;
+            })() : '입력'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+      {open && (
+        <TimeModal
+          visible={open}
+          onClose={() => setOpen(false)}
+          onSelect={handleSelect}
+          choice={isOptional ? 'optional' : undefined}
+        />
+      )}
     </ScrollView>
   );
 }
