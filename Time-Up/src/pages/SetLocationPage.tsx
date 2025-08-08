@@ -13,7 +13,7 @@ interface AddressItem {
   address: string;
 }
 
-export default function AddressSearchPage() {
+export default function SetLocationPage() {
   const navigation = useAppNavigation();
   const { dispatch } = useSchedule();
   const mockResults = [

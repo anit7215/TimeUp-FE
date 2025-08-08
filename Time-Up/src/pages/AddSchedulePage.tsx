@@ -42,17 +42,26 @@ export default function AddSchedulePage() {
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"];
 
-  const handleSave = async () => {
-    try {
-      const token = 'dev-token';
-      const savedSchedule = await createSchedule(form, token);
-      dispatch({ type: 'RESET_DRAFT' });
-      navigation.navigate('CalendarPage', { newSchedule: savedSchedule });
-    } catch (err) {
-      console.error(err);
-      Alert.alert('일정 저장 실패', '네트워크 오류 또는 서버 오류입니다');
+const handleSave = async () => {
+  try {
+    const savedSchedule = await createSchedule(form);
+    dispatch({ type: 'RESET_DRAFT' });
+    navigation.navigate('CalendarPage', { newSchedule: savedSchedule });
+  } catch (err: any) {
+    console.error('❌ Axios Error:', err);
+
+    if (err.response) {
+      console.log('🔥 status:', err.response.status);
+      console.log('🔥 message:', err.response.data); // 이거 중요
+      Alert.alert('서버 응답 오류', err.response.data?.message || '입력값을 다시 확인해주세요');
+    } else if (err.request) {
+      Alert.alert('요청 실패', '서버로 요청을 보내지 못했습니다');
+    } else {
+      Alert.alert('에러', err.message);
     }
-  };
+  }
+}
+
 
   const gotoRemindPage = () => navigation.navigate('SetRemindAlarmPage');
   const gotoRepeatPage = () => navigation.navigate('SetScheduleRepeatPage');

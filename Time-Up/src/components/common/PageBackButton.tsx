@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-// src/components/PageBackButton.tsx
-=======
+
 // src/components/common/PageBackButton.tsx
->>>>>>> bd163cca17b721aace67f8c5bbc357821fa0853d
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';

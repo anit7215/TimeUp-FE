@@ -29,10 +29,14 @@ const initialState: ScheduleState = {
     start_date: '',
     end_date: '',
     place_name: '',
+    address: '',
     color: '',
     is_important: false,
     is_reminding: false,
+    memo: '',
     remind_at: null,
+    is_recurring: false,
+    
   },
   loading: false,
   error: null
@@ -166,8 +170,11 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
         start_date: schedule.start_date,
         end_date: schedule.end_date,
         place_name: schedule.place_name,
+        address: schedule.address,
         color: schedule.color,
         is_important: schedule.is_important,
+        is_recurring: schedule.is_recurring,
+
       }));
   };
 

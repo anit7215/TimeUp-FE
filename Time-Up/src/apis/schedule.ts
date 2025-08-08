@@ -1,58 +1,44 @@
-import { CreateScheduleRequest, Schedule } from '../types/schedule';
-import axios from './axios';
+// src/api/schedule.ts
+import { axiosInstance } from './axiosInstance'
+import { CreateScheduleRequest, Schedule } from '../types/schedule'
 
-const API_URL = 'https://timeup-server.o-r.kr/'; // 백엔드 주소 설정
-
-// 일정 등록 (POST) authorization 헤더 자동으로 지정하는 axios 설정하기
+// 일정 등록 (POST)
 export const createSchedule = async (
-  data: CreateScheduleRequest,
-  token: string
+  data: CreateScheduleRequest
+  
 ): Promise<Schedule> => {
-  const res = await axios.post(`${API_URL}/schedules`, data, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  return res.data;
-};
+  
+  console.log(data)
+  const res = await axiosInstance.post('/schedules', data)
+  return res.data
+}
 
 // 월별 일정 목록 불러오기 (GET)
-export const getSchedules = async (
-  accessToken: string, 
-  month: string, 
-  year: string) => {
-  const res = await axios.get(`${API_URL}/schedules/days`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    },
-      params: {
-      year,
-      month
-    }
-  });
-  
-  return res.data;
-
-};
-
+export const getSchedules = async (month: string, year: string) => {
+  const res = await axiosInstance.get('/schedules/days', {
+    params: { year, month },
+  })
+  return res.data
+}
 
 // 일정 삭제 (DELETE)
 export const deleteSchedule = async (scheduleId: string): Promise<void> => {
-  await axios.delete(`${API_URL}/schedules/${scheduleId}`);
-};
+  await axiosInstance.delete(`/schedules/${scheduleId}`)
+}
 
-// 일정 수정 (PUT 또는 PATCH)
-export const updateSchedule = async (scheduleId: string, data: CreateScheduleRequest): Promise<Schedule> => {
-  const res = await axios.put(`${API_URL}/schedules/${scheduleId}`, data);
-  return res.data;
-};
+// 일정 수정 (PUT)
+export const updateSchedule = async (
+  scheduleId: string,
+  data: CreateScheduleRequest
+): Promise<Schedule> => {
+  const res = await axiosInstance.put(`/schedules/${scheduleId}`, data)
+  return res.data
+}
 
 // 일별 일정 불러오기
 export const fetchDaySchedule = async (date: string) => {
-  const res = await axios.get(`${API_URL}/schedule?date=${date}`, {
+  const res = await axiosInstance.get('/schedule', {
     params: { date },
-    headers: {
-      'Content-Type': 'application/json'
-    }
   })
+  return res.data
 }

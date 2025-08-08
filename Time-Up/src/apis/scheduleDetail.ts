@@ -1,11 +1,11 @@
 import { Alert } from 'react-native';
 import { Schedule } from '../types/schedule';
-import axios from './axios';
+import { axiosInstance } from './axiosInstance';
 
 
 export const getScheduleDetail = async (scheduleId: string) : Promise<Schedule> => {
     try {
-        const response = await axios.get<Schedule>(`${API_URL}/schedules/${scheduleId}`);
+        const response = await axiosInstance.get<Schedule>(`/schedules/${scheduleId}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching schedule detail:', error);

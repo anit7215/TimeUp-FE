@@ -9,10 +9,10 @@ export interface Schedule {
   color: string;
   memo?: string;
   is_reminding: boolean;
-  remind_at?: number;
+  remind_at?: number | null;
   is_recurring: boolean;
   is_important: boolean;
-  repeat: string;
+  
 }
 
 export type CreateScheduleRequest = Omit<Schedule, 'scheduleId'>;
