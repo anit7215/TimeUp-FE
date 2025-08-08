@@ -1,3 +1,4 @@
+import PageBackButton from '@/src/components/common/PageBackButton';
 import {
   BottomSheetModal,
   BottomSheetView
@@ -14,8 +15,7 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import PageBackButton from '@/src/components/common/PageBackButton';
-import StarIcon from '../../assets/icons/StarIcon.svg';
+// import StarIcon from '../../assets/icons/StarIcon.svg';
 import HalfTimeScrollPanel from '../../components/common/HalfTimeScrollPanel';
   
   // API 응답 타입 정의
@@ -444,7 +444,7 @@ import HalfTimeScrollPanel from '../../components/common/HalfTimeScrollPanel';
               }}
               disabled={!isEditing}
             >
-              <StarIcon fill={schedule.isImportant ? 'white' : 'none'} />
+              {/* <StarIcon fill={schedule.isImportant ? 'white' : 'none'} /> */}
             </TouchableOpacity>
           </View>
   
