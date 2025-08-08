@@ -1,6 +1,6 @@
 import { onboarding } from '@/src/apis/auth';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
-import { buildOnboardingPayload } from '@/src/utils/onboardingPayload';
+import { onboardingPayload } from '@/src/utils/onboardingPayload';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
@@ -166,7 +166,7 @@ export default function ProfileSettingPage() {
             onClose={() => setOpen(false)}
             onConfirm={async () => {
               try {
-                const payload = buildOnboardingPayload({
+                const payload = onboardingPayload({
                   birthYear: birthYear!,
                   job: job!,
                   transport,

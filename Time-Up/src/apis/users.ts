@@ -1,5 +1,5 @@
+import type { AutoAlarmCheckTime, AutoAlarmFeedback, UserInfo } from '../types/user';
 import { axiosInstance } from './axiosInstance';
-import type { UserInfo, AutoAlarmCheckTime, AutoAlarmFeedback } from '../types/user';
 
 export const getUserInfo = async (): Promise<UserInfo> => {
   const response = await axiosInstance.get<UserInfo>('/users/me');
@@ -25,3 +25,12 @@ export const postAutoAlarmFeedback = async (payload: AutoAlarmFeedback): Promise
   return response.data;
 };
 
+export const updateAutoAlarm = async (auto_alarm_id: number, data: any) => {
+  const response = await axiosInstance.put(`/alarm/${auto_alarm_id}/auto`, data);
+  return response.data;
+};
+
+export const getAlarmList = async () => {
+  const response = await axiosInstance.get('/alarm/alarmlist');
+  return response.data;
+}

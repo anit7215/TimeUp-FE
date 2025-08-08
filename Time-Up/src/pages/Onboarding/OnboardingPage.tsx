@@ -35,15 +35,15 @@ export default function OnboardingPage() {
         }
 
         try {
-          const userInfoRes = await axiosInstance.get('https://www.googleapis.com/userinfo/v2/me', {
-            headers: {
-              Authorization: `Bearer ${authentication.accessToken}`,
-            },
-          });
-          const userInfo = userInfoRes.data;
-          if (userInfo?.picture) {
-            setField('profileImage', userInfo.picture);
-          }
+          // const userInfoRes = await axiosInstance.get('https://www.googleapis.com/userinfo/v2/me', {
+          //   headers: {
+          //     Authorization: `Bearer ${authentication.accessToken}`,
+          //   },
+          // });
+          // const userInfo = userInfoRes.data;
+          // if (userInfo?.picture) {
+          //   setField('profileImage', userInfo.picture);
+          // }
 
           const data = await login(authentication.accessToken);
 

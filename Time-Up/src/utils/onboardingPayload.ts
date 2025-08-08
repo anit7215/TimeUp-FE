@@ -1,6 +1,6 @@
 import { AddressItem } from '@/src/types/address';
 
-export const buildOnboardingPayload = ({
+export const onboardingPayload = ({
   birthYear,
   job,
   transport,
@@ -27,17 +27,27 @@ export const buildOnboardingPayload = ({
     unemployed: "unemployed",
     etc: "other",
   };
+  const dayMap: Record<string, string> = {
+    월요일: 'mon',
+    화요일: 'tue',
+    수요일: 'wed',
+    목요일: 'thu',
+    금요일: 'fri',
+    토요일: 'sat',
+    일요일: 'sun',
+  };
+
+  const wakeup_time = Object.fromEntries(
+    Object.entries(selectedTimes).map(([day, time]) => {
+      const dayEng = dayMap[day] ?? day; 
+      return [dayEng, `${time.hour.padStart(2, '0')}:${time.minute.padStart(2, '0')}:00`];
+    })
+  );
 
   const preferences = transport.map((type, index) => ({
     priority: index + 1,
     transportType: type,
     }));
-
-  const wakeup_time = Object.fromEntries(
-    Object.entries(selectedTimes).map(([day, time]) => {
-      return [day, `${time.hour.padStart(2, '0')}:${time.minute.padStart(2, '0')}:00`];
-    })
-  );
 
   return {
     birth: Number(birthYear),
