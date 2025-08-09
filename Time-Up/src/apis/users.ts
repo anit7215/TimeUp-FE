@@ -34,3 +34,8 @@ export const getAlarmList = async () => {
   const response = await axiosInstance.get('/alarm/alarmlist');
   return response.data;
 }
+
+export const getAutoAlarm = async(auto_alarm_id:number)=>{
+  const response = await axiosInstance.get(`/alarm/${auto_alarm_id}/auto-mypage`);
+  return response.data;
+}
