@@ -250,3 +250,5 @@ export function useScheduleSelectors() {
     },
   };
 }
+
+export default ScheduleContext;

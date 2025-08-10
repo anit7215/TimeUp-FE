@@ -1,4 +1,6 @@
 // types/schedule.ts
+export type RepeatWeekDays = number[];
+
 export interface Schedule {
   scheduleId: string;
   name: string;
@@ -13,8 +15,8 @@ export interface Schedule {
   is_recurring: boolean;
   is_important: boolean;
   recurrenceRule?: {
-    repeatType: string;
-      repeatWeekDays?: string[];
+    repeatType: "weekly" | "monthly" | null;
+      repeatWeekDays?: RepeatWeekDays;
       monthlyOption?: null | string;
       dayOfMonth?: null | number;
       nthWeek?: null | number;
@@ -22,9 +24,9 @@ export interface Schedule {
     repeatMode?: string;
     repeatCount?: string;
     repeatUntilDate?: null | string;
-  }
+  };
   repeatWeekDays?: number[];
-}
+};
 
 export type CreateScheduleRequest = Omit<Schedule, 'scheduleId'>;
 

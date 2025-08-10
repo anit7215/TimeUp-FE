@@ -13,60 +13,56 @@ import {
 } from 'react-native';
 import CheckBox from '../components/common/CheckBox';
 import CustomCalendar from '../components/SetSchedule/CustomCalendar';
-import LeftArrowIcon from '../../assets/icons/LeftArrowIcon.svg';
 import { useSchedule } from '../context/ScheduleContext';
+import BeforeHeader from '../components/common/BeforeHeader';
+import { ensureRecurrenceRule, toggleWeekDay } from '../helpers/recurrence';
 
 export default function SetScheduleRepeatPage() {
   const navigation = useNavigation();
   const { state, dispatch } = useSchedule();
-  const form = state.draft;
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(form.end_date || '');
-  const [repeatType, setRepeatType] = useState<'weekly' | 'monthly' | 'none'>(form.repeat_type || 'none');
-  const [selectedWeekdays, setSelectedWeekdays] = useState<{ [key: string]: boolean }>(form.repeat_days || {
-    Sun: false, Mon: false, Tue: false, Wed: false, Thu: false, Fri: false, Sat: false
-  });
-  const [endType, setEndType] = useState<'setRepeatNum' | 'setEndDay' | null>(form.repeat_end_type || null);
-  const [value, setValue] = useState(form.repeat_count ? form.repeat_count.toString() : '');
+  // 1) 전역 draft에서 초기 스냅샷 뽑기
+  const initialRule = useMemo(
+    () => ensureRecurrenceRule(state.draft.recurrenceRule),
+    [state.draft.recurrenceRule]
+  );
 
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ['50%', '50%'], []);
-  const dayMap: { [key: string]: string } = {
-    '일': 'Sun', '월': 'Mon', '화': 'Tue', '수': 'Wed', '목': 'Thu', '금': 'Fri', '토': 'Sat'
+  // 2) 로컬 임시 상태
+  const [localRule, setLocalRule] = useState(initialRule);
+  const [isRecurring, setIsRecurring] = useState(state.draft.is_recurring);-
+
+  // 5) 요일 토글 등 UI 이벤트는 전부 로컬만 수정
+  const onToggleWeeklyDay = (day: number) => {
+    setIsRecurring(true);
+    setLocalRule((prev) => ({
+      ...prev,
+      repeatType: 'weekly',
+      repeatWeekDays: toggleWeekday(prev.repeatWeekDays, day),
+    }));
   };
 
-  const toggleWeekday = (korDay: string) => {
-    const engDay = dayMap[korDay];
-    setSelectedWeekdays(prev => ({ ...prev, [engDay]: !prev[engDay] }));
-  };
+  const setRepeatMode = (mode: 'count' | 'until') =>
+    setLocalRule((p) => ({ ...p, repeatMode: mode }));
 
-  const handleEndType = (type: 'setRepeatNum' | 'setEndDay') => {
-    setEndType(type);
-  };
+  const setRepeatCount = (count: number) =>
+    setLocalRule((p) => ({ ...p, repeatCount: String(count) }));
 
-  const handleNumChange = (text: string) => {
-    const onlyNumbers = text.replace(/[^0-9]/g, '');
-    const num = parseInt(onlyNumbers || '0', 10);
-    if (num > 100) return;
-    setValue(onlyNumbers);
-  };
+  const setRepeatUntilDate = (iso: string | null) =>
+    setLocalRule((p) => ({ ...p, repeatUntilDate: iso }));
 
+  // 6) 확인 시에만 전역 draft 반영
   const handleConfirm = () => {
     dispatch({
       type: 'UPDATE_DRAFT',
       payload: {
-        repeat: repeatType !== 'none',
-        repeat_type: repeatType,
-        repeat_days: repeatType === 'weekly' ? selectedWeekdays : undefined,
-        repeat_count: endType === 'setRepeatNum' ? parseInt(value) : undefined,
-        end_date: endType === 'setEndDay' ? selectedDate : undefined,
-        repeat_end_type: endType,
-        is_recurring: true
+        is_recurring: isRecurring,
+        recurrenceRule: localRule,
       },
     });
+  
     navigation.goBack();
   };
+
 
   return (
     <View className="flex-1 bg-[#121212] pt-20 px-4">
@@ -88,26 +84,15 @@ export default function SetScheduleRepeatPage() {
         </BottomSheetView>
       </BottomSheetModal>
 
-      <View className="flex-row space-between">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <LeftArrowIcon />
-        </TouchableOpacity>
+      <BeforeHeader rightLabel="확인" onRightPress={() => handleConfirm}/>
 
-        <TouchableOpacity
-          onPress={handleConfirm}
-          style={{ marginTop: 40, padding: 16, backgroundColor: '#007AFF', borderRadius: 8, alignItems: 'center' }}
-        >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>확인</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View className="flex-column ml-[16px] mr-[16px] pl-4 pt-4">
+      <View className="flex-column ml-[16px] mr-[16px] pl-4">
         <Text className="text-white text-[20px]">반복 주기</Text>
 
         <View className="flex-row p-4">
           <CheckBox
             isChecked={repeatType === 'weekly'}
-            onValueChangeHandler={() => setRepeatType(prev => (prev === 'weekly' ? 'none' : 'weekly'))}
+            onValueChangeHandler={() => setRepeatType(prev => (prev === 'weekly' ? null : 'weekly'))}
             disabled={false}
           />
           <Text className="text-white text-[20px] ml-2 p-3">1주마다</Text>
@@ -121,7 +106,7 @@ export default function SetScheduleRepeatPage() {
               return (
                 <TouchableOpacity
                   key={day}
-                  onPress={() => toggleWeekday(day)}
+                  onPress={() => onToggleWeeklyDay(day)}
                   className={`w-8 h-8 mx-1 rounded-full items-center justify-center border ${isSelected ? 'border-white' : 'border-0'}`}
                 >
                   <Text className="text-white text-[20px]">{day}</Text>
