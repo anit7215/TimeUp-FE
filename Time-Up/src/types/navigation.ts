@@ -1,3 +1,4 @@
+import { ScheduleLocalNotificationDetails } from 'react-native';
 import { AddressItem } from './address';
 
 export type RootStackParamList = {
@@ -28,4 +29,8 @@ export type RootStackParamList = {
   SelectAlarmVibratePage: undefined;
   WakeUpAlarmDetailPage: undefined;
   WakeUpAlarmPage: undefined;
+  ViewScheduleDetailPage: { schedule: ScheduleLocalNotificationDetails };
+  SetRemindAlarmPage: undefined;
+  SetScheduleRepeatPage: undefined;
+  SetLocationPage: undefined;
 };
