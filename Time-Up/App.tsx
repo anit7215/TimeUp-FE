@@ -8,7 +8,6 @@ import { Platform, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import './global.css';
 import { ScheduleProvider } from './src/context/ScheduleContext';
 import { AlarmProvider } from './src/contexts/AlarmContext';
 import AddSchedulePage from './src/pages/AddSchedulePage';
@@ -66,7 +65,7 @@ export default function App() {
       <BottomSheetModalProvider>
         <ScheduleProvider>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="WakeUpAlarmPage" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
               <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
               <Stack.Screen name="CalendarPage" component={CalendarPage} />
               <Stack.Screen name="MyPage" component={MyPage} />
