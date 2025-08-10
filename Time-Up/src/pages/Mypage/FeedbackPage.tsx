@@ -1,9 +1,11 @@
+import useAppNavigation from '@/src/hooks/useAppNavigation';
 import React, { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import Modal from '../../components/common/Modal';
 
 export default function FeedbackPage() {
+  const navigation = useAppNavigation();
   const [opinion, setOpinion] = useState('');
   const [alarmTimeScore, setAlarmTimeScore] = useState<number | null>(null);
   const [wakeUpScore, setWakeUpScore] = useState<number | null>(null);
@@ -12,14 +14,17 @@ export default function FeedbackPage() {
   return (
     <>
       <ScrollView className="flex-1 bg-black px-4 py-4">
-        <BeforeHeader title="자동 알람 피드백" rightLabel="제출" onRightPress={() => setOpenModal(true)} />
+        <BeforeHeader title="자동 알람 피드백" rightLabel="제출" onRightPress={() => setOpenModal(true)} onBackPress={() => navigation.navigate('MyPage')}
+ />
         <View className="bg-gray-900 rounded-2xl p-4 mb-4">
-          <Text className="text-white mb-2 font-normal text-[18px] leading-[24px] tracking-normal">오늘 기상 알람 시간은 어땠나요?</Text>
-          <View className="flex-row items-center justify-between mb-1 px-4">
-            <Text className="text-white text-sm">너무 늦어요</Text>
-            <Text className="text-white text-sm">너무 빨라요</Text>
+          <View className="self-stretch pb-1 border-b border-neutral-700 inline-flex justify-center items-center gap-2.5">
+            <Text className="text-white mb-1 font-normal text-lg leading-normal">오늘 기상 알람 시간은 어땠나요?</Text>
           </View>
-          <View className="flex-row px-[22px] justify-between">
+          <View className="flex-row items-center justify-between mb-1 px-3 py-2">
+            <Text className="text-white text-xs font-normal tracking-tight">너무 늦어요</Text>
+            <Text className="text-white text-xs font-normal tracking-tight">너무 빨라요</Text>
+          </View>
+          <View className="flex-row px-[20px] justify-between">
             {[1, 2, 3, 4, 5].map((i) => (
               <TouchableOpacity key={i} onPress={() => setAlarmTimeScore(i)}>
                 <View
@@ -33,12 +38,14 @@ export default function FeedbackPage() {
         </View>
 
         <View className="bg-gray-900 rounded-2xl p-4 mb-2">
-          <Text className="text-white mb-2 font-normal text-[18px] leading-[24px] tracking-normal">알람이 울렸을 때 일어나기 쉬우셨나요?</Text>
-          <View className="flex-row items-center justify-between mb-1 px-4">
-            <Text className="text-white text-sm">너무 힘들었어요</Text>
-            <Text className="text-white text-sm">너무 쉬웠어요</Text>
+          <View className="self-stretch pb-1 border-b border-neutral-700 inline-flex justify-center items-center gap-2.5">
+            <Text className="text-white mb-1 font-normal text-lg leading-normal">알림이 울렸을 때 일어나기 쉬우셨나요?</Text>
           </View>
-          <View className="flex-row justify-between px-[22px]">
+          <View className="flex-row items-center justify-between mb-1 px-3 py-2">
+            <Text className="text-white text-xs font-normal tracking-tight">너무 힘들었어요</Text>
+            <Text className="text-white text-xs font-normal tracking-tight">너무 쉬웠어요</Text>
+          </View>
+          <View className="flex-row justify-between px-[20px]">
             {[1, 2, 3, 4, 5].map((i) => (
               <TouchableOpacity key={i} onPress={() => setWakeUpScore(i)}>
                 <View
@@ -52,7 +59,9 @@ export default function FeedbackPage() {
         </View>
 
         <View className="bg-gray-900 rounded-2xl px-2 py-3">
-          <Text className="text-white mb-2 font-normal text-[18px] leading-[24px] tracking-normal">자유롭게 의견을 남겨주세요!</Text>
+          <View className="self-stretch pb-1 border-b border-neutral-700 inline-flex justify-center items-center gap-2.5">
+            <Text className="text-white mb-1 font-normal text-lg leading-normal">자유롭게 의견을 남겨주세요!</Text>
+          </View>
           <TextInput
             multiline
             className="bg-gray-800 rounded-xl text-white p-3 text-base h-60"
@@ -67,6 +76,8 @@ export default function FeedbackPage() {
           onClose={() => setOpenModal(false)}
           onConfirm={() => {
             setOpenModal(false);
+            navigation.navigate('MyPage');
+            alert('제출됨');
             console.log('제출 내용:', { alarmTimeScore, wakeUpScore, opinion });
           }}
         >

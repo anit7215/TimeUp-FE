@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 
@@ -32,7 +33,6 @@ export default function TimeScrollPanel({ onTimeChange }: TimeScrollPanelProps) 
     const index = Math.round(offsetY / ITEM_HEIGHT);
     onSelect(items[index]);
   };
-
   const getFontSizeClass = (
     item: string,
     selected: string,
@@ -67,7 +67,6 @@ export default function TimeScrollPanel({ onTimeChange }: TimeScrollPanelProps) 
     const num = (parseInt(value) - 1 + (max + 1)) % (max + 1);
     return String(num).padStart(2, '0');
   };
-
   const renderControlList = (
     label: string[],
     selected: string,

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import WakeUpTimeModal from './WakeUpTimeModal';
@@ -8,7 +9,7 @@ type TimeData = { period: string; hour: string; minute: string };
 
 type StepWakeUpProps = {
   selectedTimes: Record<string, TimeData>;
-  setSelectedTimes: React.Dispatch<React.SetStateAction<Record<string, TimeData>>>;
+   setSelectedTimes: (val: Record<string, TimeData>) => void;
 };
 
 export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWakeUpProps) {
@@ -16,21 +17,19 @@ export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWake
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const handleSelect = (hour: string, minute: string, period: string, selectedDays: string[]) => {
     const timeData = { hour, minute, period };
-    setSelectedTimes((prev) => {
-      const updated = { ...prev };
-      selectedDays.forEach((day) => {
-        const fullDay =
-          day === '일' ? '일요일' :
-          day === '월' ? '월요일' :
-          day === '화' ? '화요일' :
-          day === '수' ? '수요일' :
-          day === '목' ? '목요일' :
-          day === '금' ? '금요일' :
-          '토요일';
-        updated[fullDay] = timeData;
-      });
-      return updated;
+    const updated = { ...selectedTimes };
+    selectedDays.forEach((day) => {
+      const fullDay =
+        day === '일' ? '일요일' :
+        day === '월' ? '월요일' :
+        day === '화' ? '화요일' :
+        day === '수' ? '수요일' :
+        day === '목' ? '목요일' :
+        day === '금' ? '금요일' :
+        '토요일';
+      updated[fullDay] = timeData;
     });
+    setSelectedTimes(updated); 
   };
   const convertToShortDay = (day: string): string => {
   return day.slice(0, 1); 

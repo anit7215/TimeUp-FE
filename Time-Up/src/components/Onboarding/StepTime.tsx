@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import TimeModal from './TimeModal';
+import { formatTime } from '@/src/utils/userTimeFormat';
 
 type StepTimeProps = {
   readyTime: { hour: string; minute: string } | null;
-  setReadyTime: React.Dispatch<React.SetStateAction<{ hour: string; minute: string } | null>>;
+  setReadyTime: (time: { hour: string; minute: string } | null) => void;
   commuteTime: { hour: string; minute: string } | null;
-  setCommuteTime: React.Dispatch<React.SetStateAction<{ hour: string; minute: string } | null>>;
+  setCommuteTime: (time: { hour: string; minute: string } | null) => void;
 };
 
 export default function StepTime({ readyTime, setReadyTime, commuteTime, setCommuteTime }: StepTimeProps) {
@@ -14,12 +15,13 @@ export default function StepTime({ readyTime, setReadyTime, commuteTime, setComm
   const [isOptional, setIsOptional] = useState(false);
 
   const handleSelect = (hour: string, minute: string) => {
+    const newTime = { hour, minute };
     if (isOptional) {
-      setCommuteTime({ hour, minute });
+      setCommuteTime(newTime);
     } else {
-      setReadyTime({ hour, minute });
+      setReadyTime(newTime);
     }
-    setOpen(false); 
+    setOpen(false);
   };
 
   return (
@@ -31,16 +33,16 @@ export default function StepTime({ readyTime, setReadyTime, commuteTime, setComm
         setOpen(true);
         setIsOptional(false);}}>
         <Text className="text-white font-medium text-base leading-normal">외출 준비 시간</Text>
-        <Text className="text-gray-100 font-normal text-base leading-tight">{readyTime ? `${readyTime.hour}:${readyTime.minute}` : '입력'}</Text>
+        <Text className="text-gray-100 font-normal text-base leading-tight">{formatTime(readyTime)}</Text>
       </TouchableOpacity>
-      <TouchableOpacity className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-700" onPress={() => { setOpen(true);
+      <TouchableOpacity className="px-4 py-1.5 mb-4 rounded-[20px] flex-row justify-between items-center bg-gray-800" onPress={() => { setOpen(true);
       setIsOptional(true);}}>
         <View className="flex-col">
           <Text className="text-white font-medium text-base leading-normal">직장/학교까지 이동 시간</Text>
           <Text className="text-gray-200 font-normal leading-3 tracking-tight text-[10px]">*선택 사항</Text>
         </View>
         
-        <Text className="text-gray-100 font-normal text-base leading-tight">{commuteTime ? `${commuteTime.hour}:${commuteTime.minute}` : '입력'}</Text>
+        <Text className="text-gray-100 font-normal text-base leading-tight">{formatTime(commuteTime)}</Text>
       </TouchableOpacity>
       {open && (
         <TimeModal

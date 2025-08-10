@@ -1,3 +1,4 @@
+
 // src/components/common/Navbar.tsx
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';

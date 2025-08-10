@@ -2,6 +2,7 @@ import { GOOGLE_PLACES_API_KEY } from '@env';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -9,6 +10,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
 import { AlarmProvider } from './src/contexts/AlarmContext';
+import { ScheduleProvider } from './src/context/ScheduleContext';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
 import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
 import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
@@ -29,11 +31,19 @@ import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
+import AddSchedulePage from './src/pages/AddSchedulePage';
+import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
+import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
+import ScheduleDetailEditPage from './src/pages/SetPage/ScheduleDetail';
+import SetLocationPage from './src/pages/SetLocationPage';
+
+const queryClient = new QueryClient();
 
 export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
+  
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -51,54 +61,61 @@ export default function App() {
   if (!mapsLoaded) {
     return null;
   }
+  
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
-            <Stack.Screen name="CalendarPage" component={CalendarPage} />
-            <Stack.Screen name="MyPage" component={MyPage} />
-            <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
-            <Stack.Screen name="AlarmPage" component={AlarmPage} />
-            <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
-            <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
-            <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
-            <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
-            <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
-            <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
-            <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
-            <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
-            <Stack.Screen name="EditMyAlarmPage" component={EditMyAlarmPage} />
-            <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
-            <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
-            <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
-            <Stack.Screen name="EditInfoPage" component={EditInfoPage} />
-            <Stack.Screen name="EditAlarmPage" component={EditAlarmPage} />
-            <Stack.Screen name="FeedbackPage" component={FeedbackPage} />
-
-          </Stack.Navigator>
-        </NavigationContainer>
+        <ScheduleProvider>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
+              <Stack.Screen name="CalendarPage" component={CalendarPage} />
+              <Stack.Screen name="MyPage" component={MyPage} />
+              <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
+              <Stack.Screen name="AlarmPage" component={AlarmPage} />
+              <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
+              <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
+              <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
+              <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
+              <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
+              <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
+              <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
+              <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
+              <Stack.Screen name="EditMyAlarmPage" component={EditMyAlarmPage} />
+              <Stack.Screen name="PushAlarmPage" component={PushAlarmPage} />
+              <Stack.Screen name="AddressSearchPage" component={AddressSearchPage} />
+              <Stack.Screen name="ProfileSettingPage" component={ProfileSettingPage} />
+              <Stack.Screen name="EditInfoPage" component={EditInfoPage} />
+              <Stack.Screen name="EditAlarmPage" component={EditAlarmPage} />
+              <Stack.Screen name="FeedbackPage" component={FeedbackPage} />
+              <Stack.Screen name="AddSchedulePage" component={AddSchedulePage} />
+              <Stack.Screen name="SetLocationPage" component={SetLocationPage} />
+              <Stack.Screen name="SetScheduleRepeatPage" component={SetScheduleRepeatPage} />
+              <Stack.Screen name="SetRemindAlarmPage" component={SetRemindAlarmPage} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ScheduleProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 
   return (
-    <PaperProvider>
-      <AlarmProvider>
-        <SafeAreaView
-          edges={['top', 'bottom']}
-          className="flex-1 bg-black"
-          style={{
-            width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
-            height: screenHeight,
-            alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
-          }}
-        >
-          {content}
-        </SafeAreaView>
-      </AlarmProvider>
-    </PaperProvider>
+    <QueryClientProvider client={queryClient}>
+      <PaperProvider>
+        <AlarmProvider>
+          <SafeAreaView
+            edges={['top', 'bottom']}
+            className="flex-1 bg-black"
+            style={{
+              width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
+              height: screenHeight,
+              alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
+            }}
+          >
+            {content}
+          </SafeAreaView>
+        </AlarmProvider>
+      </PaperProvider>
+    </QueryClientProvider>
   );
 }

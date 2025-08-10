@@ -17,7 +17,7 @@ export default function BeforeHeader({ title, rightLabel, onRightPress, onBackPr
     <TouchableOpacity onPress={onBackPress ?? (() => navigation.goBack())}>
         <BeforeArrowIcon />
     </TouchableOpacity>
-    <View style={{ position: 'absolute', left: 0, right: 0, alignItems: 'center' }}>
+    <View style={{ position: 'absolute', left: 0, right: 0, alignItems: 'center', pointerEvents: 'none', }}>
         <Text className="font-medium text-white text-xl leading-7 font-pretendard">
         {title}
         </Text>

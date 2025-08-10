@@ -3,7 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-native",             
-    "types": ["nativewind/types"],    
+    "types": ["nativewind/types"],
+    "lib": ["ES2015", "DOM"],
     "paths": {
       "@/*": ["./*"]
     }

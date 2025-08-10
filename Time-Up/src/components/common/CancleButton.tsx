@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { LayoutChangeEvent, Text, TouchableOpacity, View } from 'react-native';
 import Svg, {
   Defs,
   FeComposite,
@@ -21,17 +21,22 @@ export default function CancelButton({
   onPress,
   disabled,
 }: CancelButtonProps) {
-  const width = 128;
   const height = 48;
   const radius = 12;
+  const [width, setWidth] = useState(0);
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    setWidth(e.nativeEvent.layout.width);
+  };
 
   return (
     <TouchableOpacity
+      onLayout={onLayout}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.8}
       style={{
-        width,
+        width: '100%',
         height,
         borderRadius: radius,
         overflow: 'hidden',
@@ -39,13 +44,9 @@ export default function CancelButton({
         position: 'relative',
       }}
     >
-      <View
-        style={{
-          position: 'absolute',
-          width,
-          height,
-        }}
-      >
+      {width > 0 && (
+        <>
+          <View style={{ position: 'absolute', width, height }}>
         <Svg width={width} height={height}>
           <Defs>
             <Filter id="cancel-shadow" x="-50%" y="-50%" width="200%" height="200%">
@@ -92,6 +93,8 @@ export default function CancelButton({
           {title}
         </Text>
       </View>
+        </>
+      )}
     </TouchableOpacity>
   );
 }
