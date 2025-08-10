@@ -2,7 +2,7 @@
 import ToggleSwitch from '@/src/components/common/ToggleSwitch';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Platform, Text, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import TransparentButton from '../../components/alarm/TransparentButton';
 import CheckBox from '../../components/common/CheckBox';
@@ -16,17 +16,30 @@ export default function SelectAlarmReplayPage() {
 
   const [selectedInterval, setSelectedInterval] = useState<string | null>(null);
   const [selectedCount, setSelectedCount] = useState<string | null>(null);
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(alarm?.isRepeating ?? false);
 
   const handleToggleSwitch = useCallback(() => {
-    setOn((prev) => !prev);
-  }, []);
+    if (!selectedInterval || !selectedCount) {
+      if (Platform.OS === 'web') {
+        window.alert('다시 울림 간격과 횟수를 모두 선택해 주세요');
+      } else {
+        Alert.alert('알림', '다시 울림 간격과 횟수를 모두 선택해 주세요');
+      }
+      return;
+    }
+
+    const newState = !on;
+    setOn(newState);
+    if (selectedAlarmId != null) {
+      updateAlarmField(selectedAlarmId, 'isRepeating', newState);
+    }
+  }, [on, selectedAlarmId, selectedInterval, selectedCount]);
 
   const handleConfirm = () => {
     if (selectedAlarmId) {
       const repeatText = `${selectedInterval ?? ''}, ${selectedCount ?? ''}`;
       updateAlarmField(selectedAlarmId, 'repeat', repeatText);
-      console.log('다시 울림 저장됨:', repeatText);
+      console.log(`진동 저장됨: ${repeatText} / ${on ? '활성화됨' : '비활성화됨'}`);
     }
     navigation.goBack();
   };

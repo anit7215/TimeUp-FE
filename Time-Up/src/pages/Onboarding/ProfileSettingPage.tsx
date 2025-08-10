@@ -176,6 +176,9 @@ export default function ProfileSettingPage() {
                   homeAddress,
                   workAddress,
                 });
+
+                console.log('📌 buildOnboardingPayload 결과:', payload);
+                
                 await onboarding(payload);
                 navigation.navigate('MyPage');
               } catch (err) {
