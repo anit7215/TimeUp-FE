@@ -47,7 +47,7 @@ export default function EditInfoPage() {
       setField('job', userInfo.job);
       setField(
         'transport',
-        userInfo.preferences ? userInfo.preferences.map((p) => p.transportType) : [],
+        userInfo.user_preference_transport ? userInfo.user_preference_transport.map((p) => p.transport) : [],
       );
       setField('homeAddress', userInfo.home_address);
       setField('workAddress', userInfo.work_address);
@@ -109,13 +109,13 @@ export default function EditInfoPage() {
 
       const payload = {
         birth: Number(birthYear),
-        job: getApiJobLabel(job),
-        // preferences: transport.map((t, idx) => ({
-        //   transportType: t,
-        //   priority: idx + 1,
-        // })),
-        // home_address: homeAddress ?? '',
-        // work_address: workAddress ?? '',
+        job: job ?? getApiJobLabel(job),
+        user_preference_transport: transport.map((t, idx) => ({
+          transport: t,
+          priority: idx + 1,
+        })),
+        home_address: homeAddress ?? '',
+        work_address: workAddress ?? '',
         avg_ready_time: avgReadyTime,
         duration_time: durationTime,
       };

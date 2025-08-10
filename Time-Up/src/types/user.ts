@@ -22,7 +22,10 @@ export type UserInfo = {
   avg_ready_time: number;
   duration_time: number;
   alarm_check_time: string;
-  preferences: TransportPreference[];
+  user_preference_transport?: {
+    transport: TransportType;
+    priority: number;
+  }[];
   home_address: string | null;
   work_address: string | null;
 };
@@ -34,5 +37,6 @@ export type AutoAlarmCheckTime = {
 export type AutoAlarmFeedback = {
   time_rating: number;     
   wakeup_rating: number;   
-  comment?: string;       
+  comment?: string;
+  alarm_id?: number;        
 };
