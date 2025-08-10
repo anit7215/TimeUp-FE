@@ -62,7 +62,6 @@ const handleSave = async () => {
   }
 }
 
-
   const gotoRemindPage = () => navigation.navigate('SetRemindAlarmPage');
   const gotoRepeatPage = () => navigation.navigate('SetScheduleRepeatPage');
   const gotoLocationPage = () => navigation.navigate('SetLocationPage');
