@@ -3,7 +3,7 @@
 export type VibrationType = 'Basic Ring' | 'Soft Buzz' | 'Sharp Pulse' | 'Heartbeat' | 'Heavy Hit';
 export type VibrationCode = 'default' | 'short1' | 'short2' | 'long1' | 'long2';
 
-// 화면 출력용 타입
+// 내 알람 화면 출력용 타입
 export interface AlarmItem {
   id: number;
   title: string;
@@ -15,6 +15,29 @@ export interface AlarmItem {
   date: {
     fullDate: string;
     dayOfWeek: string;
+  };
+  sound: string;
+  vibrate: string;
+  repeat: string;
+  memo: string;
+  isActive: boolean;
+  isSound: boolean;
+  isVibrating: boolean;
+  isRepeating: boolean;
+}
+
+// 기상 알람 화면 출력용 타입
+export interface WakeupAlarmItem {
+  id: number;
+  title: string; //generateWakeupAlarmTitle(dayOfWeek)
+  time: {
+    period: '오전' | '오후';
+    hour: number;
+    minute: number;
+  };
+  date: {
+    fullDate: string;
+    dayOfWeek: '월' | '화' | '수' | '목' | '금' | '토' | '일';
   };
   sound: string;
   vibrate: string;
@@ -118,12 +141,12 @@ export interface DeleteMyAlarmResponse {
 
 // 기상 알람 수정 요청 타입 (PUT)
 export interface UpdateWakeupAlarmRequest {
-  wakeup_time: string; // ISO date string (e.g. "2025-07-31T06:30:00Z")
+  wakeup_time: string; // ex) "2025-07-31T06:30:00Z"
   is_active: boolean;
   is_repeating: boolean;
   is_sound: boolean;
   is_vibrating: boolean;
-  vibration_type: 'default' | 'short1' | 'short2' | 'long1' | 'long2';
+  vibration_type: VibrationCode;
   sound_id: number | null;
   repeat_interval: number | null;
   repeat_count: number | null;

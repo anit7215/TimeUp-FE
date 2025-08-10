@@ -22,3 +22,4 @@ export const createDefaultWakeupAlarm = (dayOfWeek: string): AlarmItem => ({
   isVibrating: false,
   isRepeating: false,
 });
+

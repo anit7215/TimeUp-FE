@@ -36,24 +36,11 @@ export default function SelectAlarmSoundPage() {
   const soundOptions = ['Heavy Raindrop', 'Basic Ring', 'Ocean Wave', 'Bird Chirp', 'Classic Bell'];
 
   const handleConfirm = () => {
-    //debugger;
      
     if (selectedAlarmId && selectedSound) {
       updateAlarmField(selectedAlarmId, 'sound', selectedSound);
       console.log(`알람음 저장됨: ${selectedSound} / ${on ? '활성화됨' : '비활성화됨'}`);
-    } else {
-      // 새 알람을 생성한 경우
-    //   const newAlarmId = Date.now(); // 고유 ID 생성 (예시)
-    //   setSelectedAlarmId(newAlarmId);
-    //   updateAlarmField(newAlarmId, 'sound', selectedSound ?? "");
-    //   updateAlarmField(newAlarmId, 'isSound', on);
-    //   console.log('새 알람 생성 후 알람음 설정됨');
-
-   }
-    // if (selectedAlarmId && selectedSound) {
-    //   updateAlarmField(selectedAlarmId, 'sound', selectedSound);
-    //   console.log(`알람음 저장됨: ${selectedSound} / ${on ? '활성화됨' : '비활성화됨'}`);
-    // }
+    }
     navigation.goBack();
   };
 

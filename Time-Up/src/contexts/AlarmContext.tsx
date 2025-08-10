@@ -1,8 +1,11 @@
 // src/contexts/AlarmContext.tsx
 import { deleteMyAlarm, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
 import moment from 'moment';
-import React, { createContext, useContext, useState } from 'react';
-import { AlarmItem } from '../types/alarm';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { axiosInstance } from '../apis/axiosInstance';
+import { AlarmItem, GetAllAlarmsResponse } from '../types/alarm';
+import { transformWakeupSummaryToAlarmItem } from '../utils/alarmTransform';
+import { getAccessToken } from '../utils/storage';
 
 export type Day = '월' | '화' | '수' | '목' | '금' | '토' | '일';
 
@@ -20,6 +23,9 @@ interface AlarmContextProps {
 
   myAlarms: AlarmItem[];
   setMyAlarms: React.Dispatch<React.SetStateAction<AlarmItem[]>>;
+
+  wakeupAlarms: AlarmItem[];
+  setWakeupAlarms: React.Dispatch<React.SetStateAction<AlarmItem[]>>;
 
   selectedAlarmId: number | null;
   setSelectedAlarmId: (id: number | null) => void;
@@ -53,6 +59,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedAlarmId, setSelectedAlarmId] = useState<number | null>(null);
 
   const [myAlarms, setMyAlarms] = useState<AlarmItem[]>([]);
+  const [wakeupAlarms, setWakeupAlarms] = useState<AlarmItem[]>([]);
 
   const updateAlarmField = <K extends keyof AlarmItem>(
     alarmId: number,
@@ -94,6 +101,41 @@ const deleteAlarmById = async (alarmId: number) => {
   }
 };
 
+useEffect(() => {
+  const fetchAlarms = async () => {
+    try {
+      const token = await getAccessToken();
+      const res = await axiosInstance.get<GetAllAlarmsResponse>(
+        '/alarm/alarmlist',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // ✅ 전체 응답 출력
+    console.log('전체 알람 응답:', res.data);
+
+    console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+    console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+    console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+
+
+      const wakeupList = res.data.success?.wakeup_alarms ?? [];
+      console.log('서버 응답 wakeup_alarms:', res.data.success?.wakeup_alarms);
+
+      const transformed = wakeupList.map(transformWakeupSummaryToAlarmItem);
+
+      const ordered = ['월', '화', '수', '목', '금', '토', '일'].map(day =>
+        transformed.find(a => a.date.dayOfWeek === day)
+      ).filter(Boolean) as AlarmItem[];
+
+      setWakeupAlarms(ordered);
+    } catch (err) {
+      console.error('전체 알람 조회 실패:', err);
+    }
+  };
+
+  fetchAlarms();
+}, []);
+
 
   return (
     <AlarmContext.Provider
@@ -106,6 +148,8 @@ const deleteAlarmById = async (alarmId: number) => {
         setAutoAlarmOn,
         myAlarms,
         setMyAlarms,
+        wakeupAlarms,
+        setWakeupAlarms,
         selectedAlarmId,
         setSelectedAlarmId,
         selectedAlarmDate,

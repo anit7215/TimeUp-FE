@@ -1,9 +1,11 @@
 // src/pages/WakeUpAlarmPage.tsx
 // 자동알람 - 기상알람 페이지
+import { axiosInstance } from '@/src/apis/axiosInstance';
+import { GetAllAlarmsResponse } from '@/src/types/alarm';
 import { formatTime } from '@/src/utils/AlarmFormat';
-import { createDefaultWakeupAlarm } from '@/src/utils/alarmDefaults';
+import { getAccessToken } from '@/src/utils/storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
@@ -14,7 +16,37 @@ const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
 export default function WakeUpAlarmPage() {
   const navigation = useAppNavigation();
-  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, myAlarms, setMyAlarms, setSelectedAlarmId, } = useAlarmContext();
+  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, wakeupAlarms, setMyAlarms, setSelectedAlarmId, } = useAlarmContext();
+
+  // useEffect(() => {
+  //   console.log('🔥 전체 기상 알람 (wakeupAlarms):', wakeupAlarms);
+  // }, [wakeupAlarms]); // ✅ 상태가 바뀔 때마다 출력
+
+  useEffect(() => {
+    const fetchAlarms = async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await axiosInstance.get<GetAllAlarmsResponse>(
+          '/alarm/alarmlist',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+  
+        // ✅ 전체 응답 출력
+      console.log('전체 알람 응답:', res.data);
+  
+      console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+      console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+      console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+  
+  
+      } catch (err) {
+        console.error('전체 알람 조회 실패:', err);
+      }
+    };
+  
+    fetchAlarms();
+  }, []);
+  
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -38,21 +70,21 @@ export default function WakeUpAlarmPage() {
     navigation.navigate('MyAlarmPage');
   };
 
-  const handleDetailPage = (day: Day) => {
-    const alarmExists = myAlarms.find((alarm) => alarm.date.dayOfWeek === day);
+const handleDetailPage = (day: Day) => {
+  //debugger;
+  const alarm = wakeupAlarms.find(a => a.date.dayOfWeek === day);
 
-    if (!alarmExists) {
-      const defaultAlarm = createDefaultWakeupAlarm(day);
-      setMyAlarms((prev) => [...prev, defaultAlarm]);
-      setSelectedAlarmId(defaultAlarm.id);
-    } else {
-      setSelectedAlarmId(alarmExists.id);
-    }
+  if (!alarm) {
+    console.warn(`${day}요일에 대한 기상 알람이 없습니다.`);
+    return;
+  }
 
-    setSelectedDay(day);
-    console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
-    navigation.navigate('WakeUpAlarmDetailPage');
-  };
+  setSelectedDay(day);             // 요일 상태 저장
+  setSelectedAlarmId(alarm.id);    // wakeup_alarm_id 저장
+  console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
+  navigation.navigate('WakeUpAlarmDetailPage');
+};
+
 
   return (
     <BottomLayout>
@@ -90,7 +122,7 @@ export default function WakeUpAlarmPage() {
 
       <View className="mt-3">
         {weekdays.map((day) => {
-          const alarm = myAlarms.find((a) => a.date.dayOfWeek === day);
+          const alarm = wakeupAlarms.find((a) => a.date.dayOfWeek === day);
           const formattedTime = alarm ? formatTime(alarm.time) : '오전 08 : 00';
 
           return (

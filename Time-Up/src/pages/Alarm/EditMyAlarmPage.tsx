@@ -34,7 +34,7 @@ export default function EditMyAlarmPage() {
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index)
   }, [])
-  //debugger;
+
   const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
 
   const [title, setTitle] = useState(alarmToEdit?.title ?? '');
