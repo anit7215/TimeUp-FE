@@ -12,7 +12,18 @@ export interface Schedule {
   remind_at?: number | null;
   is_recurring: boolean;
   is_important: boolean;
-  
+  recurrenceRule?: {
+    repeatType: string;
+      repeatWeekDays?: string[];
+      monthlyOption?: null | string;
+      dayOfMonth?: null | number;
+      nthWeek?: null | number;
+      weekday: string[];
+    repeatMode?: string;
+    repeatCount?: string;
+    repeatUntilDate?: null | string;
+  }
+  repeatWeekDays?: number[];
 }
 
 export type CreateScheduleRequest = Omit<Schedule, 'scheduleId'>;
