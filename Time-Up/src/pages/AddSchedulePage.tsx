@@ -27,11 +27,13 @@ import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
 import CustomCalendar from '../components/SetSchedule/CustomCalendar';
 import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
 import { useSchedule } from '../context/ScheduleContext';
+import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
 
 const { width, height } = Dimensions.get('window');
 
 export default function AddSchedulePage() {
   const { state, dispatch, addSchedule } = useSchedule();
+  const { fullText } = buildRecurrenceSummary(state.draft);
   const form = state.draft;
   const navigation = useNavigation();
 
@@ -447,7 +449,7 @@ const convertTo24Hour = (hour: number, period: string): number => {
                     fontSize: width > 400 ? 14 : 12,
                     textAlign: 'center'
                   }}>
-                    {form.is_recurring ? '1주마다' : '반복 설정 안함'}
+                    {fullText}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -484,7 +486,7 @@ const convertTo24Hour = (hour: number, period: string): number => {
 
               <TouchableOpacity
                 onPress={(() => {
-                  navigation.navigate('SetLocationPage') // 폼 객체 보내기. 근데 보낼 필요가 있나 모르겠네
+                  navigation.navigate('SetLocationPage')
                 })}
                 style={{
                   marginVertical: 16,

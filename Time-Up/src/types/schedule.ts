@@ -17,12 +17,12 @@ export interface Schedule {
   recurrenceRule?: {
     repeatType: "weekly" | "monthly" | null;
       repeatWeekDays?: RepeatWeekDays;
-      monthlyOption?: null | string;
+      monthlyOption?: null | 'day_of_month' | 'nth_weekday';
       dayOfMonth?: null | number;
       nthWeek?: null | number;
-      weekday: string[];
-    repeatMode?: string;
-    repeatCount?: string;
+      weekday: number[];
+    repeatMode?: 'count' | 'until' | null;
+    repeatCount?: number | null;
     repeatUntilDate?: null | string;
   };
   repeatWeekDays?: number[];

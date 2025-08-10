@@ -1,7 +1,7 @@
-import { RepeatWeekDays } from "../types/schedule";
-import { Schedule } from "../types/schedule";
+import { RepeatWeekDays, Schedule } from "../types/schedule";
 
-export const toggleWeekDay = (current: RepeatWeekDays = [], day: number): RepeatWeekDays => {
+
+export const toggleWeekday = (current: RepeatWeekDays = [], day: number): RepeatWeekDays => {
     return current.includes(day)
     ? current.filter(d => d !== day)
     : [...current, day].sort((a, b) => a - b);
