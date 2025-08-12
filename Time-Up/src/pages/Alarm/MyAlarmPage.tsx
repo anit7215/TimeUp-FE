@@ -1,5 +1,4 @@
 // src/pages/MyAlarmPage.tsx
-// 자동알람 - 기상알람 페이지
 import { postMyAlarm } from '@/src/apis/alarmApi';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import type { AlarmItem } from '@/src/types/alarm';
