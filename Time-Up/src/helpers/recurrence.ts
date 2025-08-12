@@ -7,14 +7,14 @@ export const toggleWeekday = (current: RepeatWeekDays = [], day: number): Repeat
     : [...current, day].sort((a, b) => a - b);
 }
 
-export const ensureRecurrenceRule = (rule?: Schedule['recurrenceRule']): NonNullable<Schedule['recurrenceRule']> => ({
-  repeatType: rule?.repeatType ?? null,
-  repeatWeekDays: rule?.repeatWeekDays ?? [],
-  monthlyOption: rule?.monthlyOption ?? null,  // 'dayOfMonth' | 'nthWeekday' 등 네이밍 합의
-  dayOfMonth: rule?.dayOfMonth ?? null,
-  nthWeek: rule?.nthWeek ?? null,
+export const ensureRecurrenceRule = (rule?: Schedule['recurrence_rule']): NonNullable<Schedule['recurrence_rule']> => ({
+  repeat_type: rule?.repeat_type ?? null,
+  repeat_weekdays: rule?.repeat_weekdays ?? [],
+  monthly_option: rule?.monthly_option ?? null,  // 'dayOfMonth' | 'nthWeekday' 등 네이밍 합의
+  day_of_month: rule?.day_of_month ?? null,
+  nth_week: rule?.nth_week ?? null,
   weekday: rule?.weekday ?? [],
-  repeatMode: rule?.repeatMode ?? 'count',     // 'count' | 'until'
-  repeatCount: rule?.repeatCount ?? '',        // number가 더 자연스러움(아래 참고)
-  repeatUntilDate: rule?.repeatUntilDate ?? null,
+  repeat_mode: rule?.repeat_mode ?? 'count',     // 'count' | 'until'
+  repeat_count: rule?.repeat_count ?? null,        // number가 더 자연스러움(아래 참고)
+  repeat_until_date: rule?.repeat_until_date ?? null,
 });

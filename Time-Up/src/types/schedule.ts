@@ -14,21 +14,21 @@ export interface Schedule {
   remind_at?: number | null;
   is_recurring: boolean;
   is_important: boolean;
-  recurrenceRule?: {
-    repeatType: "weekly" | "monthly" | null;
-      repeatWeekDays?: RepeatWeekDays;
-      monthlyOption?: null | 'day_of_month' | 'nth_weekday';
-      dayOfMonth?: null | number;
-      nthWeek?: null | number;
-      weekday: number[];
-    repeatMode?: 'count' | 'until' | null;
-    repeatCount?: number | null;
-    repeatUntilDate?: null | string;
+  recurrence_rule?: {
+    repeat_type: "weekly" | "monthly" | null;
+    monthly_option?: null | 'day_of_month' | 'nth_weekday';
+    day_of_month?: null | number;
+    nth_week?: null | number;
+    weekday: number[];
+    repeat_mode?: 'count' | 'until' | null;
+    repeat_count?: number | null;
+    repeat_until_date?: null | string;
+    repeat_weekdays?: RepeatWeekDays;
   };
-  repeatWeekDays?: number[];
-};
+}
 
-export type CreateScheduleRequest = Omit<Schedule, 'scheduleId'>;
+
+export type CreateScheduleRequest = Schedule;
 
 export type UpdateScheduleRequest = Partial<CreateScheduleRequest> & {
   scheduleId: string;

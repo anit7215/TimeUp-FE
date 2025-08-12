@@ -25,6 +25,7 @@ type ScheduleAction =
 const initialState: ScheduleState = {
   schedules: [],
   draft: {
+    scheduleId: '', // scheduleId가 처음에 빈칸인게 맞나...
     name: '',
     start_date: '',
     end_date: '',
@@ -36,6 +37,17 @@ const initialState: ScheduleState = {
     memo: '',
     remind_at: null,
     is_recurring: false,
+      recurrence_rule: {
+        repeat_type: null,
+        monthly_option: null,
+        day_of_month: null,
+        nth_week: null,
+        weekday: [],
+        repeat_mode: null,
+        repeat_count: null,
+        repeat_until_date: null,
+        repeat_weekdays: []
+      }
     
   },
   loading: false,
