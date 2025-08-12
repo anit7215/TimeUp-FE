@@ -30,6 +30,14 @@ export interface Schedule {
 
 export type CreateScheduleRequest = Schedule;
 
+export type ScheduleDraft = Partial<Schedule>; 
+
+export interface GetScheduleRequest {
+  scheduleId: string;
+}
+
+export type GetScheduleResponse = Schedule;
+
 export type UpdateScheduleRequest = Partial<CreateScheduleRequest> & {
   scheduleId: string;
 };

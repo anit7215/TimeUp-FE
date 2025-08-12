@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Schedule, CreateScheduleRequest, UpdateScheduleRequest, ImportantSchedule } from '../types/schedule';
+import { Schedule, CreateScheduleRequest, UpdateScheduleRequest, ImportantSchedule, GetScheduleRequest, GetScheduleResponse, ScheduleDraft } from '../types/schedule';
 
 // 상태 타입 정의
 interface ScheduleState {
@@ -7,10 +7,16 @@ interface ScheduleState {
   draft: CreateScheduleRequest;
   loading: boolean;
   error: string | null;
+  view: Schedule | null;
 }
 
 // 액션 타입 정의
 type ScheduleAction =
+  | { type: 'SET_DRAFT'; payload: Partial<ScheduleDraft> }
+  | { type: 'VIEW_SCHEDULE_REQUEST'; payload: GetScheduleRequest}
+  | { type: 'VIEW_SCHEDULE_SUCCESS'; payload: GetScheduleResponse}
+  | { type: 'VIEW_SCHEDULE_FAILURE'; payload: { error: string }}
+
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_SCHEDULES'; payload: Schedule[] }
@@ -51,12 +57,31 @@ const initialState: ScheduleState = {
     
   },
   loading: false,
-  error: null
+  error: null,
+  view: null
 };
 
 // 리듀서 함수
 function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
   switch (action.type) {
+
+    case 'SET_DRAFT':
+  return {
+    ...state,             
+    draft: {
+      ...state.draft,
+      ...action.payload,
+  },
+  };
+    case 'VIEW_SCHEDULE_REQUEST':
+      return {...state, loading: true, error: null};
+
+    case 'VIEW_SCHEDULE_SUCCESS':
+      return {...state, loading: false, draft: action.payload, view: action.payload };
+
+    case 'VIEW_SCHEDULE_FAILURE':
+      return { ...state, loading: false, error: action.payload.error };
+    
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     

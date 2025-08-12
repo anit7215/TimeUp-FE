@@ -2,6 +2,8 @@
 import { axiosInstance } from './axiosInstance'
 import { CreateScheduleRequest, Schedule } from '../types/schedule'
 
+// 상세 스케줄 CRUD
+
 // 일정 등록 (POST)
 export const createSchedule = async (
   data: CreateScheduleRequest
@@ -13,10 +15,10 @@ export const createSchedule = async (
   return res.data
 }
 
-// 상세 스케줄 crud
-export const getScheduleById = async (scheduleId: string) => {
-  // GET /schedules/{scheduleId}
-  await axiosInstance.get(`/schedules/${scheduleId}`)
+// 상세 일정 조회 (GET)
+export const getScheduleById = async (scheduleId: string): Promise<Schedule> => {
+  const response = await axiosInstance.get(`/schedules/${scheduleId}`);
+  return response.data;
 };
 
 // 일정 삭제 (DELETE)
@@ -33,7 +35,8 @@ export const updateSchedule = async (
   return res.data
 }
 
-// 월별 일정 목록 불러오기 (GET)
+
+// 월별 일정 목록 조회 (GET)
 export const getSchedules = async (month: string, year: string) => {
   const res = await axiosInstance.get('/schedules/days', {
     params: { year, month },
@@ -42,7 +45,7 @@ export const getSchedules = async (month: string, year: string) => {
 }
 
 
-// 일별 일정 불러오기
+// 일별 일정 목록 조회
 export const fetchDaySchedule = async (date: string) => {
   const res = await axiosInstance.get('/schedule', {
     params: { date },
