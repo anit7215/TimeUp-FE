@@ -3,7 +3,7 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
 import TimeModal from '../../components/Onboarding/TimeModal';
-import { putAutoAlarmCheckTime, getAutoAlarmCheckTime, updateAutoAlarm, getAlarmList } from '@/src/apis/users';
+import { putAutoAlarmCheckTime, getAutoAlarmCheckTime, updateAutoAlarm, getAlarmList, getAutoAlarm } from '@/src/apis/users';
 import { remindSoundOptions, remindVibrationOptions, alarmSoundOptions, vibrationTypeOptions, intervalOptions, repeatCountOptions } from '@/src/constants/userOptions';
 
 export default function EditrAlarmPage() {
@@ -39,7 +39,20 @@ export default function EditrAlarmPage() {
 
         const alarmList = await getAlarmList();
         if (alarmList?.auto_alarms?.length > 0) {
-          setAutoAlarmId(alarmList.auto_alarms[0].auto_alarm_id);
+          const id = alarmList.auto_alarms[0].auto_alarm_id;
+          setAutoAlarmId(id);
+
+          const alarmDetail = await getAutoAlarm(id);
+
+          console.log('alarmDetail', alarmDetail);
+
+          setAlarmSound(alarmDetail.is_sound ? 'defaultSound' : 'no'); 
+          setVibrationType(alarmDetail.is_vibrating ? alarmDetail.vibration_type : 'no');
+          setInterval(alarmDetail.repeat_interval?.toString() ?? '0');
+          setRepeatCount(alarmDetail.repeat_count?.toString() ?? '0');
+
+          if (alarmDetail.remind_sound) setRemindSound(alarmDetail.remind_sound);
+          if (alarmDetail.remind_vibration) setRemindVibration(alarmDetail.remind_vibration);
         } else {
           console.warn('자동 알람이 없습니다.');
         }
