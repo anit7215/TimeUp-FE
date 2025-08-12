@@ -1,5 +1,6 @@
 import { signout } from '@/src/apis/auth';
 import { jobOptions, transportOptions, yearOptions } from '@/src/constants/userOptions';
+import { useUpdateUserInfo } from '@/src/hooks/mutation/my/useUpdateUserInfo';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useGetUserInfo } from '@/src/hooks/users/useGetUserInfo';
 import { JobType } from '@/src/types/user';
@@ -16,7 +17,6 @@ import StepTransport from '../../components/Onboarding/StepTransport';
 import TimeModal from '../../components/Onboarding/TimeModal';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { AddressItem } from '../../types/address';
-import { useUpdateUserInfo } from '@/src/hooks/mutation/my/useUpdateUserInfo';
 
 export default function EditInfoPage() {
   const navigation = useAppNavigation();
@@ -109,7 +109,7 @@ export default function EditInfoPage() {
 
       const payload = {
         birth: Number(birthYear),
-        job: job ?? getApiJobLabel(job),
+        job,
         user_preference_transport: transport.map((t, idx) => ({
           transport: t,
           priority: idx + 1,
@@ -168,13 +168,16 @@ export default function EditInfoPage() {
         </View>
 
         <View className="bg-gray-900 px-2 py-3 rounded-lg mb-2">
-          <View className="flex-row justify-between items-start gap-[71px] flex-wrap">
-            <Text className="text-white text-base">선호 이동 수단</Text>
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1"> 
+              <Text className="text-white text-base">선호 이동 수단</Text>
+            </View>
             <View className="flex-1">
               <StepTransport selected={transport} options={transportOptions} onSelect={onSelectTransport} />
             </View>
           </View>
         </View>
+
 
         <View className="mb-2">
           <TouchableOpacity className="bg-gray-900 px-2 py-3 rounded-t-lg"
@@ -217,7 +220,12 @@ export default function EditInfoPage() {
             })}
             className="flex-row items-center justify-between">
               <Text className="text-white text-base">집</Text>
-              <Text className="text-light text-base">{homeAddress ?? '-'}</Text>
+              <Text className="text-light text-base"
+                style={{ maxWidth: '60%' }}
+                numberOfLines={2}
+                ellipsizeMode="tail">
+                {homeAddress ?? '-'}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -232,7 +240,9 @@ export default function EditInfoPage() {
                 <Text className="text-white text-base">직장/학교</Text>
                 <Text className="text-gray-200 text-[10px]">*선택 사항</Text>
               </View>
-              <Text className="text-light text-base text-normal leading-tight">{workAddress ?? '-'}</Text>
+              <Text className="text-light text-base text-normal leading-tight" style={{ maxWidth: '60%' }}
+                numberOfLines={2}
+                ellipsizeMode="tail">{workAddress ?? '-'}</Text>
             </TouchableOpacity>
           </View>
         </View>

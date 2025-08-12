@@ -19,8 +19,11 @@ export default function StepAddress({ homeAddress, workAddress, onSelect }: Prop
         onPress={() => onSelect('home')}
       >
         <Text className="text-white font-medium text-base leading-normal">집</Text>
-        <Text className="text-gray-200 font-normal text-base leading-tight">
-          {homeAddress?.region || '입력'}
+        <Text className="text-gray-200 font-normal text-base leading-tight"
+        style={{ maxWidth: '50%' }}
+        numberOfLines={1}
+        ellipsizeMode="tail">
+        {homeAddress?.address || '입력'}
         </Text>
       </TouchableOpacity>
 
@@ -36,8 +39,12 @@ export default function StepAddress({ homeAddress, workAddress, onSelect }: Prop
             *선택 사항
           </Text>
         </View>
-        <Text className="text-gray-100 font-normal text-base leading-tight">
-          {workAddress?.region || '입력'}
+        <Text className="text-gray-200 font-normal text-base leading-tight"
+          style={{ maxWidth: '50%' }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {workAddress?.address || '입력'}
         </Text>
       </TouchableOpacity>
     </>
