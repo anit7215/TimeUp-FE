@@ -18,6 +18,7 @@ export const createSchedule = async (
 // 상세 일정 조회 (GET)
 export const getScheduleById = async (scheduleId: string): Promise<Schedule> => {
   const response = await axiosInstance.get(`/schedules/${scheduleId}`);
+  console.log(scheduleId, response.data)
   return response.data;
 };
 
@@ -26,7 +27,7 @@ export const deleteSchedule = async (scheduleId: string): Promise<void> => {
   await axiosInstance.delete(`/schedules/${scheduleId}`)
 }
 
-// 일정 수정 (PUT)
+// 상세 일정 수정 (PUT)
 export const updateSchedule = async (
   scheduleId: string,
   data: CreateScheduleRequest
@@ -37,9 +38,9 @@ export const updateSchedule = async (
 
 
 // 월별 일정 목록 조회 (GET)
-export const getSchedules = async (month: string, year: string) => {
-  const res = await axiosInstance.get('/schedules/days', {
-    params: { year, month },
+export const getSchedules = async (targetDate: string) => {
+  const res = await axiosInstance.get('/schedules/monthly', {
+    params: { month: targetDate },
   })
   return res.data
 }

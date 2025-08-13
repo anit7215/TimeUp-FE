@@ -676,7 +676,7 @@ export default function ViewScheduleDetailPage() {
                       marginHorizontal: 12
                     }}
                   >
-                    <Text style={{ color: 'black', fontSize: width > 400 ? 18 : 16 }}>편집</Text>
+                    <Text style={{ color: 'black', fontSize: width > 400 ? 18 : 16 }}>저장</Text>
                   </TouchableOpacity>
                 </>
               )}

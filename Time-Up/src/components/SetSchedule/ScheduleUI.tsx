@@ -18,6 +18,7 @@ interface Event {
   startTime: number; // 시간 (7, 8, 9, etc.)
   duration: number; // 지속 시간 (1 = 1시간)
   color: string;
+  scheduleId: string; // 백엔드 스케줄 ID 추가
 }
 
 interface ScheduleUIProps {
@@ -30,17 +31,14 @@ interface ScheduleUIProps {
 
 const ScheduleUI: React.FC<ScheduleUIProps> = ({
   date,
-  events = [
-    { id: '1', title: '대학 탐방 회의', startTime: 9, duration: 1, color: '#FFB366' }, // 일정아이디, 일정명, 일정 날짜, 일정 시작-끝 시간, 컬러를 불러옴
-    { id: '2', title: '머리 2차 과제', startTime: 15, duration: 1, color: '#90EE90' },
-  ],
+  events = [],
   onEventPress,
   onTimeSlotPress,
   onBackPress,
 }) => {
   const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6시부터 23시까지
   const SLOT_HEIGHT = 60;
-  const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정 된건가???????????
+  const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정
 
   const getEventStyle = (event: Event) => {
     const startIndex = event.startTime - 6;
@@ -49,10 +47,10 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
 
     return {
       position: 'absolute' as const,
-      top: top+10,
+      top: top + 10,
       left: 50,
       right: 16,
-      height: height-20,
+      height: height - 20,
       backgroundColor: event.color,
       borderRadius: 8,
       padding: 8,
@@ -98,7 +96,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       
       {/* Header */}
       <View style={styles.header}>
-        <PageBackButton/>
+        <PageBackButton onPress={onBackPress} />
         <Text style={styles.headerTitle}>{formatKoreanDate(date)}</Text>
         <TouchableOpacity style={styles.addButton}>
           <PlusIcon />

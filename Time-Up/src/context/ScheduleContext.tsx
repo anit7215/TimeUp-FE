@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { Schedule, CreateScheduleRequest, UpdateScheduleRequest, ImportantSchedule, GetScheduleRequest, GetScheduleResponse, ScheduleDraft } from '../types/schedule';
+import { getSchedules } from '../apis/schedule';
 
 // 상태 타입 정의
 interface ScheduleState {
+  currentMonthKey: string | null;
   schedules: Schedule[];
   draft: CreateScheduleRequest;
   loading: boolean;
@@ -10,13 +12,17 @@ interface ScheduleState {
   view: Schedule | null;
 }
 
+type MonthKey = string; // yyyy-mm
+
 // 액션 타입 정의
 type ScheduleAction =
   | { type: 'SET_DRAFT'; payload: Partial<ScheduleDraft> }
+  | { type: 'FETCH_MONTH_REQUEST'; monthKey: MonthKey }   // 월별 일정 조회
+  | { type: 'FETCH_MONTH_SUCCESS'; monthKey: MonthKey; payload: Schedule[] }
+  | { type: 'FETCH_MONTH_FAILURE'; monthKey: MonthKey; error: string }
   | { type: 'VIEW_SCHEDULE_REQUEST'; payload: GetScheduleRequest}
   | { type: 'VIEW_SCHEDULE_SUCCESS'; payload: GetScheduleResponse}
   | { type: 'VIEW_SCHEDULE_FAILURE'; payload: { error: string }}
-
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_SCHEDULES'; payload: Schedule[] }
@@ -58,7 +64,8 @@ const initialState: ScheduleState = {
   },
   loading: false,
   error: null,
-  view: null
+  view: null,
+  currentMonthKey: null, // 현재 월 키
 };
 
 // 리듀서 함수
@@ -81,6 +88,19 @@ function scheduleReducer(state: ScheduleState, action: ScheduleAction): Schedule
 
     case 'VIEW_SCHEDULE_FAILURE':
       return { ...state, loading: false, error: action.payload.error };
+
+
+
+    case 'FETCH_MONTH_REQUEST':
+        return { ...state, loading: true, error: null, currentMonthKey: action.monthKey };
+  
+    case 'FETCH_MONTH_SUCCESS':
+        return { ...state, loading: false, error: null, schedules: action.payload, currentMonthKey: action.monthKey };
+  
+    case 'FETCH_MONTH_FAILURE':
+        return { ...state, loading: false, error: action.error };
+
+
     
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
@@ -214,6 +234,22 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
 
       }));
   };
+
+  const fetchMonth = useCallback(async (monthKey: string, opts?: { signal?: AbortSignal }) => {
+    dispatch({ type: 'FETCH_MONTH_REQUEST', monthKey });
+    try {
+      const data = await getSchedules(monthKey); // '/schedules/monthly?month=YYYY-MM'
+      if (opts?.signal?.aborted) return;
+      dispatch({ type: 'FETCH_MONTH_SUCCESS', monthKey, payload: data });
+    } catch (e: any) {
+      if (opts?.signal?.aborted) return;
+      dispatch({
+        type: 'FETCH_MONTH_FAILURE',
+        monthKey,
+        error: e?.response?.data?.message || e?.message || 'Failed to load schedules',
+      });
+    }
+  }, []);
 
   // ID로 스케줄 찾기
   const getScheduleById = (scheduleId: string): Schedule | undefined => {
