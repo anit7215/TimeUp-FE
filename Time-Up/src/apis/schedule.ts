@@ -47,9 +47,10 @@ export const getSchedules = async (targetDate: string) => {
 
 
 // 일별 일정 목록 조회
-export const fetchDaySchedule = async (date: string) => {
-  const res = await axiosInstance.get('/schedule', {
-    params: { date },
+export const getDailySchedules = async (dateISO: string) => {
+  const dateParam = dateISO.slice(0, 10);
+  const res = await axiosInstance.get('/schedules/day', {
+    params: { date: dateParam },
   })
   return res.data
 }

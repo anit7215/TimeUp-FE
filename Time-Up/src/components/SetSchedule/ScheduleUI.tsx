@@ -12,7 +12,7 @@ import PlusIcon from '../../../assets/icons/plusIcon.svg';
 import PageBackButton from '../common/PageBackButton';
 import { formatKoreanDate } from './formatDate';
 
-interface Event {
+export interface UIEvent {
   id: string;
   title: string;
   startTime: number; // 시간 (7, 8, 9, etc.)
@@ -23,8 +23,8 @@ interface Event {
 
 interface ScheduleUIProps {
   date?: string;
-  events?: Event[];
-  onEventPress?: (event: Event) => void;
+  events?: UIEvent[];
+  onEventPress?: (event: UIEvent) => void;
   onTimeSlotPress?: (time: number) => void;
   onBackPress?: () => void;
 }
@@ -33,14 +33,13 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
   date,
   events = [],
   onEventPress,
-  onTimeSlotPress,
-  onBackPress,
+  onTimeSlotPress
 }) => {
   const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6시부터 23시까지
   const SLOT_HEIGHT = 60;
   const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정
 
-  const getEventStyle = (event: Event) => {
+  const getEventStyle = (event: UIEvent) => {
     const startIndex = event.startTime - 6;
     const top = startIndex * FULL_SLOT_HEIGHT + 30;
     const height = event.duration * FULL_SLOT_HEIGHT - 2;
@@ -77,7 +76,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
     );
   };
 
-  const renderEvent = (event: Event) => { // 이벤트 렌더링
+  const renderEvent = (event: UIEvent) => { // 이벤트 렌더링
     return (
       <TouchableOpacity
         key={event.id}
@@ -96,7 +95,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       
       {/* Header */}
       <View style={styles.header}>
-        <PageBackButton onPress={onBackPress} />
+        <PageBackButton/>
         <Text style={styles.headerTitle}>{formatKoreanDate(date)}</Text>
         <TouchableOpacity style={styles.addButton}>
           <PlusIcon />

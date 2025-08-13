@@ -33,6 +33,7 @@ const CalendarPage = () => {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
+  // 중요 일정 조회
   const schedules = [
     {
       scheduleId: '1',
@@ -97,6 +98,7 @@ const CalendarPage = () => {
       const byDay = res?.success?.schedulesByDay || {};
       setEvents(buildDotsFromByDay(byDay, y, mIndex0)); // ⬅️ 변경 포인트
       setSelectedMonth(monthKey);
+      console.log(res?.status, res?.result, res?.success);
     } catch (e) {
       console.error('월별 일정 조회 실패:', e);
       setEvents({});
