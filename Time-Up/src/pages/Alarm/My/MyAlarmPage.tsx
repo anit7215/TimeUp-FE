@@ -8,9 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
-import BottomLayout from '../../Layouts/BottomLayout';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import useAppNavigation from '../../hooks/useAppNavigation';
+import { FlatList } from 'react-native-gesture-handler';
+import BottomLayout from '../../../Layouts/BottomLayout';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import useAppNavigation from '../../../hooks/useAppNavigation';
 
 export default function MyAlarmPage() {
   const navigation = useAppNavigation();
@@ -53,6 +54,7 @@ export default function MyAlarmPage() {
   };
 
   const handleNewAlarm = async () => {
+    debugger;
     // 날짜-시간 조정하기. 오전 오후 시간 계산? 우선 안전하게 하루 뒤로 지정해 둠.
     try {
       const now = new Date();
@@ -140,7 +142,7 @@ export default function MyAlarmPage() {
         </TouchableOpacity>
       </View>
 
-      <View className="mt-3">
+      <View style={{ flex: 1, marginTop: 12 }}>
         {myAlarms.length === 0 ? (
           <View>
             <Text className="mt-[40%] text-white text-3xl text-center">
@@ -150,39 +152,49 @@ export default function MyAlarmPage() {
               + 버튼을 눌러 알람을 추가해보세요
             </Text>
           </View>
-
         ) : (
-          myAlarms.map((alarm) => (
-            <TouchableOpacity
-              key={alarm.id}
-              onPress={() => handleGoToAlarmDetail(alarm.id, alarm.title)}
-              activeOpacity={0.8}
-            >
-              <View className="h-[5rem] w-[91%] bg-dark border border-dark-stroke rounded-2xl self-center flex-row items-center justify-between px-[4%] mt-4">
-                <View className="flex-row items-center space-x-2">
-                  <View className="w-[50%]">
-                    <Text className="font-pretendard text-white text-[18px]" style={{ ...(Platform.OS === 'web' ? { width: 160 } : {}), }}>{alarm.title}</Text>
-                  </View>
-                  <Text className="font-pretendard text-white text-xl"> ㅣ  </Text>
-                  <View className="flex-col">
-                    <View className="flex-row items-end">
-                      <Text className="font-pretendard text-white text-base">
-                        {formatTime(alarm.time)}
+          <FlatList
+            data={myAlarms}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            renderItem={({ item: alarm }) => (
+              <TouchableOpacity
+                onPress={() => handleGoToAlarmDetail(alarm.id, alarm.title)}
+                activeOpacity={0.8}
+              >
+                <View className="h-[5rem] w-[91%] bg-dark border border-dark-stroke rounded-2xl self-center flex-row items-center justify-between px-[4%] mt-4">
+                  <View className="flex-row items-center space-x-2">
+                    <View className="w-[50%]">
+                      <Text
+                        className="font-pretendard text-white text-[18px]"
+                        style={{
+                          ...(Platform.OS === 'web' ? { width: 160 } : {}),
+                        }}
+                      >
+                        {alarm.title}
                       </Text>
                     </View>
-                    <Text className="font-pretendard text-gray-200 text-base">
-                      {formatDate(alarm.date)}
-                    </Text>
+                    <Text className="font-pretendard text-white text-xl"> ㅣ </Text>
+                    <View className="flex-col">
+                      <View className="flex-row items-end">
+                        <Text className="font-pretendard text-white text-base">
+                          {formatTime(alarm.time)}
+                        </Text>
+                      </View>
+                      <Text className="font-pretendard text-gray-200 text-base">
+                        {formatDate(alarm.date)}
+                      </Text>
+                    </View>
                   </View>
+                  <ToggleSwitch
+                    isOn={alarm.isActive}
+                    onToggle={() => handleToggleAlarm(alarm.id, alarm.isActive)}
+                    disabled={false}
+                  />
                 </View>
-                <ToggleSwitch
-                  isOn={alarm.isActive}
-                  onToggle={() => handleToggleAlarm(alarm.id, alarm.isActive)}
-                  disabled={false}
-                />
-              </View>
-            </TouchableOpacity>
-          ))
+              </TouchableOpacity>
+            )}
+          />
         )}
       </View>
     </BottomLayout>

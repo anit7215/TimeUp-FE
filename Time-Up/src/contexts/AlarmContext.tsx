@@ -4,7 +4,6 @@ import moment from 'moment';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { axiosInstance } from '../apis/axiosInstance';
 import { AlarmItem, GetAllAlarmsResponse } from '../types/alarm';
-import { transformWakeupSummaryToAlarmItem } from '../utils/alarmTransform';
 import { getAccessToken } from '../utils/storage';
 
 export type Day = '월' | '화' | '수' | '목' | '금' | '토' | '일';
@@ -110,24 +109,23 @@ useEffect(() => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // ✅ 전체 응답 출력
-    console.log('전체 알람 응답:', res.data);
+      // 전체 응답 출력
+    // console.log('전체 알람 응답:', res.data);
 
-    console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
-    console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
-    console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+    // console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+    // console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+    // console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
 
+    //   const wakeupList = res.data.success?.wakeup_alarms ?? [];
+    //   console.log('서버 응답 wakeup_alarms:', res.data.success?.wakeup_alarms);
 
-      const wakeupList = res.data.success?.wakeup_alarms ?? [];
-      console.log('서버 응답 wakeup_alarms:', res.data.success?.wakeup_alarms);
+    //   const transformed = wakeupList.map(transformWakeupSummaryToAlarmItem);
 
-      const transformed = wakeupList.map(transformWakeupSummaryToAlarmItem);
+    //   const ordered = ['월', '화', '수', '목', '금', '토', '일'].map(day =>
+    //     transformed.find(a => a.date.dayOfWeek === day)
+    //   ).filter(Boolean) as AlarmItem[];
 
-      const ordered = ['월', '화', '수', '목', '금', '토', '일'].map(day =>
-        transformed.find(a => a.date.dayOfWeek === day)
-      ).filter(Boolean) as AlarmItem[];
-
-      setWakeupAlarms(ordered);
+    //   setWakeupAlarms(ordered);
     } catch (err) {
       console.error('전체 알람 조회 실패:', err);
     }

@@ -4,15 +4,15 @@ import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import { formatDate } from '@/src/utils/AlarmFormat';
 import React from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import PageBackButton from '../../components/common/PageBackButton';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import useAppNavigation from '../../hooks/useAppNavigation';
-import BottomLayout from '../../Layouts/BottomLayout';
+import PageBackButton from '../../../components/common/PageBackButton';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import useAppNavigation from '../../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
 
-import IconBiv from '../../../assets/images/AlarmBiv.svg';
-import IconMemo from '../../../assets/images/AlarmMemo.svg';
-import IconMusic from '../../../assets/images/AlarmMusic.svg';
-import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+import IconBiv from '../../../../assets/images/AlarmBiv.svg';
+import IconMemo from '../../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 
 
 export default function MyAlarmDetailPage() {

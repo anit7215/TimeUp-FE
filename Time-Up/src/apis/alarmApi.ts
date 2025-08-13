@@ -101,7 +101,7 @@ export const putWakeupAlarm = async (
   return res.data;
 };
 
-// 알람 조회. 나중에 내 알람(myAlams), 기상알람(), 자동 알람 연결?
+// 알람 조회. 내 알람(myAlams), 기상알람(wakeup), 자동 알람 연결 post 말고 get으로 바꾸기
 export const getMyAlarms = async (): Promise<{
   myAlarms: MyAlarmSummary[];
   wakeupAlarms: WakeupAlarmSummary[];
@@ -117,4 +117,53 @@ export const getMyAlarms = async (): Promise<{
   }
 
   throw new Error(res.data.error?.message ?? '알람 목록을 불러오지 못했습니다.');
+};
+
+// 푸쉬 알람
+// 임의 전달 값들
+export interface PostWakeupAlarmPushRequest {
+  repeat_count: number;
+  repeat_interval: number;
+  push_message: string;
+}
+
+export interface PostWakeupAlarmPushSuccess {
+  wakeup_alarm_id: number;
+  total_push_sent: number;
+  scheduled_push_times: string[];
+  message: string;
+}
+
+export interface ApiResponse<T> {
+  result: 'Success' | 'Fail';
+  status: number;
+  success: T | null;
+  error: {
+    errorCode: string;
+    message: string;
+  } | null;
+}
+
+// POST: 기상알람 푸시 알람 API
+export const postWakeupAlarmPush = async (
+  wakeupAlarmId: number,
+  body: PostWakeupAlarmPushRequest
+): Promise<ApiResponse<PostWakeupAlarmPushSuccess>> => {
+  const token = await getAccessToken();
+
+  const res = await axiosInstance.post<ApiResponse<PostWakeupAlarmPushSuccess>>(
+    `/alarm/{wakeup_alarm_id}/push`,
+    body,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      params: {
+        wakeup_alarm_id: wakeupAlarmId,
+      },
+    }
+  );
+
+  return res.data;
 };

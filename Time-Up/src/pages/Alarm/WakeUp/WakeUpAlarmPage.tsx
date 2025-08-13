@@ -7,10 +7,10 @@ import { getAccessToken } from '@/src/utils/storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import BottomLayout from '../../Layouts/BottomLayout';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import { Day, useAlarmContext } from '../../contexts/AlarmContext';
-import useAppNavigation from '../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
+import useAppNavigation from '../../../hooks/useAppNavigation';
 
 const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -19,8 +19,8 @@ export default function WakeUpAlarmPage() {
   const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, wakeupAlarms, setMyAlarms, setSelectedAlarmId, } = useAlarmContext();
 
   // useEffect(() => {
-  //   console.log('🔥 전체 기상 알람 (wakeupAlarms):', wakeupAlarms);
-  // }, [wakeupAlarms]); // ✅ 상태가 바뀔 때마다 출력
+  //   console.log('전체 기상 알람 (wakeupAlarms):', wakeupAlarms);
+  // }, [wakeupAlarms]); // 상태가 바뀔 때마다 출력
 
   useEffect(() => {
     const fetchAlarms = async () => {
@@ -31,12 +31,12 @@ export default function WakeUpAlarmPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
   
-        // ✅ 전체 응답 출력
-      console.log('전체 알람 응답:', res.data);
+        // 전체 응답 출력
+      // console.log('전체 알람 응답:', res.data);
   
-      console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
-      console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
-      console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+      // console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+      // console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+      // console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
   
   
       } catch (err) {

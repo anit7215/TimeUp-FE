@@ -1,18 +1,18 @@
 // src/pages/WakeUpAlarmDetailPage.tsx
+import AlarmButton from '@/src/components/alarm/AlarmButton';
 import React from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import PageBackButton from '../../components/common/PageBackButton';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import { Day, useAlarmContext } from '../../contexts/AlarmContext';
-import useAppNavigation from '../../hooks/useAppNavigation';
-import BottomLayout from '../../Layouts/BottomLayout';
+import PageBackButton from '../../../components/common/PageBackButton';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
+import useAppNavigation from '../../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
 
-import AlarmButton from '@/src/components/alarm/AlarmButton';
-import IconBiv from '../../../assets/images/AlarmBiv.svg';
-import IconCalendar from '../../../assets/images/AlarmCalendar.svg';
-import IconMemo from '../../../assets/images/AlarmMemo.svg';
-import IconMusic from '../../../assets/images/AlarmMusic.svg';
-import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+import IconBiv from '../../../../assets/images/AlarmBiv.svg';
+import IconCalendar from '../../../../assets/images/AlarmCalendar.svg';
+import IconMemo from '../../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 
 export default function WakeUpAlarmDetailPage() {
   const navigation = useAppNavigation();

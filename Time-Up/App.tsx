@@ -1,3 +1,4 @@
+import { NotificationProvider } from '@/src/contexts/NotificationContext';
 import { GOOGLE_PLACES_API_KEY } from '@env';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
@@ -13,16 +14,15 @@ import { ScheduleProvider } from './src/context/ScheduleContext';
 import { AlarmProvider } from './src/contexts/AlarmContext';
 import AddSchedulePage from './src/pages/AddSchedulePage';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
-import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
-import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
-import MyAlarmDetailPage from './src/pages/Alarm/MyAlarmDetailPage';
-import MyAlarmPage from './src/pages/Alarm/MyAlarmPage';
+import EditMyAlarmPage from './src/pages/Alarm/My/EditMyAlarmPage';
+import MyAlarmDetailPage from './src/pages/Alarm/My/MyAlarmDetailPage';
+import MyAlarmPage from './src/pages/Alarm/My/MyAlarmPage';
 import PushAlarmPage from './src/pages/Alarm/PushAlarmPage';
 import SelectAlarmReplayPage from './src/pages/Alarm/SelectAlarmReplayPage';
 import SelectAlarmSoundPage from './src/pages/Alarm/SelectAlarmSoundPage';
 import SelectAlarmVibratePage from './src/pages/Alarm/SelectAlarmVibratePage';
-import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUpAlarmDetailPage';
-import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
+import { default as EditWakeUpAlarmPage, default as WakeUpAlarmDetailPage } from './src/pages/Alarm/WakeUp/EditWakeUpAlarmPage';
+import WakeUpAlarmPage from './src/pages/Alarm/WakeUp/WakeUpAlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
 import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
@@ -42,7 +42,7 @@ export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
-  
+
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -60,7 +60,7 @@ export default function App() {
   if (!mapsLoaded) {
     return null;
   }
-  
+
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
@@ -102,17 +102,19 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <PaperProvider>
         <AlarmProvider>
-          <SafeAreaView
-            edges={['top', 'bottom']}
-            className="flex-1 bg-black"
-            style={{
-              width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
-              height: screenHeight,
-              alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
-            }}
-          >
-            {content}
-          </SafeAreaView>
+          <NotificationProvider>
+            <SafeAreaView
+              edges={['top', 'bottom']}
+              className="flex-1 bg-black"
+              style={{
+                width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
+                height: screenHeight,
+                alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
+              }}
+            >
+              {content}
+            </SafeAreaView>
+          </NotificationProvider>
         </AlarmProvider>
       </PaperProvider>
     </QueryClientProvider>

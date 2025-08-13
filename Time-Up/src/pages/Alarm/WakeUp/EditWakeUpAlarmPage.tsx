@@ -8,16 +8,17 @@ import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Dimensions, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import { Day, useAlarmContext } from '../../contexts/AlarmContext';
-import useAppNavigation from '../../hooks/useAppNavigation';
-import BottomLayout from '../../Layouts/BottomLayout';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
+import useAppNavigation from '../../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
 
-import IconBiv from '../../../assets/images/AlarmBiv.svg';
-import IconCalendar from '../../../assets/images/AlarmCalendar.svg';
-import IconMemo from '../../../assets/images/AlarmMemo.svg';
-import IconMusic from '../../../assets/images/AlarmMusic.svg';
-import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+import IconBiv from '../../../../assets/images/AlarmBiv.svg';
+import IconCalendar from '../../../../assets/images/AlarmCalendar.svg';
+import IconMemo from '../../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
+
 
 export default function WakeUpAlarmDetailPage() {
   const navigation = useAppNavigation();
@@ -33,17 +34,17 @@ export default function WakeUpAlarmDetailPage() {
 
   // 테스트 초기값 설정. 알람 상세 설정 상태 관리 구현 후 제거하기.
   // 제목, 시간, 날짜, 사운드, 진동, 반복, 메모 구현 완료. 알람 온오프 상태 관리 추가 필요.  
-    const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
+  const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
 
-    const [title, setTitle] = useState(alarmToEdit?.title ?? '');
-    const [time, setTime] = useState<AlarmItem['time']>(
-      alarmToEdit?.time ?? { period: '오전', hour: 7, minute: 0 }
-    );
-    const [date, setDate] = useState<AlarmItem['date']>(
-      alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
-    );
-    const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
-    const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
+  const [title, setTitle] = useState(alarmToEdit?.title ?? '');
+  const [time, setTime] = useState<AlarmItem['time']>(
+    alarmToEdit?.time ?? { period: '오전', hour: 7, minute: 0 }
+  );
+  const [date, setDate] = useState<AlarmItem['date']>(
+    alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
+  );
+  const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
+  const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
 
   const handleToggleSwitchForDay = (day: Day) => {
     setWeekdaySwitchStates((prev) => {
@@ -61,40 +62,40 @@ export default function WakeUpAlarmDetailPage() {
     navigation.goBack();
   };
 
-const handleSave = async () => {
-  console.log('기상 알람을 저장합니다.');
-  if (!selectedAlarmId) return;
+  const handleSave = async () => {
+    console.log('기상 알람을 저장합니다.');
+    if (!selectedAlarmId) return;
 
-  const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
-  if (!alarmToEdit) return;
+    const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
+    if (!alarmToEdit) return;
 
-  try {
-    updateAlarmField(selectedAlarmId, 'title', title);
-    updateAlarmField(selectedAlarmId, 'time', time);
-    updateAlarmField(selectedAlarmId, 'date', date);
-    updateAlarmField(selectedAlarmId, 'memo', memo);
-    updateAlarmField(selectedAlarmId, 'isActive', isActive);
+    try {
+      updateAlarmField(selectedAlarmId, 'title', title);
+      updateAlarmField(selectedAlarmId, 'time', time);
+      updateAlarmField(selectedAlarmId, 'date', date);
+      updateAlarmField(selectedAlarmId, 'memo', memo);
+      updateAlarmField(selectedAlarmId, 'isActive', isActive);
 
-    // API 바디 변환
-    const requestBody = toPutWakeupAlarmRequest({
-      ...alarmToEdit,
-      title,
-      time,
-      memo,
-      isActive,
-    });
+      // API 바디 변환
+      const requestBody = toPutWakeupAlarmRequest({
+        ...alarmToEdit,
+        title,
+        time,
+        memo,
+        isActive,
+      });
 
-    console.log('보낼 wakeup 알람 데이터:', requestBody);
+      console.log('보낼 wakeup 알람 데이터:', requestBody);
 
-    // API 호출
-    const response = await putWakeupAlarm(selectedAlarmId, requestBody);
-    console.log('기상 알람 수정 성공:', response);
-  } catch (error) {
-    console.error('기상 알람 수정 실패:', error);
-  }
+      // API 호출
+      const response = await putWakeupAlarm(selectedAlarmId, requestBody);
+      console.log('기상 알람 수정 성공:', response);
+    } catch (error) {
+      console.error('기상 알람 수정 실패:', error);
+    }
 
-  navigation.navigate('WakeUpAlarmPage');
-};
+    navigation.navigate('WakeUpAlarmPage');
+  };
 
   const handleSelectSound = () => {
     navigation.navigate('SelectAlarmSoundPage');
