@@ -28,7 +28,6 @@ export default function EditInfoPage() {
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<'missing' | 'confirm'>('missing');
   const updateUserInfoMutation = useUpdateUserInfo();
-  
   const handleSignout = async () => {
     setOpenSignout(false);
     try {
@@ -71,19 +70,13 @@ export default function EditInfoPage() {
     setOpen(false);
   };
   const handleSelectAddress = (type: 'home' | 'work', address: AddressItem) => {
-    setField(type === 'home' ? 'homeAddress' : 'workAddress', address.region);
+        const addressString = address.address;
+    setField(type === 'home' ? 'homeAddress' : 'workAddress', addressString);
   };
 
   const onSelectTransport = (value: string) => {
     toggleTransport(value as any);
   };
-
-  const getApiJobLabel = (jobValue: string | null | undefined): JobType | undefined => {
-    if (!jobValue) return undefined;
-    const found = jobOptions.find((opt) => opt.value === jobValue);
-    return found ? (found.label as JobType) : undefined;
-  };
-
 
   const handleSave = () => {
   const isMissing =
@@ -109,9 +102,9 @@ export default function EditInfoPage() {
 
       const payload = {
         birth: Number(birthYear),
-        job: job||undefined,
-        user_preference_transport: transport.map((t, idx) => ({
-          transport: t,
+        job: job||'기타',
+        preferences: transport.map((t, idx) => ({
+          transportType: t,
           priority: idx + 1,
         })),
         home_address: homeAddress ?? null,
@@ -132,8 +125,6 @@ export default function EditInfoPage() {
       });
     }
   };
-
-
 
   return (
     <>
