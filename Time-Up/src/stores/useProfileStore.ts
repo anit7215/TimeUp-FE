@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 
 export type JobType =
-  | '직장인'
-  | '공무원/군인'
-  | '자영업자'
-  | '프리랜서'
-  | '학생'
-  | '무직'
-  | '기타';
+  | 'worker'
+  | 'public_worker'
+  | 'self_employed'
+  | 'freelancer'
+  | 'student'
+  | 'unemployed'
+  | 'other';
 
 export type TransportType = 'bus' | 'subway' | 'car' | 'walk';
 
@@ -23,7 +23,28 @@ interface ProfileState {
   setField: <K extends keyof ProfileState>(field: K, value: ProfileState[K]) => void;
   toggleTransport: (value: TransportType) => void;
   profileImage:string|null;
+  reset: () => void;
 }
+
+const initialState: Omit<ProfileState, 'setField' | 'toggleTransport' | 'reset'> = {
+  birthYear: null,
+  job: null,
+  transport: [],
+  readyTime: null,
+  commuteTime: null,
+  selectedTimes: {
+    월요일: { period: '오전', hour: '08', minute: '00' },
+    화요일: { period: '오전', hour: '08', minute: '00' },
+    수요일: { period: '오전', hour: '08', minute: '00' },
+    목요일: { period: '오전', hour: '08', minute: '00' },
+    금요일: { period: '오전', hour: '08', minute: '00' },
+    토요일: { period: '오전', hour: '08', minute: '00' },
+    일요일: { period: '오전', hour: '08', minute: '00' },
+  },
+  homeAddress: null,
+  workAddress: null,
+  profileImage: null,
+};
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
   birthYear: null,
@@ -44,4 +65,5 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     });
   },
   profileImage:null,
+  reset: () => set(initialState),
 }));

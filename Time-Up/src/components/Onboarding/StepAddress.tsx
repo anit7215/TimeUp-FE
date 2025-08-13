@@ -1,9 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { AddressItem } from '../../types/address';
 type Props = {
-  homeAddress: AddressItem | null;
-  workAddress: AddressItem | null;
+  homeAddress: string | null;
+  workAddress: string | null;
   onSelect: (type: 'home' | 'work') => void;
 };
 
@@ -23,7 +22,7 @@ export default function StepAddress({ homeAddress, workAddress, onSelect }: Prop
         style={{ maxWidth: '50%' }}
         numberOfLines={1}
         ellipsizeMode="tail">
-        {homeAddress?.address || '입력'}
+        {homeAddress || '입력'}
         </Text>
       </TouchableOpacity>
 
@@ -44,7 +43,7 @@ export default function StepAddress({ homeAddress, workAddress, onSelect }: Prop
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {workAddress?.address || '입력'}
+          {workAddress || '입력'}
         </Text>
       </TouchableOpacity>
     </>

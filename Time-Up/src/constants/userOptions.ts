@@ -1,10 +1,11 @@
+import { JobType, TransportType } from '../stores/useProfileStore';
 export const yearOptions = Array.from({ length: 101 }, (_, i) => {
   const currentYear = new Date().getFullYear();
   const y = currentYear - i;
   return { label: String(y), value: String(y) };
 });
 
-export const jobOptions = [
+export const jobOptions: { label: string; value: JobType }[] = [
   { label: '직장인', value: 'worker' },
   { label: '공무원/군인', value: 'public_worker' },
   { label: '자영업자', value: 'self_employed' },
@@ -14,7 +15,15 @@ export const jobOptions = [
   { label: '기타', value: 'other' },
 ];
 
-export const transportOptions = [
+export const jobLabelToKey = jobOptions.reduce(
+  (acc, option) => {
+    acc[option.label] = option.value;
+    return acc;
+  },
+  {} as Record<string, JobType>,
+);  
+
+export const transportOptions: { label: string; value: TransportType }[] = [
   { label: '버스', value: 'bus' },
   { label: '지하철', value: 'subway' },
   { label: '자동차', value: 'car' },

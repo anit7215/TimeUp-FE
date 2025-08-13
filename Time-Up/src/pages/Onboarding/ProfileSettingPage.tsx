@@ -1,7 +1,8 @@
 import { onboarding } from '@/src/apis/auth';
+import { jobOptions, transportOptions, yearOptions } from '@/src/constants/userOptions';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { onboardingPayload } from '@/src/utils/onboardingPayload';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import Modal from '../../components/common/Modal';
@@ -11,6 +12,7 @@ import StepForm from '../../components/Onboarding/StepForm';
 import StepTime from '../../components/Onboarding/StepTime';
 import StepTransport from '../../components/Onboarding/StepTransport';
 import StepWakeUp from '../../components/Onboarding/StepWakeUp';
+import { useProfileStore } from '../../stores/useProfileStore';
 import { AddressItem } from '../../types/address';
 
 export default function ProfileSettingPage() {
@@ -18,60 +20,18 @@ export default function ProfileSettingPage() {
   const [step, setStep] = useState(1);
   const [open, setOpen] = useState(false);
 
-  const [birthYear, setBirthYear] = useState<string | null>(null);
-  const [job, setJob] = useState<string | null>(null);
-  const [transport, setTransport] = useState<string[]>([]);
-  const [readyTime, setReadyTime] = useState<{ hour: string; minute: string } | null>(null);
-  const [commuteTime, setCommuteTime] = useState<{ hour: string; minute: string } | null>(null);
-  const defaultTime = { period: '오전', hour: '08', minute: '00' };
-  const initialSelectedTimes: Record<string, { hour: string; minute: string; period: string }> = {
-    월요일: defaultTime,
-    화요일: defaultTime,
-    수요일: defaultTime,
-    목요일: defaultTime,
-    금요일: defaultTime,
-    토요일: defaultTime,
-    일요일: defaultTime,
-  };
-  const [selectedTimes, setSelectedTimes] = useState(initialSelectedTimes);
-  const [homeAddress, setHomeAddress] = useState<AddressItem | null>(null);
-  const [workAddress, setWorkAddress] = useState<AddressItem | null>(null);
+  const { birthYear, job, transport, readyTime, commuteTime, selectedTimes, homeAddress, workAddress, setField, toggleTransport, reset, } = useProfileStore();
 
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 101 }, (_, i) => {
-    const y = currentYear - i;
-    return { label: String(y), value: String(y) };
-  });
-
-  const jobOptions = [
-    { label: '직장인', value: 'office' },
-    { label: '공무원/군인', value: 'gov' },
-    { label: '자영업자', value: 'self' },
-    { label: '프리랜서', value: 'freelancer' },
-    { label: '학생', value: 'student' },
-    { label: '무직', value: 'unemployed' },
-    { label: '기타', value: 'etc' },
-  ];
-
-  const transportOptions = [
-    { label: '버스', value: 'bus' },
-    { label: '지하철', value: 'subway' },
-    { label: '자동차', value: 'car' },
-    { label: '도보', value: 'walk' },
-  ];
-
-  const onSelectTransport = (value: string) => {
-    setTransport((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
-  };
+  useEffect(() => {
+    reset();
+  }, [reset]);
 
   const handleSelectAddress = (type: 'home' | 'work') => {
     navigation.navigate('AddressSearchPage', {
       type,
       onSelectAddress: (address: AddressItem) => {
-        if (type === 'home') setHomeAddress(address);
-        else setWorkAddress(address);
+        const addressString = address.address;
+        setField(type === 'home' ? 'homeAddress' : 'workAddress', addressString);
       },
     });
   };
@@ -85,7 +45,7 @@ export default function ProfileSettingPage() {
             options={yearOptions}
             placeholder="출생연도 선택"
             value={birthYear}
-            onChange={setBirthYear}
+            onChange={(v) => setField('birthYear', v)} 
           />
         );
       case 2:
@@ -95,7 +55,7 @@ export default function ProfileSettingPage() {
             options={jobOptions}
             placeholder="직업 선택"
             value={job}
-            onChange={setJob}
+            onChange={(v) => setField('job', v as any)} 
           />
         );
       case 3:
@@ -107,21 +67,20 @@ export default function ProfileSettingPage() {
             <StepTransport
               selected={transport}
               options={transportOptions}
-              onSelect={onSelectTransport}
+              onSelect={toggleTransport}
             />
           </>
         );
       case 4:
         return <StepTime 
-        readyTime={readyTime}
-        setReadyTime={setReadyTime}
-        commuteTime={commuteTime}
-        setCommuteTime={setCommuteTime}
-        />;
+            readyTime={readyTime}
+            setReadyTime={(v) => setField('readyTime', v)} 
+            commuteTime={commuteTime}
+            setCommuteTime={(v) => setField('commuteTime', v)} />;
       case 5:
-        return <StepWakeUp 
-        selectedTimes={selectedTimes}
-        setSelectedTimes={setSelectedTimes}/>;
+        return <StepWakeUp
+            selectedTimes={selectedTimes}
+            setSelectedTimes={(v) => setField('selectedTimes', v)}/>;
       case 6:
         return (
           <StepAddress
@@ -156,39 +115,36 @@ export default function ProfileSettingPage() {
         disabled={
           (step === 1 && !birthYear) ||
           (step === 2 && !job) ||
-          (step === 3 && transport.length !== transportOptions.length)
-          || (step === 4 && !readyTime)
-          || (step === 6 && (!homeAddress))
+          (step === 3 && transport.length !== transportOptions.length) ||
+          (step === 4 && !readyTime) ||
+          (step === 6 && !homeAddress)
         }
       />
       {open && (
-          <Modal
-            onClose={() => setOpen(false)}
-            onConfirm={async () => {
-              try {
-                const payload = onboardingPayload({
-                  birthYear: birthYear!,
-                  job: job!,
-                  transport,
-                  readyTime: readyTime!,
-                  commuteTime,
-                  selectedTimes,
-                  homeAddress,
-                  workAddress,
-                });
-
-                console.log('📌 buildOnboardingPayload 결과:', payload);
-                
-                await onboarding(payload);
-                navigation.navigate('MyPage');
-              } catch (err) {
-                console.error('온보딩 제출 실패', err);
-                alert('제출 중 오류가 발생했습니다.');
-              }
-            }}
-          >
-            {'지금까지 입력하신 내용을 \n제출하시겠습니까?'}
-          </Modal>
+        <Modal
+          onClose={() => setOpen(false)}
+          onConfirm={async () => {
+            try {
+              const payload = onboardingPayload({
+                birthYear: birthYear!,
+                job: job!,
+                transport,
+                readyTime: readyTime!,
+                commuteTime,
+                selectedTimes,
+                homeAddress,
+                workAddress,
+              });
+              await onboarding(payload);
+              navigation.navigate('MyPage');
+            } catch (err) {
+              console.error('온보딩 제출 실패', err);
+              alert('제출 중 오류가 발생했습니다.');
+            }
+          }}
+        >
+          {'지금까지 입력하신 내용을 \n제출하시겠습니까?'}
+        </Modal>
       )}
     </View>
   );

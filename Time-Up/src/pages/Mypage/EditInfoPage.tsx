@@ -3,7 +3,6 @@ import { jobOptions, transportOptions, yearOptions } from '@/src/constants/userO
 import { useUpdateUserInfo } from '@/src/hooks/mutation/my/useUpdateUserInfo';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useGetUserInfo } from '@/src/hooks/users/useGetUserInfo';
-import { JobType } from '@/src/types/user';
 import { formatTime } from '@/src/utils/userTimeFormat';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -102,7 +101,7 @@ export default function EditInfoPage() {
 
       const payload = {
         birth: Number(birthYear),
-        job: job||'기타',
+        job: job || 'other', 
         preferences: transport.map((t, idx) => ({
           transportType: t,
           priority: idx + 1,
@@ -152,7 +151,7 @@ export default function EditInfoPage() {
                 data={jobOptions}
                 placeholder="직업 선택"
                 value={job}
-                onChange={(v) => setField('job', v as JobType)} 
+                onChange={(v) => setField('job', v as any)}
               />
             </View>
           </View>

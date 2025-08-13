@@ -1,10 +1,11 @@
+import { TransportType } from '@/src/stores/useProfileStore';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface Props {
   selected: string[];
-  options: { label: string; value: string }[];
-  onSelect: (value: string) => void;
+  options: { label: string; value: TransportType }[];
+  onSelect: (value: TransportType) => void;
 }
 
 export default function StepTransport({ selected, options, onSelect }: Props) {
