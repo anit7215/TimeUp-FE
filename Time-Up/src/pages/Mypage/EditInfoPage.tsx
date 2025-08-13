@@ -109,13 +109,13 @@ export default function EditInfoPage() {
 
       const payload = {
         birth: Number(birthYear),
-        job,
+        job: job||undefined,
         user_preference_transport: transport.map((t, idx) => ({
           transport: t,
           priority: idx + 1,
         })),
-        home_address: homeAddress ?? '',
-        work_address: workAddress ?? '',
+        home_address: homeAddress ?? null,
+        work_address: workAddress ?? null,
         avg_ready_time: avgReadyTime,
         duration_time: durationTime,
       };
