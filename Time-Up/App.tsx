@@ -34,7 +34,8 @@ import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
 import AddSchedulePage from './src/pages/AddSchedulePage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
-import ScheduleDetailEditPage from './src/pages/SetPage/ScheduleDetail';
+import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
+import SchedulePage from './src/pages/SchedulePage';
 import SetLocationPage from './src/pages/SetLocationPage';
 
 const queryClient = new QueryClient();
@@ -92,6 +93,8 @@ export default function App() {
               <Stack.Screen name="SetLocationPage" component={SetLocationPage} />
               <Stack.Screen name="SetScheduleRepeatPage" component={SetScheduleRepeatPage} />
               <Stack.Screen name="SetRemindAlarmPage" component={SetRemindAlarmPage} />
+              <Stack.Screen name="SchedulePage" component={SchedulePage} />
+              <Stack.Screen name="ViewScheduleDetailPage" component={ViewScheduleDetailPage} />
             </Stack.Navigator>
           </NavigationContainer>
         </ScheduleProvider>

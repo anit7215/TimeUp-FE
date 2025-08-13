@@ -146,7 +146,7 @@ const CalendarPage = () => {
   // 날짜 선택 핸들러
   const handleDatePress = (day: any) => { // 이거 any타입이어도 될지 모르겠다...
     const dateString = `${year}-${month + 1}-${day.date}`;
-    navigation.navigate('SchedulePage', { selectedDate: dateString}) // selectedDate 삭제
+    navigation.navigate('SchedulePage', { selectedDate: dateString }) // selectedDate 삭제
     
   };
   

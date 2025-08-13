@@ -662,7 +662,7 @@ export default function ViewScheduleDetailPage() {
                       marginHorizontal: 12
                     }}
                   >
-                    <Text style={{ color: 'white', fontSize: width > 400 ? 18 : 16 }}>취소</Text>
+                    <Text style={{ color: 'white', fontSize: width > 400 ? 18 : 16 }}>삭제</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -676,7 +676,7 @@ export default function ViewScheduleDetailPage() {
                       marginHorizontal: 12
                     }}
                   >
-                    <Text style={{ color: 'black', fontSize: width > 400 ? 18 : 16 }}>저장</Text>
+                    <Text style={{ color: 'black', fontSize: width > 400 ? 18 : 16 }}>편집</Text>
                   </TouchableOpacity>
                 </>
               )}

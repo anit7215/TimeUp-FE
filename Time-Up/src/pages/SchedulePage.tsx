@@ -18,7 +18,7 @@ const SchedulePage = () => {
       id: '1', 
       title: 'UMC 회의', 
       startTime: 9, 
-      duration: 1, 
+      duration: 2, 
       color: '#FFB366' 
     },
     { 
