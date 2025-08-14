@@ -68,7 +68,7 @@ const SchedulePage = () => {
   if (loading) {
     return (
       <ScheduleUI
-        date={dateISO}              // ✅ 패딩된 ISO 전달
+        date={dateISO}              
         events={[]}                 // 로딩 중엔 빈 배열
         onEventPress={handleEventPress}
         onTimeSlotPress={handleTimeSlotPress}
@@ -79,10 +79,10 @@ const SchedulePage = () => {
 
   return (
     <ScheduleUI
-      date={dateISO}               // ✅ 패딩된 ISO 전달
+      date={dateISO}               
       events={events}
       onEventPress={handleEventPress}
-      onTimeSlotPress={handleTimeSlotPress}   // ✅ 중복 prop 제거
+      onTimeSlotPress={handleTimeSlotPress}   
       onBackPress={() => navigation.goBack()}
     />
   );

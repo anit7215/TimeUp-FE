@@ -11,6 +11,12 @@ import {
 import PlusIcon from '../../../assets/icons/plusIcon.svg';
 import PageBackButton from '../common/PageBackButton';
 import { formatKoreanDate } from './formatDate';
+import { Dispatch } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useSchedule } from '@/src/context/ScheduleContext';
+
+
+
 
 export interface UIEvent {
   id: string;
@@ -89,7 +95,22 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
     );
   };
 
+  
+    const navigation = useNavigation<any>();
+    const { dispatch } = useSchedule();
+    const selectedDate = date;
+
+  const handleAddSchedule = () => {
+    const dateToUse = selectedDate;
+    console.log('선택된 날짜:', dateToUse);
+
+    dispatch({ type: 'RESET_DRAFT'});
+    dispatch({ type: 'UPDATE_DRAFT', payload: { start_date: dateToUse, end_date: dateToUse}})
+    navigation.navigate('AddSchedulePage');
+  };
+
   return (
+    
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2A2A2A" />
       
@@ -97,7 +118,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       <View style={styles.header}>
         <PageBackButton/>
         <Text style={styles.headerTitle}>{formatKoreanDate(date)}</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity onPress={handleAddSchedule}>
           <PlusIcon />
         </TouchableOpacity>
       </View>

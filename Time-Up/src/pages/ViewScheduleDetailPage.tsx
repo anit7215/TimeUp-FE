@@ -34,6 +34,8 @@ import { useSchedule } from '../context/ScheduleContext';
 import { RootStackParamList } from '../types/navigation';
 import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
 import { toDraft } from '../helpers/schedule';
+import Modal from '../components/common/Modal';
+import PageBackButton from '../components/common/PageBackButton';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,11 +49,12 @@ export default function ViewScheduleDetailPage() {
   const { scheduleId } = route.params as ViewScheduleDetailPageRouteProp;
 
   const { state, dispatch } = useSchedule();
-  const { view, draft: form, loading, error } = state;
+  const { view, draft: schedule, loading, error } = state;
 
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date().toISOString());
+  const [openDelete, setOpenDeleteModal] = useState(false);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['50%', '70%'], []);
@@ -108,7 +111,7 @@ export default function ViewScheduleDetailPage() {
   }, [scheduleId, dispatch, navigation]);
 
   // ---- Helpers ----
-  const { fullText } = buildRecurrenceSummary(form);
+  const { fullText } = buildRecurrenceSummary(schedule);
 
   const toInt = (s: string, fallback = 0) => {
     const n = Number(s);
@@ -122,7 +125,7 @@ export default function ViewScheduleDetailPage() {
   // ---- Actions ----
   const handleUpdate = async () => {
     try {
-      const updated = await updateSchedule(scheduleId, form);
+      const updated = await updateSchedule(scheduleId, schedule);
 
       // 서버 원본/드래프트 동기화
       dispatch({ type: 'VIEW_SCHEDULE_SUCCESS', payload: updated });
@@ -142,24 +145,14 @@ export default function ViewScheduleDetailPage() {
     }
   };
 
-  const handleDelete = async () => {
-    Alert.alert('스케줄 삭제', '정말로 이 스케줄을 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteSchedule(scheduleId);
-            Alert.alert('성공', '스케줄이 삭제되었습니다.');
-            navigation.navigate('CalendarPage');
-          } catch (error: any) {
-            console.error('삭제 실패:', error);
-            Alert.alert('오류', '스케줄 삭제에 실패했습니다.');
-          }
-        },
-      },
-    ]);
+  const handleDelete = () => setOpenDeleteModal(true);
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // 원본(view) 기준으로 드래프트 복원
+    if (state.view) {
+      dispatch({ type: 'UPDATE_DRAFT', payload: toDraft(state.view) });
+    }
   };
 
   const gotoRemindPage = () => navigation.navigate('SetRemindAlarmPage');
@@ -210,7 +203,7 @@ export default function ViewScheduleDetailPage() {
               }}
               placeholder="일정 이름 입력"
               placeholderTextColor={'#979B9F'}
-              value={form.name ?? ''}
+              value={schedule.name ?? ''}
               onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
               editable={isEditing}
             />
@@ -232,7 +225,7 @@ export default function ViewScheduleDetailPage() {
               placeholderTextColor={'#979B9F'}
               multiline
               textAlignVertical="top"
-              value={form.memo ?? ''}
+              value={schedule.memo ?? ''}
               onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { memo: text } })}
               editable={isEditing}
             />
@@ -266,7 +259,7 @@ export default function ViewScheduleDetailPage() {
                 const p: '오전' | '오후' = period === '오전' ? '오전' : '오후';
                 const h24 = convertTo24Hour(h12, p);
 
-                const updatedDate = moment(form[targetField])
+                const updatedDate = moment(schedule[targetField])
                   .set({ hour: h24, minute: m, second: 0, millisecond: 0 })
                   .format('YYYY-MM-DDTHH:mm:ss');
 
@@ -292,7 +285,9 @@ export default function ViewScheduleDetailPage() {
       </BottomSheetModal>
 
       {/* Page Body */}
-      <View style={{ flex: 1, backgroundColor: '#121212', paddingTop: height > 700 ? 30 : 10 }}>
+          <View style={{ flex: 1, backgroundColor: '#121212', paddingTop: height > 700 ? 30 : 10 }}>
+
+
         {/* 제목 + 중요 */}
         <View
           style={{
@@ -303,6 +298,7 @@ export default function ViewScheduleDetailPage() {
             marginBottom: height > 700 ? 20 : 10
           }}
         >
+          <PageBackButton/>
           <TouchableOpacity
             onPress={() => {
               if (isEditing) {
@@ -310,7 +306,7 @@ export default function ViewScheduleDetailPage() {
                 bottomSheetModalRef.current?.present();
               }
             }}
-            style={{ flex: 1 }}
+            style={{ flex: 1}}
             disabled={!isEditing}
           >
             <Text
@@ -320,22 +316,23 @@ export default function ViewScheduleDetailPage() {
                 lineHeight: width > 400 ? 24 : 22,
                 minHeight: 45,
                 textAlign: 'left',
+                alignSelf: 'center' 
               }}
             >
-              {form.name || '일정 이름'}
+              {schedule.name || '일정 이름'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
               if (isEditing) {
-                dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important } });
+                dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !schedule.is_important } });
               }
             }}
             style={{ marginLeft: 18 }}
             disabled={!isEditing}
           >
-            <StarIcon fill={form.is_important ? 'white' : 'none'} />
+            <StarIcon fill={schedule.is_important ? 'white' : 'none'} />
           </TouchableOpacity>
         </View>
 
@@ -363,7 +360,7 @@ export default function ViewScheduleDetailPage() {
               disabled={!isEditing}
             >
               <Text style={{ color: 'white', fontSize: width > 400 ? 16 : 14, marginBottom: 8 }}>
-                {formatKoreanDate(form.start_date)}
+                {formatKoreanDate(schedule.start_date)}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -376,7 +373,7 @@ export default function ViewScheduleDetailPage() {
               disabled={!isEditing}
             >
               <Text style={{ color: 'white', fontSize: width > 400 ? 36 : 28 }}>
-                {timeOnly(form.start_date)}
+                {timeOnly(schedule.start_date)}
               </Text>
             </TouchableOpacity>
           </View>
@@ -396,7 +393,7 @@ export default function ViewScheduleDetailPage() {
               disabled={!isEditing}
             >
               <Text style={{ color: 'white', fontSize: width > 400 ? 16 : 14, marginBottom: 8 }}>
-                {formatKoreanDate(form.end_date)}
+                {formatKoreanDate(schedule.end_date)}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -409,7 +406,7 @@ export default function ViewScheduleDetailPage() {
               disabled={!isEditing}
             >
               <Text style={{ color: 'white', fontSize: width > 400 ? 36 : 28 }}>
-                {timeOnly(form.end_date)}
+                {timeOnly(schedule.end_date)}
               </Text>
             </TouchableOpacity>
           </View>
@@ -452,7 +449,7 @@ export default function ViewScheduleDetailPage() {
                         height: width > 400 ? 32 : 28,
                         borderRadius: 16,
                         backgroundColor: color,
-                        borderWidth: reverseColorMap[form.color ?? 'gray'] === color ? 2 : 0,
+                        borderWidth: reverseColorMap[schedule.color ?? 'gray'] === color ? 2 : 0,
                         borderColor: 'white'
                       }}
                     />
@@ -488,7 +485,7 @@ export default function ViewScheduleDetailPage() {
                   disabled={!isEditing}
                 >
                   <Text style={{ color: 'white', fontSize: width > 400 ? 14 : 12, textAlign: 'center' }}>
-                    {form.is_reminding ? `${form.remind_at ?? 0}분 전` : '알림 설정 안함'}
+                    {schedule.is_reminding ? `${schedule.remind_at ?? 0}분 전` : '알림 설정 안함'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -550,7 +547,7 @@ export default function ViewScheduleDetailPage() {
                 disabled={!isEditing}
               >
                 <Text style={{ color: 'white', fontSize: width > 400 ? 18 : 16 }}>
-                  {form.place_name || '입력'}
+                  {schedule.place_name || '입력'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -584,10 +581,28 @@ export default function ViewScheduleDetailPage() {
                 disabled={!isEditing}
               >
                 <Text style={{ color: 'white', fontSize: width > 400 ? 18 : 16 }}>
-                  {form.memo || '입력'}
+                  {schedule.memo || '입력'}
                 </Text>
               </TouchableOpacity>
             </View>
+            {openDelete && (
+      <Modal
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={async () => {
+          try {
+            await deleteSchedule(scheduleId);
+            setOpenDeleteModal(false);
+            Alert.alert('성공', '스케줄이 삭제되었습니다.');
+            navigation.navigate('CalendarPage');
+          } catch (error: any) {
+            console.error('삭제 실패:', error);
+            Alert.alert('오류', '스케줄 삭제에 실패했습니다.');
+          }
+        }}
+      >
+        {'일정을 삭제하시겠습니까?'}
+      </Modal>
+    )}
 
             {/* 하단 버튼 */}
             <View
@@ -595,34 +610,20 @@ export default function ViewScheduleDetailPage() {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginTop: 24,
-                paddingHorizontal: width > 400 ? 40 : 20,
+                paddingHorizontal: width > 400 ? 20 : 10,
                 paddingVertical: height > 700 ? 32 : 16
               }}
             >
-              {!isEditing ? (
+              {!isEditing ? ( // 조회 모드
                 <>
-                  <TouchableOpacity
-                    onPress={() => setIsEditing(true)}
-                    style={{
-                      width: '30%',
-                      paddingVertical: 12,
-                      borderRadius: 20,
-                      alignItems: 'center',
-                      backgroundColor: '#CCCCFF',
-                      marginHorizontal: 6
-                    }}
-                  >
-                    <Text style={{ color: 'black', fontSize: width > 400 ? 16 : 14 }}>수정</Text>
-                  </TouchableOpacity>
-
                   <TouchableOpacity
                     onPress={handleDelete}
                     style={{
-                      width: '30%',
+                      width: '45%',
                       paddingVertical: 12,
                       borderRadius: 20,
                       alignItems: 'center',
-                      backgroundColor: '#FF6B6B',
+                      backgroundColor: '#1C1F21',
                       marginHorizontal: 6
                     }}
                   >
@@ -630,9 +631,25 @@ export default function ViewScheduleDetailPage() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={() => setIsEditing(true)}
                     style={{
-                      width: '30%',
+                      width: '45%',
+                      paddingVertical: 12,
+                      borderRadius: 20,
+                      alignItems: 'center',
+                      backgroundColor: '#CCCCFF',
+                      marginHorizontal: 6
+                    }}
+                  >
+                    <Text style={{ color: 'black', fontSize: width > 400 ? 16 : 14 }}>편집</Text>
+                  </TouchableOpacity>
+                </>
+              ) : ( // 편집 모드
+                <>
+                  <TouchableOpacity
+                    onPress={handleCancelEdit}
+                    style={{
+                      width: '45%',
                       paddingVertical: 12,
                       borderRadius: 20,
                       alignItems: 'center',
@@ -640,29 +657,7 @@ export default function ViewScheduleDetailPage() {
                       marginHorizontal: 6
                     }}
                   >
-                    <Text style={{ color: 'white', fontSize: width > 400 ? 16 : 14 }}>닫기</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsEditing(false);
-                      // 원본(view) 기준으로 드래프트 복원
-                      if (state.view) {
-                        dispatch({ type: 'UPDATE_DRAFT', payload: toDraft(state.view) });
-                      }
-                    }}
-                    style={{
-                      width: '45%',
-                      paddingVertical: 12,
-                      borderRadius: 20,
-                      alignItems: 'center',
-                      backgroundColor: '#1C1F21',
-                      marginHorizontal: 12
-                    }}
-                  >
-                    <Text style={{ color: 'white', fontSize: width > 400 ? 18 : 16 }}>삭제</Text>
+                    <Text style={{ color: 'white', fontSize: width > 400 ? 16 : 14 }}>취소</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -673,10 +668,10 @@ export default function ViewScheduleDetailPage() {
                       borderRadius: 20,
                       alignItems: 'center',
                       backgroundColor: '#CCCCFF',
-                      marginHorizontal: 12
+                      marginHorizontal: 6
                     }}
                   >
-                    <Text style={{ color: 'black', fontSize: width > 400 ? 18 : 16 }}>저장</Text>
+                    <Text style={{ color: 'black', fontSize: width > 400 ? 16 : 14 }}>저장</Text>
                   </TouchableOpacity>
                 </>
               )}

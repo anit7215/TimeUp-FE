@@ -19,7 +19,7 @@ export interface Schedule {
     monthly_option?: null | 'day_of_month' | 'nth_weekday';
     day_of_month?: null | number;
     nth_week?: null | number;
-    weekday: number[];
+    weekday: number | null;
     repeat_mode?: 'count' | 'until' | null;
     repeat_count?: number | null;
     repeat_until_date?: null | string;
@@ -28,7 +28,7 @@ export interface Schedule {
 }
 
 
-export type CreateScheduleRequest = Schedule;
+export type CreateScheduleRequest = Omit<Schedule, 'scheduleId'>;
 
 export type ScheduleDraft = Partial<Schedule>; 
 

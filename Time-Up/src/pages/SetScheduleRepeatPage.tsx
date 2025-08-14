@@ -58,7 +58,7 @@ export default function SetScheduleRepeatPage() {
     initialRule.nth_week ?? start_nth
   );
   const [weekday, set_weekday] = useState<number | null>(
-    initialRule.weekday?.length ? Number(initialRule.weekday[0]) : start_weekday
+    initialRule.weekday ?? start_weekday
   );
 
   const is_day_of_month_selected =
@@ -79,7 +79,7 @@ export default function SetScheduleRepeatPage() {
     set_day_of_month((prev) => (initialRule.day_of_month != null ? prev : start_day_of_month));
     set_nth_week((prev) => (initialRule.nth_week != null ? prev : start_nth));
     set_weekday((prev) =>
-      initialRule.weekday?.length ? prev : start_weekday
+      initialRule.weekday? prev : start_weekday
     );
   }, [start_weekday, start_day_of_month, start_nth]);
 
@@ -126,7 +126,7 @@ export default function SetScheduleRepeatPage() {
             monthly_option: null,
             day_of_month: null,
             nth_week: null,
-            weekday: [],
+            weekday: null,
             repeat_mode: 'count',
             repeat_count: null,
             repeat_until_date: null,
@@ -145,8 +145,8 @@ export default function SetScheduleRepeatPage() {
       nth_week: repeat_type === 'monthly' && monthly_option === 'nth_weekday' ? nth_week ?? null : null,
       weekday:
         repeat_type === 'monthly' && monthly_option === 'nth_weekday' && weekday != null
-          ? [weekday]
-          : [],
+          ? weekday
+          : null,
       repeat_mode,
       repeat_count: repeat_mode === 'count' ? repeat_count : null,
       repeat_until_date: repeat_mode === 'until' ? repeat_until_date : null,

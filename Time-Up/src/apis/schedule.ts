@@ -2,6 +2,21 @@
 import { axiosInstance } from './axiosInstance'
 import { CreateScheduleRequest, Schedule } from '../types/schedule'
 
+const normalizeSchedule = (s: any) => ({
+  id: s.id ?? s.schedule_Id ?? s.schedule_id, // 방어적 매핑
+  name: s.name ?? '',
+  start_date: s.start_date ?? s.startDate ?? null,
+  end_date: s.end_date ?? s.endDate ?? null,
+  is_important: !!(s.is_important ?? s.isImportant),
+  is_reminding: !!(s.is_reminding ?? s.isReminding),
+  remind_at: s.remind_at ?? s.remind_minutes ?? null,   // 핵심!
+  memo: s.memo ?? '',
+  place_name: s.place_name ?? s.placeName ?? '',
+  color: s.color ?? 'gray',
+  recurrence_rule: s.recurrence_rule ?? null,
+});
+
+
 // 상세 스케줄 CRUD
 
 // 일정 등록 (POST)
@@ -16,10 +31,10 @@ export const createSchedule = async (
 }
 
 // 상세 일정 조회 (GET)
-export const getScheduleById = async (scheduleId: string): Promise<Schedule> => {
+export const getScheduleById = async (scheduleId: string) => { // normailze에서 any 타입이라 일단 promise 뺌
   const response = await axiosInstance.get(`/schedules/${scheduleId}`);
   console.log(scheduleId, response.data)
-  return response.data;
+  return normalizeSchedule(response.data);
 };
 
 // 일정 삭제 (DELETE)

@@ -64,7 +64,7 @@ const CalendarPage = () => {
   };
 
   const buildDotsFromByDay = (
-    schedulesByDay: Record<string, { color: string }[]>,
+    schedulesByDay: Record<string, { color: string, scheduleId?: string }[]>,
     year: number,
     monthIndex0: number // 0~11
   ) => {
@@ -72,13 +72,24 @@ const CalendarPage = () => {
   
     Object.entries(schedulesByDay || {}).forEach(([dayStr, arr]) => {
       const day = Number(dayStr); // "8" -> 8
-      const key = `${year}-${monthIndex0 + 1}-${day}`; // 네 getEventCount 포맷과 동일
+      const key = `${year}-${monthIndex0 + 1}-${day}`; // getEventCount 포맷과 동일
+
+      // 중복 제거를 위해 Map 사용
+      // scheduleId가 없으면 color와 랜덤값으로 고유 ID 생성
+      const uniqueSchedules = new Map();
+
+      (arr|| []).forEach(item => {
+        const id = item.scheduleId || `${item.color}-${Math.random()}`;
+        if (!uniqueSchedules.has(id)) {
+          uniqueSchedules.set(id, item.color);
+        }
+      });
   
       // 색상 배열(최대 6개까지만 도트로 표시)
-      const colors = (arr || []).map((x) => x.color).slice(0, 6);
+      const colors = Array.from(uniqueSchedules.values()).slice(0, 6);
   
       map[key] = {
-        count: arr?.length || 0,
+        count: uniqueSchedules.size, // 실제 일정 개수
         colors,
       };
     });
@@ -89,14 +100,14 @@ const CalendarPage = () => {
   const loadMonth = async (dateOrISO: Date | string) => {
     try {
       const monthKey = toYyyyMm(dateOrISO);     // '2025-08'
-      const res = await getSchedules(monthKey); // { result, status, success: { schedulesByDay }, ... }
+      const res = await getSchedules(monthKey); 
   
       const d = typeof dateOrISO === 'string' ? new Date(dateOrISO) : dateOrISO;
       const y = d.getFullYear();
       const mIndex0 = d.getMonth();
   
       const byDay = res?.success?.schedulesByDay || {};
-      setEvents(buildDotsFromByDay(byDay, y, mIndex0)); // ⬅️ 변경 포인트
+      setEvents(buildDotsFromByDay(byDay, y, mIndex0)); 
       setSelectedMonth(monthKey);
       console.log(res?.status, res?.result, res?.success);
     } catch (e) {

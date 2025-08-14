@@ -37,7 +37,6 @@ type ScheduleAction =
 const initialState: ScheduleState = {
   schedules: [],
   draft: {
-    scheduleId: '', // scheduleId가 처음에 빈칸인게 맞나...
     name: '',
     start_date: '',
     end_date: '',
@@ -54,7 +53,7 @@ const initialState: ScheduleState = {
         monthly_option: null,
         day_of_month: null,
         nth_week: null,
-        weekday: [],
+        weekday: null,
         repeat_mode: null,
         repeat_count: null,
         repeat_until_date: null,
