@@ -10,8 +10,7 @@ export default function DiaryWritePage() {
     <BottomLayout>
       <View className="flex-1 items-center justify-center bg-black">
         <DiaryIcon/>
-        <Text className="mt-[54px] text-xl text-slate-50 text-white font-medium leading-7">하루 일기 서비스를 준비중입니다!</Text>
-        <Text className="text-xl text-slate-50 text-white font-medium leading-7">곧 만나요!</Text>
+        <Text className="mt-[54px] text-xl text-slate-50 text-white font-medium leading-7 text-center">하루 일기 서비스를 준비중입니다!{'\n'}곧 만나요!</Text>
       </View>
     </BottomLayout>
   );
