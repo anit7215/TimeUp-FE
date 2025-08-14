@@ -223,9 +223,9 @@ const handleSave = async () => {
               onPress={()=>dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important }})}
               style={{ marginLeft: 18}}
             >
-              {/* <StarIcon 
+              { <StarIcon 
                 fill={form.is_important ? 'white' : 'none'}
-              /> */}
+              /> }
             </TouchableOpacity>
           </View>
 

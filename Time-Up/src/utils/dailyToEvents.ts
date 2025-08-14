@@ -1,5 +1,6 @@
 // utils/dailyToEvents.ts
 import type { UIEvent } from '../components/SetSchedule/ScheduleUI';
+import { toHex } from '@/src/utils/colors'; // 색상 유틸리티 함수
 
 // 로컬 타임존 오프셋(+9 같은 것). JS는 분 단위로 주니 시간으로 환산
 const tzHours = -new Date().getTimezoneOffset() / 60; // KST이면 9
@@ -39,7 +40,7 @@ export const dailyToEvents = (schedules: any[]): UIEvent[] => {
       title: s.name,
       startTime,
       duration,
-      color: s.color || 'dodgerblue',
+      color: toHex(s.color),
       scheduleId: String(s.schedule_id),
     } as UIEvent;
   });

@@ -16,6 +16,7 @@ import { useSchedule } from '../context/ScheduleContext';
 import { toYyyyMm } from '../utils/userTimeFormat';
 import { getSchedules, getImportantSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
 import { dailyToEvents } from '../utils/dailyToEvents';
+import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
 
 const { width, height } = Dimensions.get('window');
 
@@ -108,31 +109,68 @@ const CalendarPage = () => {
   };
 
   const loadMonth = async (dateOrISO: Date | string) => {
+    // setLoading(true);
+    // setError?.(null as any);
+  
     try {
-      const monthKey = toYyyyMm(dateOrISO);     // '2025-08'
-      const res = await getSchedules(monthKey); 
-      const importantRes = await getImportantSchedules(monthKey) // 중요 일정 같이 조회
+      const monthKey = toYyyyMm(dateOrISO); // 'YYYY-MM'
   
-      const d = typeof dateOrISO === 'string' ? new Date(dateOrISO) : dateOrISO;
-      const y = d.getFullYear();
-      const mIndex0 = d.getMonth();
+      // 병렬 요청으로 살짝 더 빠르게
+      const [res, importantRes] = await Promise.all([
+        getSchedules(monthKey),
+        getImportantSchedules(monthKey),
+      ]);
   
-      const byDay = res?.success?.schedulesByDay || {};
-      setEvents(buildDotsFromByDay(byDay, y, mIndex0)); 
+      // 기준 날짜 파생
+      const base = typeof dateOrISO === 'string' ? new Date(dateOrISO) : dateOrISO;
+      const y = base.getFullYear();
+      const mIndex0 = base.getMonth();
+  
+      // 월별 도트 데이터 정규화: 색상 → HEX, ID는 되도록 유니크하게
+      const byDayRaw = res?.success?.schedulesByDay ?? {};
+      const byDay = Object.fromEntries(
+        Object.entries(byDayRaw).map(([dayStr, arr]: any) => [
+          dayStr,
+          (arr ?? []).map((item: any) => ({
+            ...item,
+            color: toHex(item.color), // 'red' → '#F7A1A1', 이미 hex면 그대로
+            // 도트 중복 제거용 key: 서버가 schedule_id만 주면 여기서 scheduleId로 통일
+            scheduleId: String(item.scheduleId ?? item.schedule_id ?? item.id ?? `${dayStr}-${Math.random()}`),
+          })),
+        ])
+      );
+  
+      setEvents(buildDotsFromByDay(byDay, y, mIndex0));
       setSelectedMonth(monthKey);
-      console.log(res?.status, res?.result, res?.success);
-      console.log(importantRes?.status, importantRes?.result, importantRes?.success);
+  
+      // 중요 일정 응답 파싱
       const raw =
         importantRes?.success?.schedules ??
         importantRes?.success ??
         importantRes?.data ??
         importantRes;
   
-      setImportantSchedules(Array.isArray(raw) ? raw : []);
+      const list: any[] = Array.isArray(raw) ? raw : [];
+  
+      // 중요 일정도 색상을 HEX로 정규화 + 정렬
+      const normalizedImportant = list
+        .map((s) => ({
+          ...s,
+          color: toHex(s.color),
+        }))
+        .sort(
+          (a, b) =>
+            new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        );
+  
+      setImportantSchedules(normalizedImportant);
     } catch (e) {
-      console.error('월별 일정 조회 실패:', e); // 에러부분을 다시 추가해야 하나?
+      console.error('월별 일정 조회 실패:', e);
+      // setError?.('월별 일정 조회 실패');
       setEvents({});
       setImportantSchedules([]);
+    } finally {
+      // setLoading(false);
     }
   };
   

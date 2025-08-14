@@ -83,6 +83,7 @@ export default function ViewScheduleDetailPage() {
   };
 
   // ---- Load schedule on mount ----
+  /*
   useEffect(() => {
     if (!scheduleId) return;
 
@@ -108,8 +109,103 @@ export default function ViewScheduleDetailPage() {
         navigation.goBack();
       }
     })();
-  }, [scheduleId, dispatch, navigation]);
+  }, [scheduleId, dispatch, navigation]); */
+// 디버깅용 useEffect
 
+// 1. 스케줄 로드 함수 분리
+const loadSchedule = async () => {
+  try {
+    console.log('🔄 스케줄 로딩 시작...');
+    dispatch({ type: 'VIEW_SCHEDULE_REQUEST', payload: { scheduleId } });
+
+    const apiResponse = await getScheduleById(scheduleId);
+    console.log('🔍 API 전체 응답:', apiResponse);
+
+    // 실제 스케줄 데이터 추출
+    let actualSchedule = apiResponse;
+    if (apiResponse?.success?.schedule) {
+      actualSchedule = apiResponse.success.schedule;
+    } else if (apiResponse?.schedule) {
+      actualSchedule = apiResponse.schedule;
+    }
+
+    console.log('🔍 실제 스케줄 데이터:', actualSchedule);
+    console.log('🔍 actualSchedule.name:', actualSchedule.name);
+
+    // 서버 원본 보관
+    dispatch({ type: 'VIEW_SCHEDULE_SUCCESS', payload: actualSchedule });
+
+    // 드래프트 초기화
+    const draftData = toDraft(actualSchedule);
+    console.log('🔍 toDraft 결과:', draftData);
+    dispatch({ type: 'UPDATE_DRAFT', payload: draftData });
+
+    setCurrentDate(actualSchedule.start_date ?? new Date().toISOString());
+    console.log('✅ 스케줄 로딩 완료');
+  } catch (e: any) {
+    console.error('❌ 스케줄 로드 에러:', e);
+    dispatch({
+      type: 'VIEW_SCHEDULE_FAILURE',
+      payload: { error: e?.message ?? '조회 실패' },
+    });
+    throw e;
+  }
+};
+
+// 2. useEffect
+useEffect(() => {
+  if (!scheduleId) return;
+
+  loadSchedule().catch((error) => {
+    console.error('❌ useEffect 에러:', error);
+    Alert.alert('오류', '스케줄을 불러올 수 없습니다.');
+    navigation.goBack();
+  });
+}, [scheduleId]);
+
+// 3. 수정 핸들러
+const handleUpdate = async () => {
+  try {
+    console.log('🔄 스케줄 수정 시작...');
+    console.log('🔍 수정할 데이터:', schedule);
+
+    // 1. 수정 요청
+    const updateResponse = await updateSchedule(scheduleId, schedule);
+    console.log('🔍 수정 API 응답:', updateResponse);
+
+    // 2. 수정 후 최신 데이터 다시 로드
+    console.log('🔄 수정 후 데이터 다시 로드...');
+    await loadSchedule();
+
+    setIsEditing(false);
+    Alert.alert('성공', '스케줄이 수정되었습니다.');
+    console.log('✅ 스케줄 수정 완료');
+  } catch (err: any) {
+    console.error('❌ 수정 에러:', err);
+    if (err?.response) {
+      Alert.alert('서버 응답 오류', err.response.data?.message || '수정에 실패했습니다');
+    } else if (err?.request) {
+      Alert.alert('요청 실패', '서버로 요청을 보내지 못했습니다');
+    } else {
+      Alert.alert('에러', err?.message ?? '수정 실패');
+    }
+  }
+};
+
+// 4. 취소 핸들러도 수정
+const handleCancelEdit = () => {
+  setIsEditing(false);
+  // 원본(view) 기준으로 드래프트 복원
+  if (state.view) {
+    console.log('🔄 편집 취소 - 원본으로 복원');
+    dispatch({ type: 'UPDATE_DRAFT', payload: toDraft(state.view) });
+  }
+};
+
+// 추가: 렌더링 시점의 데이터 상태 확인
+console.log('🔍 렌더링 시점 schedule:', schedule);
+console.log('🔍 렌더링 시점 schedule.name:', schedule?.name);
+console.log('🔍 렌더링 시점 schedule.start_date:', schedule?.start_date);
   // ---- Helpers ----
   const { fullText } = buildRecurrenceSummary(schedule);
 
@@ -123,7 +219,7 @@ export default function ViewScheduleDetailPage() {
   };
 
   // ---- Actions ----
-  const handleUpdate = async () => {
+  /* const handleUpdate = async () => {
     try {
       const updated = await updateSchedule(scheduleId, schedule);
 
@@ -143,18 +239,9 @@ export default function ViewScheduleDetailPage() {
         Alert.alert('에러', err?.message ?? '수정 실패');
       }
     }
-  };
+  }; */
 
   const handleDelete = () => setOpenDeleteModal(true);
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    // 원본(view) 기준으로 드래프트 복원
-    if (state.view) {
-      dispatch({ type: 'UPDATE_DRAFT', payload: toDraft(state.view) });
-    }
-  };
-
   const gotoRemindPage = () => navigation.navigate('SetRemindAlarmPage');
   const gotoRepeatPage = () => navigation.navigate('SetScheduleRepeatPage');
   const gotoLocationPage = () => navigation.navigate('SetLocationPage');

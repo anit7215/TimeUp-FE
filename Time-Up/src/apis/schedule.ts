@@ -2,6 +2,7 @@
 import { axiosInstance } from './axiosInstance'
 import { CreateScheduleRequest, Schedule } from '../types/schedule'
 
+/* 
 const normalizeSchedule = (s: any) => ({
   id: s.id ?? s.schedule_Id ?? s.schedule_id, // 방어적 매핑
   name: s.name ?? '',
@@ -15,7 +16,7 @@ const normalizeSchedule = (s: any) => ({
   color: s.color ?? 'gray',
   recurrence_rule: s.recurrence_rule ?? null,
 });
-
+*/
 
 // 상세 스케줄 CRUD
 
@@ -34,7 +35,7 @@ export const createSchedule = async (
 export const getScheduleById = async (scheduleId: string) => { // normailze에서 any 타입이라 일단 promise 뺌
   const response = await axiosInstance.get(`/schedules/${scheduleId}`);
   console.log(scheduleId, response.data)
-  return normalizeSchedule(response.data);
+  return response.data.success.schedule;
 };
 
 // 일정 삭제 (DELETE)
@@ -47,9 +48,18 @@ export const updateSchedule = async (
   scheduleId: string,
   data: CreateScheduleRequest
 ): Promise<Schedule> => {
-  const res = await axiosInstance.put(`/schedules/${scheduleId}`, data)
-  return res.data
-}
+  const res = await axiosInstance.put(`/schedules/${scheduleId}`, data);
+  
+  // 응답 구조 확인 후 안전하게 추출
+  if (res.data?.success?.schedule) {
+    return res.data.success.schedule;
+  } else if (res.data?.schedule) {
+    return res.data.schedule;
+  } else {
+    console.warn('예상하지 못한 API 응답 구조:', res.data);
+    return res.data;
+  }
+};
 
 
 // 월별 일정 목록 조회 (GET)
