@@ -47,7 +47,6 @@ export interface ImportantSchedule {
   name: string;
   start_date: string;
   end_date: string;
-  place_name?: string;
+  place_name: string;
   color: string;
-  is_important: boolean;
 }

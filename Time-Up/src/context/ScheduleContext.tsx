@@ -20,11 +20,14 @@ type ScheduleAction =
   | { type: 'FETCH_MONTH_REQUEST'; monthKey: MonthKey }   // 월별 일정 조회
   | { type: 'FETCH_MONTH_SUCCESS'; monthKey: MonthKey; payload: Schedule[] }
   | { type: 'FETCH_MONTH_FAILURE'; monthKey: MonthKey; error: string }
+
   | { type: 'VIEW_SCHEDULE_REQUEST'; payload: GetScheduleRequest}
   | { type: 'VIEW_SCHEDULE_SUCCESS'; payload: GetScheduleResponse}
   | { type: 'VIEW_SCHEDULE_FAILURE'; payload: { error: string }}
+
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
+  
   | { type: 'SET_SCHEDULES'; payload: Schedule[] }
   | { type: 'ADD_SCHEDULE'; payload: Schedule }
   | { type: 'UPDATE_SCHEDULE'; payload: UpdateScheduleRequest }

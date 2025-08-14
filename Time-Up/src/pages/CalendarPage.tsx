@@ -14,9 +14,19 @@ import { formatMonthDay } from '../components/SetSchedule/formatDate';
 import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
 import { useSchedule } from '../context/ScheduleContext';
 import { toYyyyMm } from '../utils/userTimeFormat';
-import { getSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
+import { getSchedules, getImportantSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
+import { dailyToEvents } from '../utils/dailyToEvents';
 
 const { width, height } = Dimensions.get('window');
+
+
+type ImportantSchedule = {
+  schedule_id: number; // 얘는 또 snake여
+  name: string;
+  start_date: string;
+  end_date: string;
+  color: string;
+}
 
 const CalendarPage = () => {
   const navigation = useNavigation<any>();
@@ -29,12 +39,12 @@ const CalendarPage = () => {
   const [events, setEvents] = useState<Record<string, { count: number; colors: string[] }>>({});
   const [isPlusButtonPressed, setIsPlusButtonPressed] = useState(false);
   const [ModalOpen, setModalOpen] = useState(false);
+  const [importantSchedules, setImportantSchedules] = useState<ImportantSchedule[]>([]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // 중요 일정 조회
-  const schedules = [
+/*  const schedules = [
     {
       scheduleId: '1',
       name: '옷 사기',
@@ -53,7 +63,7 @@ const CalendarPage = () => {
       is_important: true,
       place_name: '회의실 B'
     }
-  ];
+  ]; */
 
   const toDateKey = (isoOrDate: string | Date) => {
     const d = typeof isoOrDate === 'string' ? new Date(isoOrDate) : isoOrDate;
@@ -101,6 +111,7 @@ const CalendarPage = () => {
     try {
       const monthKey = toYyyyMm(dateOrISO);     // '2025-08'
       const res = await getSchedules(monthKey); 
+      const importantRes = await getImportantSchedules(monthKey) // 중요 일정 같이 조회
   
       const d = typeof dateOrISO === 'string' ? new Date(dateOrISO) : dateOrISO;
       const y = d.getFullYear();
@@ -110,9 +121,18 @@ const CalendarPage = () => {
       setEvents(buildDotsFromByDay(byDay, y, mIndex0)); 
       setSelectedMonth(monthKey);
       console.log(res?.status, res?.result, res?.success);
+      console.log(importantRes?.status, importantRes?.result, importantRes?.success);
+      const raw =
+        importantRes?.success?.schedules ??
+        importantRes?.success ??
+        importantRes?.data ??
+        importantRes;
+  
+      setImportantSchedules(Array.isArray(raw) ? raw : []);
     } catch (e) {
-      console.error('월별 일정 조회 실패:', e);
+      console.error('월별 일정 조회 실패:', e); // 에러부분을 다시 추가해야 하나?
       setEvents({});
+      setImportantSchedules([]);
     }
   };
   
@@ -129,14 +149,6 @@ const CalendarPage = () => {
     `${year}-${String(month + 1).padStart(2, '0')}`
   );
   const [isModalVisible, setIsModalVisible] = useState(true); // 항상 표시되도록 true로 설정
-
-
-
-
-  // 중요 일정 모달 열기 함수 추가
-  const openImportantScheduleModal = () => {
-    setIsModalVisible(true);
-  };
 
   const closeImportantScheduleModal = () => {
     setIsModalVisible(false);
@@ -161,7 +173,7 @@ useEffect(() => {
   loadMonth(currentDate);
 }, [currentDate]);
 
-  const handleAddSchedule = (date: string) => { // 이건 모달창 뜨고 확인 버튼 누르고 나서 이뤄져야 할 로직
+  const handleAddSchedule = (date: string) => { 
     const dateToUse = selectedDate;
     console.log('선택된 날짜:', dateToUse);
 
@@ -409,7 +421,7 @@ useEffect(() => {
     {/* ImportantScheduleModal을 GestureHandlerRootView 내부로 이동 */}
     <ImportantScheduleModal
       selectedMonth={selectedMonth}
-      schedules={schedules}
+      schedules={importantSchedules}
       isVisible={isModalVisible}
       onClose={closeImportantScheduleModal}
     />

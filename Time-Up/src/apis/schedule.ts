@@ -69,3 +69,11 @@ export const getDailySchedules = async (dateISO: string) => {
   })
   return res.data
 }
+
+// 중요 일정 조회
+export const getImportantSchedules = async (targetMonth: string) => {
+  const res = await axiosInstance.get('/schedules/important', {
+    params: { month: targetMonth },
+  })
+  return res.data
+}
