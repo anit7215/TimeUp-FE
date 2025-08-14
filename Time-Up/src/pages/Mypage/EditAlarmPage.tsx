@@ -1,10 +1,11 @@
+import { getAlarmList, getAutoAlarm, getAutoAlarmCheckTime, putAutoAlarmCheckTime, updateAutoAlarm } from '@/src/apis/users';
+import { alarmSoundOptions, intervalOptions, remindSoundOptions, remindVibrationOptions, repeatCountOptions, vibrationTypeOptions } from '@/src/constants/userOptions';
+import { loadRemindSettings, saveRemindSettings } from '@/src/utils/remindStorage';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
 import TimeModal from '../../components/Onboarding/TimeModal';
-import { putAutoAlarmCheckTime, getAutoAlarmCheckTime, updateAutoAlarm, getAlarmList, getAutoAlarm } from '@/src/apis/users';
-import { remindSoundOptions, remindVibrationOptions, alarmSoundOptions, vibrationTypeOptions, intervalOptions, repeatCountOptions } from '@/src/constants/userOptions';
 
 export default function EditrAlarmPage() {
   const [remindSound, setRemindSound] = useState<string | null>(null);
@@ -26,7 +27,12 @@ export default function EditrAlarmPage() {
   };
 
   useEffect(() => {
-    const fetchAlarmData = async () => {
+    const fetchAndSetData = async () => {
+      const remindSettings = await loadRemindSettings();
+      if (remindSettings) {
+        setRemindSound(remindSettings.sound);
+        setRemindVibration(remindSettings.vibration);
+      }
       try {
         const response = await getAutoAlarmCheckTime();
         const timeStr = response?.alarm_check_time;
@@ -43,16 +49,10 @@ export default function EditrAlarmPage() {
           setAutoAlarmId(id);
 
           const alarmDetail = await getAutoAlarm(id);
-
-          console.log('alarmDetail', alarmDetail);
-
           setAlarmSound(alarmDetail.is_sound ? 'defaultSound' : 'no'); 
           setVibrationType(alarmDetail.is_vibrating ? alarmDetail.vibration_type : 'no');
           setInterval(alarmDetail.repeat_interval?.toString() ?? '0');
           setRepeatCount(alarmDetail.repeat_count?.toString() ?? '0');
-
-          if (alarmDetail.remind_sound) setRemindSound(alarmDetail.remind_sound);
-          if (alarmDetail.remind_vibration) setRemindVibration(alarmDetail.remind_vibration);
         } else {
           console.warn('자동 알람이 없습니다.');
         }
@@ -60,7 +60,7 @@ export default function EditrAlarmPage() {
         console.error('알람 데이터 불러오기 실패:', error);
       }
     };
-    fetchAlarmData();
+    fetchAndSetData();
   }, []);
 
   const handleSave = async () => {
@@ -74,6 +74,7 @@ export default function EditrAlarmPage() {
     }
 
     try {
+      await saveRemindSettings({ sound: remindSound, vibration: remindVibration });
       const timePayload = {
         alarm_check_time: new Date(
           Date.UTC(1970, 0, 1, Number(alarmTime.hour), Number(alarmTime.minute), 0)
@@ -90,12 +91,11 @@ export default function EditrAlarmPage() {
         repeat_interval: Number(interval) || 0,
         repeat_count: Number(repeatCount) || 0,
       };
-
       await updateAutoAlarm(autoAlarmId, alarmPayload);
 
-      Alert.alert('저장 완료', '자동 알람 설정이 저장되었습니다.');
+      Alert.alert('저장 완료', '설정이 저장되었습니다.');
     } catch (error) {
-      console.error('자동 알람 저장 실패:', error);
+      console.error('설정 저장 실패:', error);
       Alert.alert('저장 실패', '다시 시도해주세요.');
     }
   };
