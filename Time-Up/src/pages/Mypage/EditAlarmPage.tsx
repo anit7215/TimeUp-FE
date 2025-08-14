@@ -1,11 +1,11 @@
 import { getAlarmList, getAutoAlarm, getAutoAlarmCheckTime, putAutoAlarmCheckTime, updateAutoAlarm } from '@/src/apis/users';
 import { alarmSoundOptions, intervalOptions, remindSoundOptions, remindVibrationOptions, repeatCountOptions, vibrationTypeOptions } from '@/src/constants/userOptions';
 import { loadRemindSettings, saveRemindSettings } from '@/src/utils/remindStorage';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
-import TimeModal from '../../components/Onboarding/TimeModal';
+import DayTimeModal, { TimeModalRef } from '../../components/Onboarding/DayTimeModal';
 
 export default function EditrAlarmPage() {
   const [remindSound, setRemindSound] = useState<string | null>(null);
@@ -15,16 +15,17 @@ export default function EditrAlarmPage() {
   const [interval, setInterval] = useState<string | null>(null);
   const [repeatCount, setRepeatCount] = useState<string | null>(null);
 
-  const [open, setOpen] = useState(false);
-  const [isOptional, setIsOptional] = useState(false);
   const [alarmTime, setAlarmTime] = useState<{ hour: string; minute: string } | null>(null);
 
   const [autoAlarmId, setAutoAlarmId] = useState<number | null>(null);
+  const timeModalRef = useRef<TimeModalRef>(null);
 
   const handleSelect = (hour: string, minute: string) => {
     setAlarmTime({ hour, minute });
-    setOpen(false);
   };
+  const handleOpenTimeModal = useCallback(() => {
+    timeModalRef.current?.present();
+  }, []);
 
   useEffect(() => {
     const fetchAndSetData = async () => {
@@ -147,7 +148,7 @@ export default function EditrAlarmPage() {
 
       <TouchableOpacity
         className="bg-gray-900 rounded-lg px-2 py-3 mb-2"
-        onPress={() => { setOpen(true); setIsOptional(true); }}
+        onPress={handleOpenTimeModal}
       >
         <View className="flex-row justify-between items-center">
           <Text className="text-white text-base">자동 알람 확인 시간</Text>
@@ -163,14 +164,10 @@ export default function EditrAlarmPage() {
           </Text>
         </View>
       </TouchableOpacity>
-      {open && (
-        <TimeModal
-          visible={open}
-          onClose={() => setOpen(false)}
-          onSelect={handleSelect}
-          choice={isOptional ? 'optional' : undefined}
-        />
-      )}
+       <DayTimeModal
+        ref={timeModalRef}
+        onSelect={handleSelect}
+        choice={'optional'}/>
     </ScrollView>
   );
 }

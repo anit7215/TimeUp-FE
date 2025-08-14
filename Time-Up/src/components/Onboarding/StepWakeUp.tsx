@@ -1,20 +1,18 @@
-
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import WakeUpTimeModal from './WakeUpTimeModal';
+import WakeUpTimeModal, { WakeUpTimeModalRef } from './WakeUpTimeModal';
 
 const days = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
 
 type TimeData = { period: string; hour: string; minute: string };
 
 type StepWakeUpProps = {
-  selectedTimes: Record<string, TimeData>;
-   setSelectedTimes: (val: Record<string, TimeData>) => void;
+  selectedTimes: Record<string, TimeData>;  setSelectedTimes: (val: Record<string, TimeData>) => void;
 };
 
 export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWakeUpProps) {
-  const [open, setOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const wakeUpModalRef = useRef<WakeUpTimeModalRef>(null);
   const handleSelect = (hour: string, minute: string, period: string, selectedDays: string[]) => {
     const timeData = { hour, minute, period };
     const updated = { ...selectedTimes };
@@ -34,6 +32,10 @@ export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWake
   const convertToShortDay = (day: string): string => {
   return day.slice(0, 1); 
 };
+  const handleOpenModal = useCallback((day: string) => {
+    setSelectedDay(day); 
+    wakeUpModalRef.current?.present(); 
+  }, []);
 
   return (
     <>
@@ -44,10 +46,7 @@ export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWake
         <TouchableOpacity
           key={day}
           className="px-12 py-3 mb-3 rounded-[20px] flex-row justify-between items-center bg-gray-800"
-          onPress={() => {
-            setSelectedDay(day);
-            setOpen(true);
-          }}
+          onPress={() => handleOpenModal(day)}
         >
           <Text className="text-white font-normal text-base leading-tight">{day}</Text>
           <Text className="text-white font-normal text-base">|</Text>
@@ -68,14 +67,11 @@ export default function StepWakeUp({ selectedTimes, setSelectedTimes }: StepWake
         </TouchableOpacity>
       ))}
 
-      {open && (
-        <WakeUpTimeModal
-          visible={open}
-          onClose={() => setOpen(false)}
-          onSelect={handleSelect}
-          initialSelectedDays={selectedDay ? [convertToShortDay(selectedDay)] : []}
-        />
-      )}
+      <WakeUpTimeModal
+        ref={wakeUpModalRef}
+        onSelect={handleSelect}
+        initialSelectedDays={selectedDay ? [convertToShortDay(selectedDay)] : []}
+      />
     </>
   );
 }

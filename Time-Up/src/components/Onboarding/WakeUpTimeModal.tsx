@@ -1,82 +1,120 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 import HalfTimeScrollPanel from '../common/HalfTimeScrollPanel';
 
 interface WakeUpTimeModalProps {
-  visible: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onSelect: (hour: string, minute: string, period: string, selectedDays: string[]) => void;
   initialSelectedDays: string[];
+  initialTime?: SelectedTime;
 }
+export interface WakeUpTimeModalRef {
+  present: () => void;
+  dismiss: () => void;
+}
+type SelectedTime = {
+  hour: string;
+  minute: string;
+  period: string;
+};
 
 const days = ['일', '월', '화', '수', '목', '금', '토'];
 
-export default function WakeUpTimeModal({ visible, onClose, onSelect, initialSelectedDays }: WakeUpTimeModalProps) {
-  const [selectedTime, setSelectedTime] = useState({ hour: '00', minute: '00', period: '오전' });
-  const [selectedDays, setSelectedDays] = useState<string[]>(initialSelectedDays);
-  useEffect(() => {
-  setSelectedDays(initialSelectedDays);
-}, [initialSelectedDays]);
+const WakeUpTimeModal = forwardRef<WakeUpTimeModalRef, WakeUpTimeModalProps>(
+  ({ onClose, onSelect, initialSelectedDays, initialTime }, ref) => {
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+    const snapPoints = useMemo(() => ['65%'], []);
+    const [selectedTime, setSelectedTime] = useState<SelectedTime>(
+      initialTime || { hour: '07', minute: '00', period: '오전' });
+    const [selectedDays, setSelectedDays] = useState<string[]>(initialSelectedDays);
+    useEffect(() => {
+      setSelectedDays(initialSelectedDays);
+    }, [initialSelectedDays]);
+    useImperativeHandle(ref, () => ({
+      present: () => {
+        setSelectedTime(initialTime || { hour: '07', minute: '00', period: '오전' });
+        setSelectedDays(initialSelectedDays); 
+        bottomSheetModalRef.current?.present();
+      },
+      dismiss: () => {
+        bottomSheetModalRef.current?.dismiss();
+      },
+    }));
 
-  const toggleDay = (day: string) => {
-    setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
+    const toggleDay = (day: string) => {
+      setSelectedDays((prev) =>
+        prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      );
+    };
 
-  const handleTimeChange = (hour: string, minute: string, period: string) => {
-    setSelectedTime({ hour, minute, period });
-  };
+    const handleTimeChange = (hour: string, minute: string, period: string) => {
+      setSelectedTime({ hour, minute, period: period as '오전' | '오후' });
+    };
 
-  const handleSelect = () => {
-    onSelect(selectedTime.hour, selectedTime.minute, selectedTime.period, selectedDays);
-    onClose();
-  };
+    const handleSelect = () => {
+      onSelect(selectedTime.hour, selectedTime.minute, selectedTime.period, selectedDays);
+      bottomSheetModalRef.current?.dismiss();
+    };
 
-  return (
-    <Modal animationType="slide" transparent visible={visible}>
-      <Pressable className="flex-1 justify-end bg-black/50" onPress={onClose}>
-        <Pressable
-          className="px-4 pt-9 pb-12 rounded-t-[32px] flex-col justify-end items-center bg-gray-800"
-          onPress={() => {}}
-        >
-          <HalfTimeScrollPanel onTimeChange={handleTimeChange} />
+    const handleClose = () => {
+      bottomSheetModalRef.current?.dismiss();
+    };
 
-          <View className="flex-row justify-between w-full px-9 mt-9">
-            {days.map((day) => (
-              <TouchableOpacity
-                key={day}
-                className={`px-3 py-1 rounded-full ${
-                  selectedDays.includes(day) ? 'bg-blue' : 'bg-transparent'
-                }`}
-                onPress={() => toggleDay(day)}
+    return (
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={0}
+        snapPoints={snapPoints}
+        onDismiss={onClose}
+        backgroundStyle={{ backgroundColor: '#33373B' }}
+        handleIndicatorStyle={{ backgroundColor: '#52565A' }}
+      >
+        <BottomSheetView className='px-12 py-8 flex-1 justify-between items-center'>
+          <View className="w-full items-center flex-grow justify-between">
+            <View  className='items-center'>
+              <HalfTimeScrollPanel 
+                onTimeChange={handleTimeChange}/>
+              <View className="flex-row justify-between w-full px-9 mt-8">
+                {days.map((day) => (
+                  <TouchableOpacity
+                    key={day}
+                    className={`px-3 py-1 rounded-full ${
+                      selectedDays.includes(day) ? 'bg-blue' : 'bg-transparent'
+                    }`}
+                    onPress={() => toggleDay(day)}
+                  >
+                    <Text
+                      className={`text-lg text-white font-normal`}>
+                      {day}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View className="flex-row justify-between items-center w-full px-12 mt-8 mb-12 gap-6">
+              <TouchableOpacity 
+                onPress={handleClose}
+                className='flex-1 px-[46px] py-2 rounded-[20px] justify-center items-center bg-gray-700'
               >
-                <Text
-                  className={`text-lg text-white font-normal`}>
-                  {day}
-                </Text>
+                <Text className="text-gray-100 text-base font-medium leading-normal">취소</Text>
               </TouchableOpacity>
-            ))}
+              <TouchableOpacity
+                onPress={handleSelect}
+                disabled={selectedDays.length === 0}
+                className={`flex-1 px-[46px] py-2  rounded-[20px] justify-center items-center bg-light ${
+                  selectedDays.length === 0 ? 'opacity-50' : ''
+                }`}
+              >
+                <Text className="text-black text-base font-medium leading-normal">선택</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+        </BottomSheetView>
+      </BottomSheetModal>
+    );
+  }
+);
 
-          <View className="flex-row justify-between gap-6 items-center w-full px-6 mt-16">
-            <TouchableOpacity
-              onPress={onClose}
-              className="px-[46px] py-2 rounded-[20px] justify-center items-center bg-gray-700"
-            >
-              <Text className="text-gray-100 text-base font-medium leading-normal">취소</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleSelect}
-              className="px-[46px] py-2 rounded-[20px] justify-center items-center bg-light"
-              disabled={selectedDays.length === 0}
-            >
-              <Text className="text-black text-base font-medium leading-normal">선택</Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
+export default WakeUpTimeModal;

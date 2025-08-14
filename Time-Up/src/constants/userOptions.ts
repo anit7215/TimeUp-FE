@@ -32,19 +32,28 @@ export const transportOptions: { label: string; value: TransportType }[] = [
 
 export const remindSoundOptions = [
   { label: '알림음 없음', value: 'no' },
-  { label: 'Ring Tone', value: 'ring' },
-  { label: 'Basic', value: 'vibrate' },
+  { label: 'Heavy Raindrop', value: 'rain' },
+  { label: 'Basic Ring', value: 'basic' },
+  { label: 'Ocean Wave', value: 'ocean' },
+  { label: 'Bird Chirp', value: 'bird' },
+  { label: 'Classic Bell', value: 'classic' }
 ];
 
 export const remindVibrationOptions = [
   { label: '진동 없음', value: 'no' },
-  { label: 'Ring Tone', value: 'ring' },
-  { label: 'Basic', value: 'vibrate' },
+  { label: 'short1', value: 'short1' },
+  { label: 'short2', value: 'short2' },
+  { label: 'long1', value: 'long1' },
+  { label: 'long2', value: 'long2' },
 ];
 
 export const alarmSoundOptions = [
   { label: '알림음 없음', value: 'no' },
   { label: 'Heavy Raindrop', value: 'rain' },
+  { label: 'Basic Ring', value: 'basic' },
+  { label: 'Ocean Wave', value: 'ocean' },
+  { label: 'Bird Chirp', value: 'bird' },
+  { label: 'Classic Bell', value: 'classic' }
 ];
 
 export const vibrationTypeOptions = [
