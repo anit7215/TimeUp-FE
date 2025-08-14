@@ -15,7 +15,7 @@ export type RootStackParamList = {
   };
   EditInfoPage: undefined;
   EditAlarmPage: undefined;
-  FeedbackPage: undefined;
+  FeedbackPage: { alarmId: number };
   AlarmMemoPage: undefined;
   AlarmPage: undefined;
   EditMyAlarmPage: undefined;

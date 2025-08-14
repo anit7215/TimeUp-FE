@@ -1,10 +1,13 @@
-import { getAlarmList, postAutoAlarmFeedback } from '@/src/apis/users';
+import { postAutoAlarmFeedback } from '@/src/apis/users';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
+import { RootStackParamList } from '@/src/types/navigation';
+import { markFeedbackSubmitted } from '@/src/utils/feedbackStorage';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import Modal from '../../components/common/Modal';
-
+type FeedbackPageRouteProp = RouteProp<RootStackParamList, 'FeedbackPage'>;
 export default function FeedbackPage() {
   const navigation = useAppNavigation();
   const [opinion, setOpinion] = useState('');
@@ -12,40 +15,25 @@ export default function FeedbackPage() {
   const [wakeUpScore, setWakeUpScore] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [alarmId, setAlarmId] = useState<number | null>(null);
+  const [modalType, setModalType] = useState<'missing' | 'confirm'>('missing');
+  const route = useRoute<FeedbackPageRouteProp>();
 
   useEffect(() => {
-    const fetchTodayAlarmId = async () => {
-      try {
-        const alarmList = await getAlarmList();
-        const today = new Date().toISOString().slice(0, 10);
-
-        if (alarmList?.auto_alarms?.length > 0) {
-          const todayAlarm = alarmList.auto_alarms.find((alarm: any) => {
-            const alarmDate = alarm.alarm_time?.slice(0, 10);
-            return alarmDate === today;
-          });
-
-          if (todayAlarm) {
-            setAlarmId(todayAlarm.auto_alarm_id);
-          } else {
-            console.warn('오늘 울린 알람이 없습니다.');
-          }
-        } else {
-          console.warn('자동 알람이 없습니다.');
-        }
-      } catch (error) {
-        console.error('알람 데이터 불러오기 실패:', error);
-      }
-    };
-
-    fetchTodayAlarmId();
-  }, []);
-
-  const submitFeedback = async () => {
-    if (alarmTimeScore == null || wakeUpScore == null) {
-      alert('모든 항목을 선택해주세요.');
-      return;
+    if (route.params?.alarmId) {
+      setAlarmId(route.params.alarmId);
     }
+  }, [route.params]);
+
+  const handlePressSubmitButton = () => {
+    if (alarmTimeScore === null || wakeUpScore === null) {
+      setModalType('missing');
+      setOpenModal(true);
+    } else {
+      setModalType('confirm');
+      setOpenModal(true);
+    }
+  };
+  const submitFeedback = async () => {
     if (!alarmId) {
       alert('제출할 알람이 없습니다.');
       return;
@@ -53,11 +41,12 @@ export default function FeedbackPage() {
 
     try {
       await postAutoAlarmFeedback({
-        time_rating: alarmTimeScore,
-        wakeup_rating: wakeUpScore,
+        time_rating: alarmTimeScore!,
+        wakeup_rating: wakeUpScore!,
         comment: opinion,
         alarm_id: alarmId,
       });
+      await markFeedbackSubmitted(alarmId);
       alert('피드백이 제출되었습니다.');
       navigation.navigate('MyPage');
     } catch (error) {
@@ -69,7 +58,7 @@ export default function FeedbackPage() {
   return (
     <>
       <ScrollView className="flex-1 bg-black px-4 py-4">
-        <BeforeHeader title="자동 알람 피드백" rightLabel="제출" onRightPress={() => setOpenModal(true)} onBackPress={() => navigation.navigate('MyPage')}
+        <BeforeHeader title="자동 알람 피드백" rightLabel="제출" onRightPress={handlePressSubmitButton} onBackPress={() => navigation.navigate('MyPage')}
  />
         <View className="bg-gray-900 rounded-2xl p-4 mb-4">
           <View className="self-stretch pb-1 border-b border-neutral-700 inline-flex justify-center items-center gap-2.5">
@@ -127,14 +116,13 @@ export default function FeedbackPage() {
           />
         </View>
       </ScrollView>
-      {openModal && (  <Modal
+      {openModal && (
+        <Modal
           onClose={() => setOpenModal(false)}
-          onConfirm={() => {
+          onConfirm={modalType === 'confirm' ? () => {
             setOpenModal(false);
-            submitFeedback();
-          }}
-        >
-          피드백을 제출하시겠습니까?
+            submitFeedback(); } : undefined}  >
+          {modalType === 'missing' ? '만족도 점수를 모두 선택해주세요.' : '피드백을 제출하시겠습니까?'}
         </Modal>
       )}
     </>
