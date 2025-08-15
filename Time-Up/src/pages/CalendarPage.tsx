@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -9,15 +9,14 @@ import {
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PlusIcon from '../../assets/icons/plusIcon.svg';
+import { getImportantSchedules, getSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
 import Modal from '../components/common/Modal';
 import { formatMonthDay } from '../components/SetSchedule/formatDate';
 import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
 import { useSchedule } from '../context/ScheduleContext';
-import { toYyyyMm } from '../utils/userTimeFormat';
-import { getSchedules, getImportantSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
-import { dailyToEvents } from '../utils/dailyToEvents';
-import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
 import BottomLayout from '../Layouts/BottomLayout';
+import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
+import { toYyyyMm } from '../utils/userTimeFormat';
 
 const { width, height } = Dimensions.get('window');
 
@@ -467,7 +466,6 @@ useEffect(() => {
     />
     </BottomLayout>
   </GestureHandlerRootView>
-  </BottomLayout>
   );
 };
 
