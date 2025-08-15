@@ -67,7 +67,7 @@ export default function EditWakeUpAlarmPage() {
     console.log('기상 알람을 저장합니다.');
     if (!selectedAlarmId) return;
 
-    const alarmToEdit = wakeupAlarms.find(a => a.id === selectedAlarmId);
+    const alarmToEdit = wakeupAlarms.find(a => a.serverId === selectedAlarmId);
     if (!alarmToEdit) return;
 
     try {
@@ -86,11 +86,14 @@ export default function EditWakeUpAlarmPage() {
         isActive,
       });
 
-      const remoteId = (alarmToEdit as any).serverId ?? alarmToEdit.id;
+      if (alarmToEdit?.serverId == null) {
+        console.error('서버 ID가 없습니다. (wakeup_alarm_id 누락)');
+        return;
+      }
+      const remoteId = alarmToEdit.serverId; // 여기서부터 number로 추론됨
       console.log('보낼 wakeup 알람 데이터:', requestBody, '서버ID:', remoteId);
-
-      // API 호출
       const response = await putWakeupAlarm(remoteId, requestBody);
+
       console.log('기상 알람 수정 성공:', response);
       // (아래 선택) 성공 후 서버와 재동기화
       // await refreshAlarms();
@@ -103,15 +106,15 @@ export default function EditWakeUpAlarmPage() {
   };
 
   const handleSelectSound = () => {
-    navigation.navigate('SelectAlarmSoundPage');
+    navigation.navigate('SelectWakeupAlarmSoundPage');
   };
 
   const handleSelectVibrate = () => {
-    navigation.navigate('SelectAlarmVibratePage');
+    navigation.navigate('SelectWakeupAlarmVibratePage');
   };
 
   const handleSelectReplay = () => {
-    navigation.navigate('SelectAlarmReplayPage');
+    navigation.navigate('SelectWakeupAlarmReplayPage');
   };
 
   const handleTimeCancel = () => {

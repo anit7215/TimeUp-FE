@@ -104,15 +104,15 @@ export default function EditMyAlarmPage() {
 
 
   const handleSelectSound = () => {
-    navigation.navigate('SelectAlarmSoundPage');
+    navigation.navigate('SelectMyAlarmSoundPage');
   };
 
   const handleSelectVibrate = () => {
-    navigation.navigate('SelectAlarmVibratePage');
+    navigation.navigate('SelectMyAlarmVibratePage');
   };
 
   const handleSelectReplay = () => {
-    navigation.navigate('SelectAlarmReplayPage');
+    navigation.navigate('SelectMyAlarmReplayPage');
   };
 
   const handleModalCancel = () => {

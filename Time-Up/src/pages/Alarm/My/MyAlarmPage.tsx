@@ -103,12 +103,16 @@ export default function MyAlarmPage() {
     navigation.navigate('WakeUpAlarmPage');
   };
 
-  const handleGoToAlarmDetail = (id: number, title: string) => {
-    setSelectedAlarmId(id);
-    console.log(`${title} 알람 디테일 페이지로 이동합니다.`);
+  const handleGoToAlarmDetail = (alarm: AlarmItem) => {
+    const remoteId = (alarm as any).serverId ?? alarm.id; // 서버ID 최우선
+    if (remoteId == null) {
+      console.warn('서버 ID가 없습니다.');
+      return;
+    }
+    setSelectedAlarmId(remoteId);
+    console.log(`${remoteId} 알람 디테일 페이지로 이동합니다.`);
     navigation.navigate('MyAlarmDetailPage');
   };
-
 
   const handleToggleAlarm = async (id: number, currentState: boolean) => {
     try {
@@ -236,11 +240,11 @@ export default function MyAlarmPage() {
         ) : (
           <FlatList
             data={myAlarms}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => ((item as any).serverId ?? item.id).toString()}
             contentContainerStyle={{ paddingBottom: 20 }}
             renderItem={({ item: alarm }) => (
               <TouchableOpacity
-                onPress={() => handleGoToAlarmDetail(alarm.id, alarm.title)}
+                onPress={() => handleGoToAlarmDetail(alarm)}
                 activeOpacity={0.8}
               >
                 <View className="h-[5rem] w-[91%] bg-dark border border-dark-stroke rounded-2xl self-center flex-row items-center justify-between px-[4%] mt-4">

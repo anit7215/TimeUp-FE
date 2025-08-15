@@ -77,14 +77,15 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { myAlarms: myList, wakeupAlarms: wakeList } = await fetchAllAlarms();
 
       const mappedMy = myList.map((a, idx) => {
-        const serverId = (a as any).alarm_id;                // 서버에서 오면 그대로
-        const tsId = new Date(a.my_alarm_time).getTime() + idx; // fallback
-        const uiId = serverId ?? tsId;                       // 화면용 id
-
+        const serverId = (a as any).alarm_id ?? (a as any).my_alarm_id;
+        const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단임.. 이거 쓰면 안됨.. 에러 방지용..^^;;
+        // 화면 id는 서버ID가 있으면 서버ID로 고정
+        const uiId = serverId ?? tsId;
         const item = transformAlarmResponseToItem(a);
         return { ...item, id: uiId, serverId };
       });
       const mappedWake = wakeList.map((w, idx) => {
+        const serverId = (w as any).wakeup_alarm_id;
         const dayFromApi = typeof (w as any).day === 'number' ? (w as any).day : new Date(w.wakeup_time).getDay();
         const dayId = ((dayFromApi % 7) + 7) % 7; // 안전한 0~6
 
@@ -139,6 +140,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchAlarms();
   }, []);
 
+  // 아래 서버 id로 바꾸기?
   const updateAlarmField = <K extends keyof AlarmItem>(alarmId: number, field: K, value: AlarmItem[K]) => {
     setMyAlarms((prev) => prev.map((a) => (a.id === alarmId ? { ...a, [field]: value } : a)));
   };

@@ -10,8 +10,7 @@ import {
   PutMyAlarmResponse,
   ToggleMyAlarmActivationResponse,
   UpdateWakeupAlarmRequest,
-  UpdateWakeupAlarmResponse,
-  WakeupAlarmSummary,
+  WakeupAlarmSummary
 } from '@/src/types/alarm';
 import { getAccessToken } from '@/src/utils/storage';
 import { axiosInstance } from './axiosInstance';
@@ -82,29 +81,22 @@ export const deleteMyAlarm = async (
 };
 
 // 기상알람 수정 요청
-export const putWakeupAlarm = async (
-  wakeupAlarmId: number,
-  data: UpdateWakeupAlarmRequest
-): Promise<UpdateWakeupAlarmResponse> => {
+// src/apis/alarmApi.ts
+export const putWakeupAlarm = async (wakeupAlarmId: number, body: UpdateWakeupAlarmRequest) => {
   const token = await getAccessToken();
-
-  const res = await axiosInstance.put<UpdateWakeupAlarmResponse>(
+  const res = await axiosInstance.put(
     `/alarm/${wakeupAlarmId}/wakeup`,
-    data,
+    body,
     {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      params: {
-        wakeup_alarm_id: wakeupAlarmId,
       },
     }
   );
-
   return res.data;
 };
+
 
 // 기상알람 활성/비활성화 응답
 export interface ToggleWakeupActiveResponse {

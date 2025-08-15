@@ -17,11 +17,14 @@ import AlarmPage from './src/pages/Alarm/AlarmPage';
 import EditMyAlarmPage from './src/pages/Alarm/My/EditMyAlarmPage';
 import MyAlarmDetailPage from './src/pages/Alarm/My/MyAlarmDetailPage';
 import MyAlarmPage from './src/pages/Alarm/My/MyAlarmPage';
+import SelectMyAlarmReplayPage from './src/pages/Alarm/My/SelectMyAlarmReplayPage';
+import SelectMyAlarmSoundPage from './src/pages/Alarm/My/SelectMyAlarmSoundPage';
+import SelectMyAlarmVibratePage from './src/pages/Alarm/My/SelectMyAlarmVibratePage';
 import PushAlarmPage from './src/pages/Alarm/PushAlarmPage';
-import SelectAlarmReplayPage from './src/pages/Alarm/SelectAlarmReplayPage';
-import SelectAlarmSoundPage from './src/pages/Alarm/SelectAlarmSoundPage';
-import SelectAlarmVibratePage from './src/pages/Alarm/SelectAlarmVibratePage';
 import EditWakeUpAlarmPage from './src/pages/Alarm/WakeUp/EditWakeUpAlarmPage';
+import SelectWakeupAlarmReplayPage from './src/pages/Alarm/WakeUp/SelectWakeupAlarmReplayPage';
+import SelectWakeupAlarmSoundPage from './src/pages/Alarm/WakeUp/SelectWakeupAlarmSoundPage';
+import SelectWakeupAlarmVibratePage from './src/pages/Alarm/WakeUp/SelectWakeupAlarmVibratePage';
 import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUp/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/Alarm/WakeUp/WakeUpAlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
@@ -75,9 +78,9 @@ export default function App() {
               <Stack.Screen name="AlarmPage" component={AlarmPage} />
               <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
               <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
-              <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
-              <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
-              <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
+              <Stack.Screen name="SelectMyAlarmReplayPage" component={SelectMyAlarmReplayPage} />
+              <Stack.Screen name="SelectMyAlarmSoundPage" component={SelectMyAlarmSoundPage} />
+              <Stack.Screen name="SelectMyAlarmVibratePage" component={SelectMyAlarmVibratePage} />
               <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
               <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
               <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
@@ -92,6 +95,9 @@ export default function App() {
               <Stack.Screen name="SetLocationPage" component={SetLocationPage} />
               <Stack.Screen name="SetScheduleRepeatPage" component={SetScheduleRepeatPage} />
               <Stack.Screen name="SetRemindAlarmPage" component={SetRemindAlarmPage} />
+              <Stack.Screen name="SelectWakeupAlarmReplayPage" component={SelectWakeupAlarmReplayPage} />
+              <Stack.Screen name="SelectWakeupAlarmSoundPage" component={SelectWakeupAlarmSoundPage} />
+              <Stack.Screen name="SelectWakeupAlarmVibratePage" component={SelectWakeupAlarmVibratePage} />
             </Stack.Navigator>
           </NavigationContainer>
         </ScheduleProvider>

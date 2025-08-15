@@ -99,6 +99,7 @@ export default function WakeUpAlarmPage() {
   };
 
   const handleDetailPage = (day: Day) => {
+    //debugger;
     const alarm = wakeupAlarms.find(a => a.date.dayOfWeek === day);
 
     if (!alarm) {
@@ -107,7 +108,14 @@ export default function WakeUpAlarmPage() {
     }
 
     setSelectedDay(day);             // 요일 상태 저장
-    setSelectedAlarmId(alarm.id);    // wakeup_alarm_id 저장
+    if (alarm.serverId == null) {
+      console.warn('선택한 요일 알람에 serverId(wakeup_alarm_id)가 없습니다.');
+      return;
+    }
+    setSelectedAlarmId(alarm.serverId);
+
+    console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
+    navigation.navigate('WakeUpAlarmDetailPage');
     console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
     navigation.navigate('WakeUpAlarmDetailPage');
   };

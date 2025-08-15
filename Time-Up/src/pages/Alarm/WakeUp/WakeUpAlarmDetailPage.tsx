@@ -20,8 +20,8 @@ export default function WakeUpAlarmDetailPage() {
   const { height } = Dimensions.get('window');
   const { selectedAlarmId, wakeupAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, setSelectedDay } = useAlarmContext();
 
-  debugger;
-  const alarm = wakeupAlarms.find((a) => a.id === selectedAlarmId);
+  //debugger;
+  const alarm = wakeupAlarms.find((a) => a.serverId === selectedAlarmId);
   // const alarm = wakeupAlarms.find(a => a.serverId === selectedAlarmId);
 
   if (!alarm) {

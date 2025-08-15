@@ -53,11 +53,13 @@ export default function MyAlarmDetailPage() {
 
     try {
       await deleteAlarmById(selectedAlarmId);
+      // 여기 아래를 서버 id로 넘기면?
       setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId));
       navigation.navigate('MyAlarmPage');
     } catch (error: any) {
       if (error.response?.status === 404) {
         console.warn(`알람 ${selectedAlarmId}는 이미 존재하지 않습니다.`);
+         // 여기 아래를 서버 id로 넘기면?
         setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId));
         navigation.navigate('MyAlarmPage');
       } else {
