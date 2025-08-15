@@ -4,15 +4,15 @@ import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import { formatDate } from '@/src/utils/AlarmFormat';
 import React from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import PageBackButton from '../../components/common/PageBackButton';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import useAppNavigation from '../../hooks/useAppNavigation';
-import BottomLayout from '../../Layouts/BottomLayout';
+import PageBackButton from '../../../components/common/PageBackButton';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import useAppNavigation from '../../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
 
-import IconBiv from '../../../assets/images/AlarmBiv.svg';
-import IconMemo from '../../../assets/images/AlarmMemo.svg';
-import IconMusic from '../../../assets/images/AlarmMusic.svg';
-import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+import IconBiv from '../../../../assets/images/AlarmBiv.svg';
+import IconMemo from '../../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 
 
 export default function MyAlarmDetailPage() {
@@ -40,34 +40,33 @@ export default function MyAlarmDetailPage() {
     navigation.navigate('EditMyAlarmPage');
   };
 
-const handleDelete = async () => {
-  if (!selectedAlarmId) return;
+  const handleDelete = async () => {
+    if (!selectedAlarmId) return;
 
-    // ✅ 로컬 상태에서 알람 존재 여부 확인
-  if (!myAlarms.some(alarm => alarm.id === selectedAlarmId)) {
-    console.warn('삭제하려는 알람이 로컬 상태에 없습니다.');
-    return;
-  }
-  else {
-    console.log(`삭제하려는 알람이 로컬에 있습니다.`);
-  }
+    if (!myAlarms.some(alarm => alarm.id === selectedAlarmId)) {
+      console.warn('삭제하려는 알람이 로컬 상태에 없습니다.');
+      return;
+    }
+    else {
+      console.log(`삭제하려는 알람이 로컬에 있습니다.`);
+    }
 
-  try {
-    await deleteAlarmById(selectedAlarmId); // 성공적으로 삭제
-    setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId)); // 상태에서 제거
-    navigation.navigate('MyAlarmPage');
-  } catch (error: any) {
-    if (error.response?.status === 404) {
-      console.warn(`알람 ${selectedAlarmId}는 이미 존재하지 않습니다.`);
-      // 그래도 상태에서 제거하고 페이지 이동
+    try {
+      await deleteAlarmById(selectedAlarmId);
+      // 여기 아래를 서버 id로 넘기면?
       setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId));
       navigation.navigate('MyAlarmPage');
-    } else {
-      console.error('알람 삭제 실패:', error);
-      // 필요 시 사용자에게 에러 알림 추가 가능
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        console.warn(`알람 ${selectedAlarmId}는 이미 존재하지 않습니다.`);
+         // 여기 아래를 서버 id로 넘기면?
+        setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId));
+        navigation.navigate('MyAlarmPage');
+      } else {
+        console.error('알람 삭제 실패:', error);
+      }
     }
-  }
-};
+  };
 
   if (!alarm) {
     return (

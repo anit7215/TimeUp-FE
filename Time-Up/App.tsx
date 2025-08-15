@@ -1,3 +1,4 @@
+import { NotificationProvider } from '@/src/contexts/NotificationContext';
 import { GOOGLE_PLACES_API_KEY } from '@env';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,19 +10,23 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
-import { AlarmProvider } from './src/contexts/AlarmContext';
 import { ScheduleProvider } from './src/context/ScheduleContext';
+import { AlarmProvider } from './src/contexts/AlarmContext';
+import AddSchedulePage from './src/pages/AddSchedulePage';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
-import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
-import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
-import MyAlarmDetailPage from './src/pages/Alarm/MyAlarmDetailPage';
-import MyAlarmPage from './src/pages/Alarm/MyAlarmPage';
+import EditMyAlarmPage from './src/pages/Alarm/My/EditMyAlarmPage';
+import MyAlarmDetailPage from './src/pages/Alarm/My/MyAlarmDetailPage';
+import MyAlarmPage from './src/pages/Alarm/My/MyAlarmPage';
+import SelectMyAlarmReplayPage from './src/pages/Alarm/My/SelectMyAlarmReplayPage';
+import SelectMyAlarmSoundPage from './src/pages/Alarm/My/SelectMyAlarmSoundPage';
+import SelectMyAlarmVibratePage from './src/pages/Alarm/My/SelectMyAlarmVibratePage';
 import PushAlarmPage from './src/pages/Alarm/PushAlarmPage';
-import SelectAlarmReplayPage from './src/pages/Alarm/SelectAlarmReplayPage';
-import SelectAlarmSoundPage from './src/pages/Alarm/SelectAlarmSoundPage';
-import SelectAlarmVibratePage from './src/pages/Alarm/SelectAlarmVibratePage';
-import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUpAlarmDetailPage';
-import WakeUpAlarmPage from './src/pages/Alarm/WakeUpAlarmPage';
+import EditWakeUpAlarmPage from './src/pages/Alarm/WakeUp/EditWakeUpAlarmPage';
+import SelectWakeupAlarmReplayPage from './src/pages/Alarm/WakeUp/SelectWakeupAlarmReplayPage';
+import SelectWakeupAlarmSoundPage from './src/pages/Alarm/WakeUp/SelectWakeupAlarmSoundPage';
+import SelectWakeupAlarmVibratePage from './src/pages/Alarm/WakeUp/SelectWakeupAlarmVibratePage';
+import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUp/WakeUpAlarmDetailPage';
+import WakeUpAlarmPage from './src/pages/Alarm/WakeUp/WakeUpAlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiaryWritePage from './src/pages/DiaryWritePage';
 import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
@@ -31,12 +36,13 @@ import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
-import AddSchedulePage from './src/pages/AddSchedulePage';
+import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
 import SchedulePage from './src/pages/SchedulePage';
 import SetLocationPage from './src/pages/SetLocationPage';
+
 
 const queryClient = new QueryClient();
 
@@ -44,7 +50,7 @@ export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
-  
+
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -62,7 +68,7 @@ export default function App() {
   if (!mapsLoaded) {
     return null;
   }
-  
+
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
@@ -76,9 +82,9 @@ export default function App() {
               <Stack.Screen name="AlarmPage" component={AlarmPage} />
               <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
               <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
-              <Stack.Screen name="SelectAlarmReplayPage" component={SelectAlarmReplayPage} />
-              <Stack.Screen name="SelectAlarmSoundPage" component={SelectAlarmSoundPage} />
-              <Stack.Screen name="SelectAlarmVibratePage" component={SelectAlarmVibratePage} />
+              <Stack.Screen name="SelectMyAlarmReplayPage" component={SelectMyAlarmReplayPage} />
+              <Stack.Screen name="SelectMyAlarmSoundPage" component={SelectMyAlarmSoundPage} />
+              <Stack.Screen name="SelectMyAlarmVibratePage" component={SelectMyAlarmVibratePage} />
               <Stack.Screen name="WakeUpAlarmDetailPage" component={WakeUpAlarmDetailPage} />
               <Stack.Screen name="EditWakeUpAlarmPage" component={EditWakeUpAlarmPage} />
               <Stack.Screen name="MyAlarmDetailPage" component={MyAlarmDetailPage} />
@@ -95,6 +101,9 @@ export default function App() {
               <Stack.Screen name="SetRemindAlarmPage" component={SetRemindAlarmPage} />
               <Stack.Screen name="SchedulePage" component={SchedulePage} />
               <Stack.Screen name="ViewScheduleDetailPage" component={ViewScheduleDetailPage} />
+              <Stack.Screen name="SelectWakeupAlarmReplayPage" component={SelectWakeupAlarmReplayPage} />
+              <Stack.Screen name="SelectWakeupAlarmSoundPage" component={SelectWakeupAlarmSoundPage} />
+              <Stack.Screen name="SelectWakeupAlarmVibratePage" component={SelectWakeupAlarmVibratePage} />
             </Stack.Navigator>
           </NavigationContainer>
         </ScheduleProvider>
@@ -106,17 +115,19 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <PaperProvider>
         <AlarmProvider>
-          <SafeAreaView
-            edges={['top', 'bottom']}
-            className="flex-1 bg-black"
-            style={{
-              width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
-              height: screenHeight,
-              alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
-            }}
-          >
-            {content}
-          </SafeAreaView>
+          <NotificationProvider>
+            <SafeAreaView
+              edges={['top', 'bottom']}
+              className="flex-1 bg-black"
+              style={{
+                width: Platform.OS === 'web' && screenWidth > 474 ? 474 : '100%',
+                height: screenHeight,
+                alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
+              }}
+            >
+              {content}
+            </SafeAreaView>
+          </NotificationProvider>
         </AlarmProvider>
       </PaperProvider>
     </QueryClientProvider>

@@ -15,8 +15,8 @@ type TabName = 'DiaryWritePage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
 const tabGroups: Record<TabName, string[]> = {
   DiaryWritePage: ['DiaryWritePage'],
   AlarmPage: ['WakeUpAlarmPage', 'MyAlarmDetailPage', 'MyAlarmPage',
-     'WakeUpAlarmDetailPage', 'SelectAlarmSoundPage', 'SelectAlarmReplayPage',
-     'SelectAlarmVibratePage', 'EditWakeUpAlarmPage', 'EditMyAlarmPage',
+     'WakeUpAlarmDetailPage', 'SelectMyAlarmSoundPage', 'SelectMyAlarmReplayPage',
+     'SelectMyAlarmVibratePage', 'EditWakeUpAlarmPage', 'EditMyAlarmPage',
      'PushAlarmPage',],
   CalendarPage: ['CalendarPage'],
   MyPage: ['MyPage'],
