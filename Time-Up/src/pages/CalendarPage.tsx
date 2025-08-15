@@ -17,17 +17,10 @@ import { useSchedule } from '../context/ScheduleContext';
 import BottomLayout from '../Layouts/BottomLayout';
 import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
 import { toYyyyMm } from '../utils/userTimeFormat';
+import { ImportantSchedule } from '../types/schedule';
 
 const { width, height } = Dimensions.get('window');
 
-
-type ImportantSchedule = {
-  schedule_id: number; // 얘는 또 snake여
-  name: string;
-  start_date: string;
-  end_date: string;
-  color: string;
-}
 
 const CalendarPage = () => {
   const navigation = useNavigation<any>();
@@ -65,14 +58,6 @@ const CalendarPage = () => {
       place_name: '회의실 B'
     }
   ]; */
-
-  const toDateKey = (isoOrDate: string | Date) => {
-    const d = typeof isoOrDate === 'string' ? new Date(isoOrDate) : isoOrDate;
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;      // 1~12 (0 padding 없이)
-    const day = d.getDate();         // 1~31 (0 padding 없이)
-    return `${y}-${m}-${day}`;
-  };
 
   const buildDotsFromByDay = (
     schedulesByDay: Record<string, { color: string, scheduleId?: string }[]>,
@@ -134,8 +119,8 @@ const CalendarPage = () => {
           (arr ?? []).map((item: any) => ({
             ...item,
             color: toHex(item.color), // 'red' → '#F7A1A1', 이미 hex면 그대로
-            // 도트 중복 제거용 key: 서버가 schedule_id만 주면 여기서 scheduleId로 통일
-            scheduleId: String(item.scheduleId ?? item.schedule_id ?? item.id ?? `${dayStr}-${Math.random()}`),
+            // 도트 중복 제거용 key: 서버가 scheduleId만 주면 여기서 scheduleId로 통일
+            scheduleId: String(item.scheduleId ?? item.scheduleId ?? item.id ?? `${dayStr}-${Math.random()}`),
           })),
         ])
       );

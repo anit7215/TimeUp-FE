@@ -34,7 +34,7 @@ import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
 const { width, height } = Dimensions.get('window');
 
 export default function AddSchedulePage() {
-  const { state, dispatch, addSchedule } = useSchedule();
+  const { state, dispatch } = useSchedule();
   const { fullText } = buildRecurrenceSummary(state.draft);
   const form = state.draft;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

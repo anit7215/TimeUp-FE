@@ -11,19 +11,14 @@ export const formatKoreanDate = (dateString: string): string => {
     return `${month}월 ${day}일 ${weekday}요일`;
 }
 
-export const formatMonthDay = (dateString: string): string => {
-    const date = dayjs(dateString);
-    const month = date.month() + 1;
-    const day = date.date();
-        
-    return `${month}월 ${day}일`;
-}
+
 
 export const timeOnly = (dateString: string) : string => {
     const time = dayjs(dateString ).format('HH:mm')
     return time;
 }; */
 // components/SetSchedule/formatDate.ts
+import dayjs from 'dayjs';
 import moment from 'moment';
 import 'moment/locale/ko';
 
@@ -57,3 +52,11 @@ export const timeOnly = (iso?: string | null) => {
   // 예: 08:00
   return m.format('HH:mm');
 };
+
+export const formatMonthDay = (dateString: string): string => {
+    const date = dayjs(dateString);
+    const month = date.month() + 1;
+    const day = date.date();
+        
+    return `${month}월 ${day}일`;
+}
