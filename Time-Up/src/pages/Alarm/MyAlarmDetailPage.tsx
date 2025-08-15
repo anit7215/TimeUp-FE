@@ -2,7 +2,7 @@
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import { formatDate } from '@/src/utils/AlarmFormat';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
 import PageBackButton from '../../components/common/PageBackButton';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
@@ -18,32 +18,56 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 export default function MyAlarmDetailPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms } = useAlarmContext();
-  const { updateAlarmField } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, setMyAlarms, deleteAlarmById, toggleAlarmActivation, updateAlarmField } = useAlarmContext();
 
-  const alarm = myAlarms.find((a) => a.id === selectedAlarmId);
+  const alarm = myAlarms.find(a => a.id === selectedAlarmId);
 
-  const handleToggleSwitch = useCallback(() => {
+  const handleToggleSwitch = async () => {
     if (!alarm) return;
-    updateAlarmField(alarm.id, 'isActive', !alarm.isActive);
-  }, [alarm]);
+
+    try {
+      await toggleAlarmActivation(alarm.id);
+      const newState = !alarm.isActive;
+      updateAlarmField(alarm.id, 'isActive', newState);
+      console.log(`알람 ${alarm.id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${alarm.id} 토글 실패:`, error);
+    }
+  };
 
   const handleEdit = () => {
     console.log(`${alarm!.title} 알람 설정을 편집합니다`);
     navigation.navigate('EditMyAlarmPage');
   };
 
-  const handleDelete = () => {
-    if (!selectedAlarmId) return;
+const handleDelete = async () => {
+  if (!selectedAlarmId) return;
 
-    const alarmToDelete = myAlarms.find((a) => a.id === selectedAlarmId);
-    if (alarmToDelete) {
-      console.log(`${alarmToDelete.title} 알람이 삭제되었습니다.`);
-      const updatedAlarms = myAlarms.filter((a) => a.id !== selectedAlarmId);
-      setMyAlarms(updatedAlarms);
-      navigation.navigate('MyAlarmPage'); // 삭제 후 목록으로 이동
+    // ✅ 로컬 상태에서 알람 존재 여부 확인
+  if (!myAlarms.some(alarm => alarm.id === selectedAlarmId)) {
+    console.warn('삭제하려는 알람이 로컬 상태에 없습니다.');
+    return;
+  }
+  else {
+    console.log(`삭제하려는 알람이 로컬에 있습니다.`);
+  }
+
+  try {
+    await deleteAlarmById(selectedAlarmId); // 성공적으로 삭제
+    setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId)); // 상태에서 제거
+    navigation.navigate('MyAlarmPage');
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      console.warn(`알람 ${selectedAlarmId}는 이미 존재하지 않습니다.`);
+      // 그래도 상태에서 제거하고 페이지 이동
+      setMyAlarms(prev => prev.filter(a => a.id !== selectedAlarmId));
+      navigation.navigate('MyAlarmPage');
+    } else {
+      console.error('알람 삭제 실패:', error);
+      // 필요 시 사용자에게 에러 알림 추가 가능
     }
-  };
+  }
+};
 
   if (!alarm) {
     return (

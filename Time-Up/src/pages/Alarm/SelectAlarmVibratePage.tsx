@@ -2,7 +2,7 @@
 import ToggleSwitch from '@/src/components/common/ToggleSwitch';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import React, { useCallback, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Platform, Text, View } from 'react-native';
 import BottomLayout from '../../Layouts/BottomLayout';
 import TransparentButton from '../../components/alarm/TransparentButton';
 import CheckBox from '../../components/common/CheckBox';
@@ -14,18 +14,31 @@ export default function SelectAlarmVibratePage() {
   const { selectedAlarmId, myAlarms, updateAlarmField } = useAlarmContext();
   const alarm = myAlarms.find(a => a.id === selectedAlarmId);
   const [selectedVibration, setSelectedVibration] = useState<string | null>(alarm?.vibrate ?? null);
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(alarm?.isVibrating ?? false);
 
   const handleToggleSwitch = useCallback(() => {
-    setOn((prev) => !prev);
-  }, []);
+    if (!selectedVibration || selectedVibration === '선택') {
+      if (Platform.OS === 'web') {
+        window.alert('진동 유형을 선택해 주세요');
+      } else {
+        Alert.alert('알림', '진동 유형을 선택해 주세요');
+      }
+      return;
+    }
+
+    const newState = !on;
+    setOn(newState);
+    if (selectedAlarmId != null) {
+      updateAlarmField(selectedAlarmId, 'isVibrating', newState);
+    }
+  }, [on, selectedAlarmId, selectedVibration]);
 
   const vibrationOptions = ['Basic Ring', 'Soft Buzz', 'Sharp Pulse', 'Heartbeat', 'Heavy Hit'];
 
   const handleConfirm = () => {
     if (selectedAlarmId && selectedVibration) {
       updateAlarmField(selectedAlarmId, 'vibrate', selectedVibration);
-      console.log('진동 저장됨:', selectedVibration);
+      console.log(`진동 저장됨: ${selectedVibration} / ${on ? '활성화됨' : '비활성화됨'}`);
     }
     navigation.goBack();
   };

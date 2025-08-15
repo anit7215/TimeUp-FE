@@ -1,9 +1,11 @@
 // src/pages/EditMyAlarmPage.tsx
+import { putMyAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate } from '@/src/utils/AlarmFormat';
+import { toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -14,6 +16,7 @@ import ToggleSwitch from '../../components/common/ToggleSwitch';
 import useAppNavigation from '../../hooks/useAppNavigation';
 import BottomLayout from '../../Layouts/BottomLayout';
 
+
 import IconBiv from '../../../assets/images/AlarmBiv.svg';
 import IconMemo from '../../../assets/images/AlarmMemo.svg';
 import IconMusic from '../../../assets/images/AlarmMusic.svg';
@@ -22,7 +25,7 @@ import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, toggleAlarmActivation } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
@@ -34,8 +37,6 @@ export default function EditMyAlarmPage() {
 
   const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
 
-  // 테스트 초기값 설정. 알람 상세 설정 상태 관리 구현 후 제거하기.
-  // 제목, 시간, 날짜, 사운드, 진동, 반복, 메모 구현 완료. 알람 온오프 상태 관리 추가 필요.
   const [title, setTitle] = useState(alarmToEdit?.title ?? '');
   const [time, setTime] = useState<AlarmItem['time']>(
     alarmToEdit?.time ?? { period: '오전', hour: 7, minute: 0 }
@@ -43,7 +44,6 @@ export default function EditMyAlarmPage() {
   const [date, setDate] = useState<AlarmItem['date']>(
     alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
   );
-  const [repeat, setRepeat] = useState(alarmToEdit?.repeat ?? '10분, 5회');
   const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
   const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
 
@@ -52,41 +52,57 @@ export default function EditMyAlarmPage() {
     navigation.goBack();
   };
 
-  const handleSave = () => {
-    console.log('내 알람을 저장합니다.');
-
+  const handleSave = async () => {
     if (selectedAlarmId) {
-      // 기존 알람 수정
+      console.log('내 알람을 저장합니다.');
+      const alarmToEdit = myAlarms.find((a) => a.id === selectedAlarmId);
+      if (!alarmToEdit) return;
+
       updateAlarmField(selectedAlarmId, 'title', title);
       updateAlarmField(selectedAlarmId, 'time', time);
       updateAlarmField(selectedAlarmId, 'date', date);
       updateAlarmField(selectedAlarmId, 'memo', memo);
       updateAlarmField(selectedAlarmId, 'isActive', isActive);
-      navigation.navigate('MyAlarmDetailPage');
-    } else {
-      // 새 알람 생성
-      const newAlarm: AlarmItem = {
-        id: Date.now(),
-        title,
-        time,
-        date,
-        sound: '선택',
-        vibrate: 'Basic Ring',
-        repeat: '10분, 5회',
-        memo,
-        isActive: true,
-      };
-      setMyAlarms((prev) => [...prev, newAlarm]);
+
+      try {
+        const patchBody = toPutMyAlarmRequest({
+          ...alarmToEdit,
+          title,
+          time,
+          date,
+          memo,
+          isActive,
+          isSound: alarmToEdit.isSound,
+          isVibrating: alarmToEdit.isVibrating,
+          isRepeating: alarmToEdit.isRepeating,
+        });
+        console.log('PATCH 요청 바디:', JSON.stringify(patchBody, null, 2));
+        if (!selectedAlarmId) throw new Error('서버 응답에 alarm_id가 없습니다.');
+        console.log('수정 요청할 alarm_id:', selectedAlarmId);
+        const res = await putMyAlarm(selectedAlarmId, patchBody);
+        console.log('알람 수정 성공:', res);
+      } catch (error) {
+        console.error('알람 수정 실패:', error);
+      }
+
       navigation.navigate('MyAlarmPage');
     }
-  };
+  }
 
-  const handleToggleSwitch = useCallback(() => {
+  const handleToggleSwitch = useCallback(async () => {
     if (!selectedAlarmId) return;
-    const newState = !isActive;
-    setIsActive(newState);
-    updateAlarmField(selectedAlarmId, 'isActive', newState);
-  }, [isActive, selectedAlarmId]);
+
+    try {
+      await toggleAlarmActivation(selectedAlarmId);
+      const newState = !isActive;
+      setIsActive(newState);
+      updateAlarmField(selectedAlarmId, 'isActive', newState);
+      console.log(`알람 ${selectedAlarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${selectedAlarmId} 상태 토글 실패:`, error);
+    }
+  }, [selectedAlarmId, isActive]);
+
 
   const handleSelectSound = () => {
     navigation.navigate('SelectAlarmSoundPage');
@@ -360,7 +376,7 @@ export default function EditMyAlarmPage() {
                 <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
               </View>
               <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
-                <Text className="font-pretendard text-gray-200 text-xl">
+                <Text className="font-pretendard text-gray-200 font-semibold text-xl">
                   {alarmToEdit?.sound ?? '선택'}
                 </Text>
               </View>
@@ -375,7 +391,7 @@ export default function EditMyAlarmPage() {
                 <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
               </View>
               <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
-                <Text className="font-pretendard text-gray-200 text-xl">
+                <Text className="font-pretendard text-gray-200 font-semibold text-xl">
                   {alarmToEdit?.vibrate ?? '선택'}
                 </Text>
               </View>
@@ -391,7 +407,7 @@ export default function EditMyAlarmPage() {
               <IconRepeat width={20} height={20} />
               <Text className="font-pretendard text-gray-200 text-xl ml-2">다시 울림</Text>
             </View>
-            <Text className="font-pretendard text-gray-200 text-xl mt-2">
+            <Text className="font-pretendard text-gray-200 font-semibold text-xl mt-2">
               {alarmToEdit?.repeat ?? '선택'}
             </Text>
           </TouchableOpacity>

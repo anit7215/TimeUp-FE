@@ -1,8 +1,9 @@
 // src/types/alarm.ts
 // 기존 공통 타입
 export type VibrationType = 'Basic Ring' | 'Soft Buzz' | 'Sharp Pulse' | 'Heartbeat' | 'Heavy Hit';
+export type VibrationCode = 'default' | 'short1' | 'short2' | 'long1' | 'long2';
 
-// 화면 출력용 타입
+// 내 알람 화면 출력용 타입
 export interface AlarmItem {
   id: number;
   title: string;
@@ -20,6 +21,32 @@ export interface AlarmItem {
   repeat: string;
   memo: string;
   isActive: boolean;
+  isSound: boolean;
+  isVibrating: boolean;
+  isRepeating: boolean;
+}
+
+// 기상 알람 화면 출력용 타입
+export interface WakeupAlarmItem {
+  id: number;
+  title: string; //generateWakeupAlarmTitle(dayOfWeek)
+  time: {
+    period: '오전' | '오후';
+    hour: number;
+    minute: number;
+  };
+  date: {
+    fullDate: string;
+    dayOfWeek: '월' | '화' | '수' | '목' | '금' | '토' | '일';
+  };
+  sound: string;
+  vibrate: string;
+  repeat: string;
+  memo: string;
+  isActive: boolean;
+  isSound: boolean;
+  isVibrating: boolean;
+  isRepeating: boolean;
 }
 
 // 내 알람 등록 요청용 타입 (POST)
@@ -30,22 +57,38 @@ export interface PostMyAlarmRequest {
   is_repeating: boolean;
   is_sound: boolean;
   is_vibrating: boolean;
-  vibration_type: VibrationType;
+  vibration_type: VibrationCode;
   sound_id: number;
   repeat_interval: number;
   repeat_count: number;
   memo: string;
 }
 
+// 내 알람 등록 응답 타입 (POST)
+export interface PostMyAlarmResponse {
+  result: 'Success' | 'Fail';
+  status: number;
+  success: {
+    alarm_id: number;
+    my_alarm_name: string;
+    my_alarm_time: string; // ISO format (e.g. "2025-05-21T15:00:00")
+    message: string;
+  } | null;
+  error: {
+    errorCode: string; // e.g. "MissingDateTimeError", "PastTimeNotAllowedError"
+    message: string;
+  } | null;
+}
+
 // 내 알람 수정 요청용 타입 (PUT / PATCH)
-export interface PatchMyAlarmRequest {
+export interface PutMyAlarmRequest {
   my_alarm_name: string;
   my_alarm_time: string;
   is_active: boolean;
   is_repeating: boolean;
   is_sound: boolean;
   is_vibrating: boolean;
-  vibration_type: VibrationType;
+  vibration_type: VibrationCode;
   sound_id: number;
   repeat_interval: number;
   repeat_count: number;
@@ -53,7 +96,7 @@ export interface PatchMyAlarmRequest {
 }
 
 // 내 알람 수정 응답 타입
-export interface PatchMyAlarmResponse {
+export interface PutMyAlarmResponse {
   result: 'Success' | 'Fail';
   status: number;
   success: {
@@ -67,9 +110,8 @@ export interface PatchMyAlarmResponse {
   } | null;
 }
 
-// 내 알람 알람 비/활성화 요청: PATCH /my-alarms/activate?alarm_id=1
-// ✅ 요청 body는 없음
-// 응답 타입
+// 내 알람 비/활성화 요청 body는 필요 없음
+// 내 알람 비/활성화 응답 타입 (PATCH)
 export interface ToggleMyAlarmActivationResponse {
   result: 'Success' | 'Fail';
   status: number;
@@ -99,12 +141,12 @@ export interface DeleteMyAlarmResponse {
 
 // 기상 알람 수정 요청 타입 (PUT)
 export interface UpdateWakeupAlarmRequest {
-  wakeup_time: string; // ISO date string (e.g. "2025-07-31T06:30:00Z")
+  wakeup_time: string; // ex) "2025-07-31T06:30:00Z"
   is_active: boolean;
   is_repeating: boolean;
   is_sound: boolean;
   is_vibrating: boolean;
-  vibration_type: 'default' | 'short1' | 'short2' | 'long1' | 'long2';
+  vibration_type: VibrationCode;
   sound_id: number | null;
   repeat_interval: number | null;
   repeat_count: number | null;

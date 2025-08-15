@@ -1,7 +1,10 @@
 // src/pages/MyAlarmPage.tsx
 // 자동알람 - 기상알람 페이지
+import { postMyAlarm } from '@/src/apis/alarmApi';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
+import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate, formatTime } from '@/src/utils/AlarmFormat';
+import { AlarmWithoutId, toPostMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
@@ -16,6 +19,7 @@ export default function MyAlarmPage() {
   const { myAlarms, setMyAlarms } = useAlarmContext();
   const { setSelectedAlarmId } = useAlarmContext();
   const { updateAlarmField } = useAlarmContext();
+  const { toggleAlarmActivation } = useAlarmContext();
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -38,18 +42,63 @@ export default function MyAlarmPage() {
   };
 
 
-  const handleToggleAlarm = (id: number, currentState: boolean) => {
-    setMyAlarms((prev) =>
-      prev.map((alarm) => {
-        if (alarm.id === id) {
-          const newState = !currentState;
-          updateAlarmField(id, 'isActive', newState);
-          console.log(`${alarm.title} 알람이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
-          return { ...alarm, isActive: newState };
-        }
-        return alarm;
-      })
-    );
+  const handleToggleAlarm = async (id: number, currentState: boolean) => {
+    try {
+      await toggleAlarmActivation(id);
+      const newState = !currentState;
+      updateAlarmField(id, 'isActive', newState);
+      console.log(`알람 ${id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${id}번 토글 실패:`, error);
+    }
+  };
+
+  const handleNewAlarm = async () => {
+    // 날짜-시간 조정하기. 오전 오후 시간 계산? 우선 안전하게 하루 뒤로 지정해 둠.
+    try {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const defaultAlarm: AlarmWithoutId = {
+        title: '',
+        time: {
+          period: tomorrow.getHours() < 12 ? '오전' : '오후',
+          hour: tomorrow.getHours() % 12 || 12,
+          minute: tomorrow.getMinutes(),
+        },
+        date: {
+          fullDate: tomorrow.toISOString().split('T')[0],
+          dayOfWeek: ['일', '월', '화', '수', '목', '금', '토'][tomorrow.getDay()],
+        },
+        sound: '선택',
+        vibrate: '선택',
+        repeat: '선택',
+        memo: '',
+        isActive: true,
+        isSound: false,
+        isVibrating: false,
+        isRepeating: false,
+      };
+
+      const requestBody = toPostMyAlarmRequest(defaultAlarm);
+      console.log('보낼 요청 데이터:', requestBody);
+      const response = await postMyAlarm(requestBody);
+
+      const newAlarmId = response.success?.alarm_id;
+      if (!newAlarmId) throw new Error('alarm_id 없음');
+
+      const newAlarm: AlarmItem = {
+        id: newAlarmId,
+        ...defaultAlarm,
+      };
+
+      setMyAlarms(prev => [...prev, newAlarm]);
+      setSelectedAlarmId(newAlarmId);
+      navigation.navigate('EditMyAlarmPage');
+    } catch (error) {
+      console.error('알람 생성 실패:', error);
+    }
   };
 
   return (
@@ -87,49 +136,55 @@ export default function MyAlarmPage() {
       </View>
 
       <View className="ml-[85%] mt-[-40px]">
-        <TouchableOpacity
-          onPress={() => {
-            setSelectedAlarmId(null);
-            navigation.navigate('EditMyAlarmPage');
-          }}
-        >
+        <TouchableOpacity onPress={handleNewAlarm}>
           <Ionicons name="add-circle-outline" size={38} color="white" />
         </TouchableOpacity>
       </View>
 
       <View className="mt-3">
-        {myAlarms.map((alarm) => (
-          <TouchableOpacity
-            key={alarm.id}
-            onPress={() => handleGoToAlarmDetail(alarm.id, alarm.title)}
-            activeOpacity={0.8}
-          >
-            <View className="h-[5rem] w-[91%] bg-dark border border-dark-stroke rounded-2xl self-center flex-row items-center justify-between px-[4%] mt-4">
-              <View className="flex-row items-center space-x-2">
-                <View className="w-[50%]">
-                  <Text className="font-pretendard text-white text-[18px]" style={{...(Platform.OS === 'web' ? { width: 160 } : {}),}}>{alarm.title}</Text>
-                </View>
-                <Text className="font-pretendard text-white text-xl"> ㅣ  </Text>
-                <View className="flex-col">
-                  <View className="flex-row items-end">
-                    <Text className="font-pretendard text-white text-base">
-                      {formatTime(alarm.time)}
+        {myAlarms.length === 0 ? (
+          <View>
+            <Text className="mt-[40%] text-white text-3xl text-center">
+              아직 내 알람이 없습니다!
+            </Text>
+            <Text className="mt-[5%] text-gray-300 text-xl text-center">
+              + 버튼을 눌러 알람을 추가해보세요
+            </Text>
+          </View>
+
+        ) : (
+          myAlarms.map((alarm) => (
+            <TouchableOpacity
+              key={alarm.id}
+              onPress={() => handleGoToAlarmDetail(alarm.id, alarm.title)}
+              activeOpacity={0.8}
+            >
+              <View className="h-[5rem] w-[91%] bg-dark border border-dark-stroke rounded-2xl self-center flex-row items-center justify-between px-[4%] mt-4">
+                <View className="flex-row items-center space-x-2">
+                  <View className="w-[50%]">
+                    <Text className="font-pretendard text-white text-[18px]" style={{ ...(Platform.OS === 'web' ? { width: 160 } : {}), }}>{alarm.title}</Text>
+                  </View>
+                  <Text className="font-pretendard text-white text-xl"> ㅣ  </Text>
+                  <View className="flex-col">
+                    <View className="flex-row items-end">
+                      <Text className="font-pretendard text-white text-base">
+                        {formatTime(alarm.time)}
+                      </Text>
+                    </View>
+                    <Text className="font-pretendard text-gray-200 text-base">
+                      {formatDate(alarm.date)}
                     </Text>
                   </View>
-                  <Text className="font-pretendard text-gray-200 text-base">
-                    {formatDate(alarm.date)}
-                  </Text>
                 </View>
+                <ToggleSwitch
+                  isOn={alarm.isActive}
+                  onToggle={() => handleToggleAlarm(alarm.id, alarm.isActive)}
+                  disabled={false}
+                />
               </View>
-              <ToggleSwitch
-                isOn={alarm.isActive}
-                onToggle={() => handleToggleAlarm(alarm.id, alarm.isActive)}
-                disabled={false}
-              />
-            </View>
-          </TouchableOpacity>
-        ))}
-
+            </TouchableOpacity>
+          ))
+        )}
       </View>
     </BottomLayout>
   );
