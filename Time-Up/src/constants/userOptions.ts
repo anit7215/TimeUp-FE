@@ -41,10 +41,11 @@ export const remindSoundOptions = [
 
 export const remindVibrationOptions = [
   { label: '진동 없음', value: 'no' },
-  { label: 'short1', value: 'short1' },
-  { label: 'short2', value: 'short2' },
-  { label: 'long1', value: 'long1' },
-  { label: 'long2', value: 'long2' },
+  { label: 'Basic Ring', value: 'basic' },
+  { label: 'Soft Buzz', value: 'soft' },
+  { label: 'Sharp Pulse', value: 'sharp' },
+  { label: 'Heartbeat', value: 'heartbeat' },
+  { label: 'Heavy Hit', value: 'heavy' }
 ];
 
 export const alarmSoundOptions = [
@@ -57,11 +58,12 @@ export const alarmSoundOptions = [
 ];
 
 export const vibrationTypeOptions = [
-  { label: '진동없음', value: 'no' },
-  { label: 'short1', value: 'short1' },
-  { label: 'short2', value: 'short2' },
-  { label: 'long1', value: 'long1' },
-  { label: 'long2', value: 'long2' },
+  { label: '진동 없음', value: 'no' },
+  { label: 'Basic Ring', value: 'basic' },
+  { label: 'Soft Buzz', value: 'soft' },
+  { label: 'Sharp Pulse', value: 'sharp' },
+  { label: 'Heartbeat', value: 'heartbeat' },
+  { label: 'Heavy Hit', value: 'heavy' }
 ];
 
 export const intervalOptions = [

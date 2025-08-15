@@ -95,4 +95,5 @@ const TimeModal = forwardRef<TimeModalRef, TimeModalProps>(
         </BottomSheetView>
       </BottomSheetModal>
     );});
+TimeModal.displayName = 'TimeModal';
 export default TimeModal;

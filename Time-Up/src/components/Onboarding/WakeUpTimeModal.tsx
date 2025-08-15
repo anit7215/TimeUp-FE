@@ -116,5 +116,5 @@ const WakeUpTimeModal = forwardRef<WakeUpTimeModalRef, WakeUpTimeModalProps>(
     );
   }
 );
-
+WakeUpTimeModal.displayName = 'WakeUpTimeModal';
 export default WakeUpTimeModal;

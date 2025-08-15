@@ -67,7 +67,7 @@ export default function App() {
 
   useEffect(() => {
     const token = getAccessToken();
-    setInitialRoute(token ? 'AlarmPage' : 'CalendarPage'); 
+    setInitialRoute(token ? 'CalendarPage' : 'OnboardingPage'); 
   }, []);
   if (!mapsLoaded || !initialRoute) return null;
   const content = (
