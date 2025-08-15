@@ -36,13 +36,9 @@ import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
-import SchedulePage from './src/pages/SchedulePage';
 import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
-import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
-
-import { getAccessToken } from './src/utils/storage';
 
 const queryClient = new QueryClient();
 
@@ -50,7 +46,7 @@ export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
+
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -65,17 +61,16 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    const token = getAccessToken();
-    setInitialRoute(token ? 'AlarmPage' : 'CalendarPage'); 
-  }, []);
-  if (!mapsLoaded || !initialRoute) return null;
+  if (!mapsLoaded) {
+    return null;
+  }
+
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <ScheduleProvider>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
               <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
               <Stack.Screen name="CalendarPage" component={CalendarPage} />
               <Stack.Screen name="MyPage" component={MyPage} />
@@ -100,8 +95,6 @@ export default function App() {
               <Stack.Screen name="SetLocationPage" component={SetLocationPage} />
               <Stack.Screen name="SetScheduleRepeatPage" component={SetScheduleRepeatPage} />
               <Stack.Screen name="SetRemindAlarmPage" component={SetRemindAlarmPage} />
-              <Stack.Screen name="SchedulePage" component={SchedulePage} />
-              <Stack.Screen name="ViewScheduleDetailPage" component={ViewScheduleDetailPage} />
               <Stack.Screen name="SelectWakeupAlarmReplayPage" component={SelectWakeupAlarmReplayPage} />
               <Stack.Screen name="SelectWakeupAlarmSoundPage" component={SelectWakeupAlarmSoundPage} />
               <Stack.Screen name="SelectWakeupAlarmVibratePage" component={SelectWakeupAlarmVibratePage} />

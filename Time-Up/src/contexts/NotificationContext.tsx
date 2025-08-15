@@ -20,6 +20,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const { updateAlarmField } = useAlarmContext();
 
+  const hasRegisteredRef = useRef(false);
+
   //debugger;
   //console.log('NotificationProvider 렌더링됨');
   useEffect(() => {
