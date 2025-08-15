@@ -45,12 +45,12 @@ export default function SetRemindAlarmPage() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'black', paddingTop: 10 }}>
+    <View className="flex-1 bg-black pt-5 px-7">
       <BeforeHeader rightLabel="확인" onRightPress={saveReminder} />
 
       {/* 토글 스위치 */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 }}>
-        <Text style={{ color: 'white', fontSize: 18 }}>리마인드 알림</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20,marginBottom: 13  }}>
+        <Text style={{ color: 'white', fontSize: 20}}>리마인드 알림</Text>
         <ToggleSwitch isOn={alarmOn} onToggle={handleToggleSwitch} disabled={false} />
       </View>
 
@@ -62,7 +62,7 @@ export default function SetRemindAlarmPage() {
             <TouchableOpacity
               key={minutes}
               onPress={() => alarmOn && setSelectedOption(minutes)}
-              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}
+              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 25 }}
             >
               <CheckBox
                 isChecked={isSelected}

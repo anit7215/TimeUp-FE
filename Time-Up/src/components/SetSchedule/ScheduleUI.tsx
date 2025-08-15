@@ -11,7 +11,6 @@ import {
 import PlusIcon from '../../../assets/icons/plusIcon.svg';
 import PageBackButton from '../common/PageBackButton';
 import { formatKoreanDate } from './formatDate';
-import { Dispatch } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useSchedule } from '@/src/context/ScheduleContext';
 
@@ -59,7 +58,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
 
     return {
       position: 'absolute' as const,
-      top,
+      top: top+32,
       left: 50,
       right: 16,
       height,
@@ -169,8 +168,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: '#FFFFFF',
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: 50,
+    right: 50,
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',

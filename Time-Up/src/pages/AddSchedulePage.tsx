@@ -214,11 +214,13 @@ const handleSave = async () => {
             }}
           >
             <TouchableOpacity
+            style={{ flex: 1, 
+              marginLeft: 10,
+              marginTop: 20, }}
               onPress={() => {
                 setSelectedItem("일정 이름")
                 bottomSheetModalRef.current?.present()
               }}
-              style={{ flex: 1 }}
             >
               <Text
                 style={{
@@ -235,7 +237,7 @@ const handleSave = async () => {
 
             <TouchableOpacity 
               onPress={()=>dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important }})}
-              style={{ marginLeft: 18}}
+              style={{ marginLeft: 18, marginRight: 15}}
             >
               { <StarIcon 
                 fill={form.is_important ? 'white' : 'none'}
@@ -385,7 +387,7 @@ const handleSave = async () => {
                         height: width > 400 ? 32 : 28,
                         borderRadius: 16,
                         backgroundColor: color,
-                        borderWidth: form.color === color ? 2 : 0,
+                        borderWidth: form.color === colorMap[color] ? 2 : 0,
                         borderColor: 'white'
                       }}
                     />
