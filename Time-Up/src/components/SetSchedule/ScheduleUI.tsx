@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSchedule } from '@/src/context/ScheduleContext';
 
 
-const GRID_START = 6;        // 6시 시작
+const GRID_START = 0;        // 0시 시작
 const ROW_HEIGHT = 90;       // 1시간(60+30) = 90px
 const TIMELINE_PADDING_TOP = 0;  // 타임라인 위쪽 여백을 주고 싶으면 스타일에서 paddingTop으로만 제어
 
@@ -28,6 +28,7 @@ export interface UIEvent {
   duration: number; // 지속 시간 (1 = 1시간)
   color: string;
   scheduleId: string; // 백엔드 스케줄 ID 추가
+  url?: string;
 }
 
 interface ScheduleUIProps {
@@ -44,7 +45,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
   onEventPress,
   onTimeSlotPress
 }) => {
-  const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6시부터 23시까지
+  const hours = Array.from({ length: 24 }, (_, i) => i); // 0시부터 24시까지
   const SLOT_HEIGHT = 60;
   const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정
 

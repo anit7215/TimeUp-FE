@@ -1,6 +1,6 @@
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { getDailySchedules } from '../apis/schedule'; // 경로는 네 프로젝트 구조에 맞게
 import type { UIEvent }from '../components/SetSchedule/ScheduleUI';
 import ScheduleUI from '../components/SetSchedule/ScheduleUI';
@@ -30,19 +30,13 @@ const SchedulePage = () => {
       try {
         setLoading(true);
         const iso = padISO(selectedDate);
-        setDateISO(iso);
+        setDateISO(iso); 
 
-        const res = await getDailySchedules(iso);
+        const { schedules = [], googleSchedules = [] } = await getDailySchedules(iso);
 
-        console.log('일별 조회 status:', res?.status);
-        console.log('일별 조회 결과:', res?.success?.schedules);
-        if (res?.status === 200) {
-          const list = res?.success?.schedules ?? [];
-          setEvents(dailyToEvents(list)); // snake 그대로 → Event[]로 맵핑
-          console.log('[ScheduleUI] events:', events)
-        } else {
-          setEvents([]);
-        }
+        const allSchedules = [...schedules, ...googleSchedules];
+        setEvents(dailyToEvents(allSchedules)); // snake 그대로 → Event[]로 맵핑
+        console.log('일별 일정 조회 성공:', allSchedules);
       } catch (e) {
         console.error('일별 일정 조회 실패:', e);
         setEvents([]);
@@ -54,9 +48,15 @@ const SchedulePage = () => {
   }, [selectedDate]);
 
   const handleEventPress = (event: UIEvent) => {
-    navigation.navigate('ViewScheduleDetailPage', {
-      scheduleId: event.scheduleId,
-    });
+    console.log('event:', event)
+    if (event.url) {
+      Linking.openURL(event.url);
+
+    }else {
+      navigation.navigate('ViewScheduleDetailPage', {
+        scheduleId: event.scheduleId, // 스케줄 ID로 상세 페이지 이동
+      })
+    }
   };
 
   const handleTimeSlotPress = (time: number) => {

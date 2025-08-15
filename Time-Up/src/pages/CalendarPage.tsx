@@ -126,7 +126,7 @@ const CalendarPage = () => {
       const y = base.getFullYear();
       const mIndex0 = base.getMonth();
   
-      // 월별 도트 데이터 정규화: 색상 → HEX, ID는 되도록 유니크하게
+      // 월별 도트 데이터 정규화: 색상 → HEX
       const byDayRaw = res?.success?.schedulesByDay ?? {};
       const byDay = Object.fromEntries(
         Object.entries(byDayRaw).map(([dayStr, arr]: any) => [

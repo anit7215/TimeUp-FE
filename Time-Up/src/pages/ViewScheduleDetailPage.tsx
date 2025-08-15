@@ -355,17 +355,19 @@ console.log('🔍 렌더링 시점 schedule.start_date:', schedule?.start_date);
             />
           )}
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 }}>
+          <View  className="flex-row mx-2 py-4 rounded-2xl justify-between bg-[#33363B]">
             <TouchableOpacity
               onPress={() => {
                 bottomSheetModalRef.current?.dismiss();
                 setSelectedItem(null);
               }}
+              className="flex-1 items-center justify-center px-4 py-2 rounded-[20px] bg-[#52565A] mr-4"
             >
-              <Text style={{ color: 'white' }}>취소</Text>
+              <Text className="text-white text-[18px]">취소</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}>
-              <Text style={{ color: 'white' }}>선택</Text>
+            <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}
+              className="flex-1 items-center justify-center px-4 py-2 rounded-[20px] bg-[#CCCCFF] ml-4">
+              <Text className="text-black text-[18px]">선택</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

@@ -59,8 +59,13 @@ export default function AddSchedulePage() {
   
 
 const handleSave = async () => {
+  const formToSend = {
+    ...form,
+    start_date: moment(form.start_date).format('YYYY-MM-DDTHH:mm:ss'),
+    end_date: moment(form.end_date).format('YYYY-MM-DDTHH:mm:ss'),
+  }
   try {
-    const savedSchedule = await createSchedule(form);
+    await createSchedule(formToSend);
     dispatch({ type: 'RESET_DRAFT' });
     navigation.navigate('CalendarPage');
   } catch (err: any) {
@@ -113,6 +118,10 @@ const handleSave = async () => {
               placeholderTextColor={'#979B9F'}
               value={form.name}
               onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
+                  onSubmitEditing={() => {
+                  bottomSheetModalRef.current?.dismiss();
+                  setSelectedItem(null);
+                  }}
             />
           )}
 
@@ -168,13 +177,19 @@ const handleSave = async () => {
 />
 
           )}
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 }}>
-            <TouchableOpacity onPress={() => { bottomSheetModalRef.current?.dismiss(); setSelectedItem(null); }}>
-              <Text style={{ color: 'white' }}>취소</Text>
+          <View  className="flex-row mx-2 py-4 rounded-2xl justify-between bg-[#33363B]">
+            <TouchableOpacity
+              onPress={() => {
+                bottomSheetModalRef.current?.dismiss();
+                setSelectedItem(null);
+              }}
+              className="flex-1 items-center justify-center px-4 py-2 rounded-[20px] bg-[#52565A] mr-4"
+            >
+              <Text className="text-white text-[18px]">취소</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}>
-              <Text style={{ color: 'white' }}>선택</Text>
+            <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}
+              className="flex-1 items-center justify-center px-4 py-2 rounded-[20px] bg-[#CCCCFF] ml-4">
+              <Text className="text-black text-[18px]">선택</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

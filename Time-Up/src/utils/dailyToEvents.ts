@@ -1,3 +1,53 @@
+import type { UIEvent } from '../components/SetSchedule/ScheduleUI';
+import { toHex } from '@/src/utils/colors'; // 선택: 서버 color 이름→HEX 정규화 쓰는 경우
+
+// 문자열에서 HH:mm만 뽑아 "벽시계" 시간으로 사용 (TZ 무시)
+const toWallClockStartTime = (input: string) => {
+  // input: '2025-08-15T08:00:00Z'
+  const date = new Date(input);
+  // UTC 시간에 +9시간
+  let hour = date.getUTCHours() + 9;
+  if (hour >= 24) hour -= 24;
+  const min = date.getUTCMinutes();
+  return hour + (min >= 30 ? 0.5 : 0);
+};
+
+const clampToGrid = (startTime: number, duration: number) => {
+  const GRID_START = 6;
+  const GRID_END = 24; // 23:30까지 표현
+  const s = Math.max(GRID_START, Math.min(startTime, GRID_END - 0.5));
+  const e = Math.min(startTime + duration, GRID_END);
+  return { startTime: s, duration: Math.max(0.5, e - s) };
+};
+
+export const dailyToEvents = (schedules: any[]): UIEvent[] => {
+  return (schedules || []).map((s: any) => {
+    const startStr = s.start_date as string;
+    const endStr   = s.end_date as string;
+
+    // 시작 시간: TZ 무시하고 문자열의 HH:mm로 계산 → 08:00이면 8로 렌더
+    const startTimeRaw = toWallClockStartTime(startStr);
+
+    // duration은 시작/끝의 차이(ms)로 계산하면 TZ 유무와 무관 (둘 다 같은 표기면 차이는 정확)
+    const start = new Date(startStr);
+    const end   = new Date(endStr);
+    const ms = Math.max(0, end.getTime() - start.getTime());
+    const durationRaw = Math.max(0.5, Math.round(ms / (30 * 60 * 1000)) / 2); // 30분 단위
+
+    const { startTime, duration } = clampToGrid(startTimeRaw, durationRaw);
+
+    return {
+      scheduleId: String(s.schedule_id ?? s.id ?? s.scheduleId),
+      title: s.name,
+      startTime,
+      duration,
+      color: toHex ? toHex(s.color) : (s.color || 'dodgerblue'), // 선택: color 정규화
+      id: String(s.schedule_id ?? s.id),
+      url: s.url, // 선택: URL이 있으면 추가
+    } as UIEvent;
+  });
+};
+
 // utils/dailyToEvents.ts
 /*  import type { UIEvent } from '../components/SetSchedule/ScheduleUI';
 import { toHex } from '@/src/utils/colors'; // 색상 유틸리티 함수
@@ -76,64 +126,3 @@ export const dailyToEvents = (schedules: any[]): UIEvent[] => {
 };
 
     */
-import type { UIEvent } from '../components/SetSchedule/ScheduleUI';
-import { toHex } from '@/src/utils/colors'; // 선택: 서버 color 이름→HEX 정규화 쓰는 경우
-
-// 문자열에서 HH:mm만 뽑아 "벽시계" 시간으로 사용 (TZ 무시)
-const toWallClockStartTime = (input: string | Date) => {
-  if (typeof input === 'string') {
-    // 예: '2025-08-15T08:00:00Z', '...+09:00', '2025-08-15 08:00:00' 등 모두 매치
-    const m = input.match(/T?(\d{2}):(\d{2})/);
-    if (m) {
-      const hh = parseInt(m[1], 10);
-      const mm = parseInt(m[2], 10);
-      return hh + (mm >= 30 ? 0.5 : 0);
-    }
-  }
-  // 혹시 Date 객체가 들어오면 최소한의 폴백(그래도 KST 고정)
-  const d = typeof input === 'string' ? new Date(input) : input;
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Seoul',
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-  }).formatToParts(d);
-  const hh = Number(parts.find(p => p.type === 'hour')?.value ?? '0');
-  const mm = Number(parts.find(p => p.type === 'minute')?.value ?? '0');
-  return hh + (mm >= 30 ? 0.5 : 0);
-};
-
-const clampToGrid = (startTime: number, duration: number) => {
-  const GRID_START = 6;
-  const GRID_END = 24; // 23:30까지 표현
-  const s = Math.max(GRID_START, Math.min(startTime, GRID_END - 0.5));
-  const e = Math.min(startTime + duration, GRID_END);
-  return { startTime: s, duration: Math.max(0.5, e - s) };
-};
-
-export const dailyToEvents = (schedules: any[]): UIEvent[] => {
-  return (schedules || []).map((s: any) => {
-    const startStr = s.start_date as string;
-    const endStr   = s.end_date as string;
-
-    // ✅ 시작 시간: TZ 무시하고 문자열의 HH:mm로 계산 → 08:00이면 8로 렌더
-    const startTimeRaw = toWallClockStartTime(startStr);
-
-    // ✅ duration은 시작/끝의 차이(ms)로 계산하면 TZ 유무와 무관 (둘 다 같은 표기면 차이는 정확)
-    const start = new Date(startStr);
-    const end   = new Date(endStr);
-    const ms = Math.max(0, end.getTime() - start.getTime());
-    const durationRaw = Math.max(0.5, Math.round(ms / (30 * 60 * 1000)) / 2); // 30분 단위
-
-    const { startTime, duration } = clampToGrid(startTimeRaw, durationRaw);
-
-    return {
-      id: String(s.schedule_id ?? s.id),
-      title: s.name,
-      startTime,
-      duration,
-      color: toHex ? toHex(s.color) : (s.color || 'dodgerblue'), // 선택: color 정규화
-      scheduleId: String(s.schedule_id ?? s.id),
-    } as UIEvent;
-  });
-};

@@ -1,4 +1,3 @@
-import { getScheduleDetail } from '@/src/apis/scheduleDetail';
 import { RootStackParamList } from '@/src/types/navigation';
 import { ImportantSchedule } from '@/src/types/schedule';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -7,7 +6,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { timeOnly } from './formatDate';
-
+import { Dispatch } from 'react';
+import { useSchedule } from '@/src/context/ScheduleContext';
+import { getScheduleById } from '../../apis/schedule';
 type Navigation = NativeStackNavigationProp<RootStackParamList, 'ViewScheduleDetailPage'>;
 
 interface ImportantScheduleModalProps {
@@ -29,6 +30,8 @@ const ImportantScheduleModal: React.FC<ImportantScheduleModalProps> = ({
 
   // ID 필드 유연 처리 (scheduleId | schedule_id)
   const getScheduleId = (s: any) => String(s?.scheduleId ?? s?.schedule_id);
+
+  const { dispatch } = useSchedule();
 
   // ✅ 추가 필터링 없이 정렬만
   const sortedSchedules = useMemo(
@@ -107,14 +110,18 @@ const ImportantScheduleModal: React.FC<ImportantScheduleModalProps> = ({
                   className="bg-[#F7F7FE] rounded-[20px] p-4 mb-3"
                   activeOpacity={0.7}
                   onPress={async () => {
-                    const scheduleData = await getScheduleDetail(id);
-                    navigation.navigate('ViewScheduleDetailPage', { schedule: scheduleData });
+                    const scheduleData = await getScheduleById(schedule.scheduleId)
+                    dispatch({
+                      type: 'VIEW_SCHEDULE_SUCCESS',
+                      payload: scheduleData
+                    })
+                    navigation.navigate('ViewScheduleDetailPage', { scheduleId: schedule.scheduleId }) // 타입 에러
                   }}
                 >
                   <View className="flex-row items-start">
                     {/* 색상 인디케이터 */}
                     <View
-                      className="w-3 h-full rounded-[12px] mr-3"
+                      className="w-3 self-stretch rounded-[12px] mr-3"
                       style={{ backgroundColor: schedule.color, minHeight: 40 }}
                     />
 

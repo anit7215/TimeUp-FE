@@ -67,6 +67,7 @@ export const getSchedules = async (targetDate: string) => {
   const res = await axiosInstance.get('/schedules/monthly', {
     params: { month: targetDate },
   })
+  console.log('월별 일정 조회 성공:', res.data)
   return res.data
 }
 
@@ -77,7 +78,10 @@ export const getDailySchedules = async (dateISO: string) => {
   const res = await axiosInstance.get('/schedules/day', {
     params: { date: dateParam },
   })
-  return res.data
+  return {
+    schedules: res.data.success.schedules,
+    googleSchedules: res.data.success.googleSchedules,
+  }
 }
 
 // 중요 일정 조회
