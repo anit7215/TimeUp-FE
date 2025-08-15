@@ -1,3 +1,4 @@
+import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useProfileStore } from '@/src/stores/useProfileStore';
 import { setAccessToken, setRefreshToken } from '@/src/utils/storage';
@@ -14,6 +15,8 @@ WebBrowser.maybeCompleteAuthSession();
 export default function OnboardingPage() {
   const navigation = useAppNavigation();
   const { setField } = useProfileStore();
+  const { refreshAlarms } = useAlarmContext();
+  const syncedOnceRef = useRef(false); 
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
@@ -52,8 +55,18 @@ export default function OnboardingPage() {
           if (data.success?.refreshToken) {
             setRefreshToken(data.success.refreshToken);
           }
+
+          if (!syncedOnceRef.current) {
+            syncedOnceRef.current = true;
+            try {
+              await refreshAlarms();
+            } catch (e) {
+              console.warn('초기 알람 동기화 실패(무시 가능):', e);
+            }
+          }
+
           if (data.success?.isNew) {
-            navigation.navigate('ProfileSettingPage',{});
+            navigation.navigate('ProfileSettingPage', {});
           } else {
             navigation.navigate('AlarmPage');
           }
