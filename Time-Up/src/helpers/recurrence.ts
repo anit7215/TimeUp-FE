@@ -13,7 +13,7 @@ export const ensureRecurrenceRule = (rule?: Schedule['recurrence_rule']): NonNul
   monthly_option: rule?.monthly_option ?? null,  // 'dayOfMonth' | 'nthWeekday' 등 네이밍 합의
   day_of_month: rule?.day_of_month ?? null,
   nth_week: rule?.nth_week ?? null,
-  weekday: rule?.weekday ?? [],
+  weekday: rule?.weekday ?? null,
   repeat_mode: rule?.repeat_mode ?? 'count',     // 'count' | 'until'
   repeat_count: rule?.repeat_count ?? null,        // number가 더 자연스러움(아래 참고)
   repeat_until_date: rule?.repeat_until_date ?? null,
