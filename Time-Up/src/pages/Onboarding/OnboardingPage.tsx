@@ -56,7 +56,7 @@ export default function OnboardingPage() {
           if (data.success?.isNew) {
             navigation.navigate('ProfileSettingPage',{});
           } else {
-            navigation.navigate('MyPage'); // 캘린더 페이지로 수정 예정
+            navigation.navigate('CalendarPage'); 
           }
         } catch (error: any) {
           console.error('로그인 요청 실패:', error);
