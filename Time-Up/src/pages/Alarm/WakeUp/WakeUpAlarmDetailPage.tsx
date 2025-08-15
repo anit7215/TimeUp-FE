@@ -1,26 +1,28 @@
 // src/pages/WakeUpAlarmDetailPage.tsx
+import AlarmButton from '@/src/components/alarm/AlarmButton';
 import React from 'react';
 import { Dimensions, Platform, Text, View } from 'react-native';
-import PageBackButton from '../../components/common/PageBackButton';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import { Day, useAlarmContext } from '../../contexts/AlarmContext';
-import useAppNavigation from '../../hooks/useAppNavigation';
-import BottomLayout from '../../Layouts/BottomLayout';
+import PageBackButton from '../../../components/common/PageBackButton';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
+import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
+import useAppNavigation from '../../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
 
-import AlarmButton from '@/src/components/alarm/AlarmButton';
-import IconBiv from '../../../assets/images/AlarmBiv.svg';
-import IconCalendar from '../../../assets/images/AlarmCalendar.svg';
-import IconMemo from '../../../assets/images/AlarmMemo.svg';
-import IconMusic from '../../../assets/images/AlarmMusic.svg';
-import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+import IconBiv from '../../../../assets/images/AlarmBiv.svg';
+import IconCalendar from '../../../../assets/images/AlarmCalendar.svg';
+import IconMemo from '../../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 
 export default function WakeUpAlarmDetailPage() {
   const navigation = useAppNavigation();
   const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, setSelectedDay } = useAlarmContext();
+  const { selectedAlarmId, wakeupAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, setSelectedDay } = useAlarmContext();
 
-  const alarm = myAlarms.find((a) => a.id === selectedAlarmId);
+  //debugger;
+  const alarm = wakeupAlarms.find((a) => a.serverId === selectedAlarmId);
+  // const alarm = wakeupAlarms.find(a => a.serverId === selectedAlarmId);
 
   if (!alarm) {
     return (
@@ -54,7 +56,7 @@ export default function WakeUpAlarmDetailPage() {
         style={{ marginTop: Platform.OS === 'web' ? 30 : 15 }}>
         <PageBackButton goTo="WakeUpAlarmPage" />
 
-        <Text className='font-pretendard text-white text-[24px] mr-[4%]'>
+        <Text className='font-pretendard text-white text-[24px]'>
           {selectedDay}요일 기상 알람
         </Text>
         <ToggleSwitch
@@ -79,13 +81,14 @@ export default function WakeUpAlarmDetailPage() {
       </View>
 
       <View className="w-full h-[55%] items-center gap-3 space-y-3">
-        <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
+        <View className="w-[91%] h-[90px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
           <View className="flex-row items-center">
             <IconCalendar width={20} height={20} />
             <Text className="font-pretendard text-gray-200 text-xl ml-2">반복요일</Text>
           </View>
 
-          <View className="flex-row items-center justify-center gap-x-4 mt-[4%] mx-4">
+          <View className="flex-row items-center justify-center gap-x-4 mt-[2%] mx-4"
+            style={{ marginLeft: Platform.OS === 'web' ? 40 : 0 }}>
             {weekdays.map((day) => {
               const isSelected = selectedDay === day;
               return (

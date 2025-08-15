@@ -2,6 +2,24 @@
 import { axiosInstance } from './axiosInstance'
 import { CreateScheduleRequest, Schedule } from '../types/schedule'
 
+/* 
+const normalizeSchedule = (s: any) => ({
+  id: s.id ?? s.schedule_Id ?? s.schedule_id, // 방어적 매핑
+  name: s.name ?? '',
+  start_date: s.start_date ?? s.startDate ?? null,
+  end_date: s.end_date ?? s.endDate ?? null,
+  is_important: !!(s.is_important ?? s.isImportant),
+  is_reminding: !!(s.is_reminding ?? s.isReminding),
+  remind_at: s.remind_at ?? s.remind_minutes ?? null,   // 핵심!
+  memo: s.memo ?? '',
+  place_name: s.place_name ?? s.placeName ?? '',
+  color: s.color ?? 'gray',
+  recurrence_rule: s.recurrence_rule ?? null,
+});
+*/
+
+// 상세 스케줄 CRUD
+
 // 일정 등록 (POST)
 export const createSchedule = async (
   data: CreateScheduleRequest
@@ -13,32 +31,63 @@ export const createSchedule = async (
   return res.data
 }
 
-// 월별 일정 목록 불러오기 (GET)
-export const getSchedules = async (month: string, year: string) => {
-  const res = await axiosInstance.get('/schedules/days', {
-    params: { year, month },
-  })
-  return res.data
-}
+// 상세 일정 조회 (GET)
+export const getScheduleById = async (scheduleId: string) => { // normailze에서 any 타입이라 일단 promise 뺌
+  const response = await axiosInstance.get(`/schedules/${scheduleId}`);
+  console.log(scheduleId, response.data)
+  return response.data.success.schedule;
+};
 
 // 일정 삭제 (DELETE)
 export const deleteSchedule = async (scheduleId: string): Promise<void> => {
   await axiosInstance.delete(`/schedules/${scheduleId}`)
 }
 
-// 일정 수정 (PUT)
+// 상세 일정 수정 (PUT)
 export const updateSchedule = async (
   scheduleId: string,
   data: CreateScheduleRequest
 ): Promise<Schedule> => {
-  const res = await axiosInstance.put(`/schedules/${scheduleId}`, data)
+  const res = await axiosInstance.put(`/schedules/${scheduleId}`, data);
+  
+  // 응답 구조 확인 후 안전하게 추출
+  if (res.data?.success?.schedule) {
+    return res.data.success.schedule;
+  } else if (res.data?.schedule) {
+    return res.data.schedule;
+  } else {
+    console.warn('예상하지 못한 API 응답 구조:', res.data);
+    return res.data;
+  }
+};
+
+
+// 월별 일정 목록 조회 (GET)
+export const getSchedules = async (targetDate: string) => {
+  const res = await axiosInstance.get('/schedules/monthly', {
+    params: { month: targetDate },
+  })
+  console.log('월별 일정 조회 성공:', res.data)
   return res.data
 }
 
-// 일별 일정 불러오기
-export const fetchDaySchedule = async (date: string) => {
-  const res = await axiosInstance.get('/schedule', {
-    params: { date },
+
+// 일별 일정 목록 조회
+export const getDailySchedules = async (dateISO: string) => {
+  const dateParam = dateISO.slice(0, 10);
+  const res = await axiosInstance.get('/schedules/day', {
+    params: { date: dateParam },
+  })
+  return {
+    schedules: res.data.success.schedules,
+    googleSchedules: res.data.success.googleSchedules,
+  }
+}
+
+// 중요 일정 조회
+export const getImportantSchedules = async (targetMonth: string) => {
+  const res = await axiosInstance.get('/schedules/important', {
+    params: { month: targetMonth },
   })
   return res.data
 }

@@ -2,7 +2,10 @@
 import { putMyAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
+import ToggleSwitch from '@/src/components/common/ToggleSwitch';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
+import useAppNavigation from '@/src/hooks/useAppNavigation';
+import BottomLayout from '@/src/Layouts/BottomLayout';
 import type { AlarmItem } from '@/src/types/alarm';
 import { formatDate } from '@/src/utils/AlarmFormat';
 import { toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
@@ -12,15 +15,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import ToggleSwitch from '../../components/common/ToggleSwitch';
-import useAppNavigation from '../../hooks/useAppNavigation';
-import BottomLayout from '../../Layouts/BottomLayout';
 
-
-import IconBiv from '../../../assets/images/AlarmBiv.svg';
-import IconMemo from '../../../assets/images/AlarmMemo.svg';
-import IconMusic from '../../../assets/images/AlarmMusic.svg';
-import IconRepeat from '../../../assets/images/AlarmRepeat.svg';
+import IconBiv from '../../../../assets/images/AlarmBiv.svg';
+import IconMemo from '../../../../assets/images/AlarmMemo.svg';
+import IconMusic from '../../../../assets/images/AlarmMusic.svg';
+import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
@@ -105,15 +104,15 @@ export default function EditMyAlarmPage() {
 
 
   const handleSelectSound = () => {
-    navigation.navigate('SelectAlarmSoundPage');
+    navigation.navigate('SelectMyAlarmSoundPage');
   };
 
   const handleSelectVibrate = () => {
-    navigation.navigate('SelectAlarmVibratePage');
+    navigation.navigate('SelectMyAlarmVibratePage');
   };
 
   const handleSelectReplay = () => {
-    navigation.navigate('SelectAlarmReplayPage');
+    navigation.navigate('SelectMyAlarmReplayPage');
   };
 
   const handleModalCancel = () => {

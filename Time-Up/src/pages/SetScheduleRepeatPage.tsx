@@ -1,75 +1,171 @@
-// SetScheduleRepeatPage.tsx - 전역 상태(draft) 기반 리팩토링
-
-import {
-  BottomSheetModal, BottomSheetView
-} from '@gorhom/bottom-sheet';
+// SetScheduleRepeatPage.tsx
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import BeforeHeader from '../components/common/BeforeHeader';
 import CheckBox from '../components/common/CheckBox';
 import CustomCalendar from '../components/SetSchedule/CustomCalendar';
-import LeftArrowIcon from '../../assets/icons/LeftArrowIcon.svg';
+
 import { useSchedule } from '../context/ScheduleContext';
+import { ensureRecurrenceRule, toggleWeekday } from '../helpers/recurrence';
+
+const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'] as const;
+
+const toLocalDate = (iso?: string | null) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
+const nthWeekOfMonth = (date: Date) => Math.floor((date.getDate() - 1) / 7) + 1;
 
 export default function SetScheduleRepeatPage() {
   const navigation = useNavigation();
   const { state, dispatch } = useSchedule();
-  const form = state.draft;
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(form.end_date || '');
-  const [repeatType, setRepeatType] = useState<'weekly' | 'monthly' | 'none'>(form.repeat_type || 'none');
-  const [selectedWeekdays, setSelectedWeekdays] = useState<{ [key: string]: boolean }>(form.repeat_days || {
-    Sun: false, Mon: false, Tue: false, Wed: false, Thu: false, Fri: false, Sat: false
+  const initialRule = useMemo(
+    () => ensureRecurrenceRule(state.draft.recurrence_rule),
+    [state.draft.recurrence_rule]
+  );
+
+  const start_local = useMemo(() => toLocalDate(state.draft.start_date) ?? new Date(), [state.draft.start_date]);
+  const start_day_of_month = start_local.getDate();
+  const start_weekday = start_local.getDay();
+  const start_nth = nthWeekOfMonth(start_local);
+  const start_weekday_label = DAY_LABELS[start_weekday];
+
+  const [repeat_type, set_repeat_type] = useState<null | 'weekly' | 'monthly'>(initialRule.repeat_type);
+  const [repeat_weekdays, set_repeat_weekdays] = useState<number[]>(
+    initialRule.repeat_weekdays && initialRule.repeat_weekdays.length
+      ? initialRule.repeat_weekdays
+      : [start_weekday]
+  );
+  const [repeat_mode, set_repeat_mode] = useState<'count' | 'until'>(initialRule.repeat_mode === 'until' ? 'until' : 'count');
+  const [repeat_count, set_repeat_count] = useState<number>(() => {
+    const n = Number(initialRule.repeat_count ?? 1);
+    return Number.isFinite(n) && n > 0 ? n : 1;
   });
-  const [endType, setEndType] = useState<'setRepeatNum' | 'setEndDay' | null>(form.repeat_end_type || null);
-  const [value, setValue] = useState(form.repeat_count ? form.repeat_count.toString() : '');
+  const [repeat_until_date, set_repeat_until_date] = useState<string | null>(initialRule.repeat_until_date ?? null);
+
+  const [monthly_option, set_monthly_option] = useState<null | 'day_of_month' | 'nth_weekday'>(
+    (initialRule.monthly_option as any) ?? null
+  );
+  const [day_of_month, set_day_of_month] = useState<number | null>(
+    initialRule.day_of_month ?? start_day_of_month
+  );
+  const [nth_week, set_nth_week] = useState<number | null>(
+    initialRule.nth_week ?? start_nth
+  );
+  const [weekday, set_weekday] = useState<number | null>(
+    initialRule.weekday ?? start_weekday
+  );
+
+  const is_day_of_month_selected =
+    repeat_type === 'monthly' &&
+    monthly_option === 'day_of_month' &&
+    day_of_month === start_day_of_month;
+
+  const is_nth_weekday_selected =
+    repeat_type === 'monthly' &&
+    monthly_option === 'nth_weekday' &&
+    nth_week === start_nth &&
+    weekday === start_weekday;
+
+  useEffect(() => {
+    set_repeat_weekdays((prev) =>
+      initialRule.repeat_weekdays && initialRule.repeat_weekdays.length ? prev : [start_weekday]
+    );
+    set_day_of_month((prev) => (initialRule.day_of_month != null ? prev : start_day_of_month));
+    set_nth_week((prev) => (initialRule.nth_week != null ? prev : start_nth));
+    set_weekday((prev) =>
+      initialRule.weekday? prev : start_weekday
+    );
+  }, [start_weekday, start_day_of_month, start_nth]);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['50%', '50%'], []);
-  const dayMap: { [key: string]: string } = {
-    '일': 'Sun', '월': 'Mon', '화': 'Tue', '수': 'Wed', '목': 'Thu', '금': 'Fri', '토': 'Sat'
+
+  const onToggleWeeklyDay = (day_index: number) => {
+    set_repeat_type('weekly');
+    set_repeat_weekdays(prev => toggleWeekday(prev, day_index));
   };
 
-  const toggleWeekday = (korDay: string) => {
-    const engDay = dayMap[korDay];
-    setSelectedWeekdays(prev => ({ ...prev, [engDay]: !prev[engDay] }));
+  const handleEndType = (mode: 'count' | 'until') => {
+    set_repeat_mode(mode);
+    if (mode === 'count') set_repeat_until_date(null);
   };
 
-  const handleEndType = (type: 'setRepeatNum' | 'setEndDay') => {
-    setEndType(type);
+  const handleNumChange = (v: string) => {
+    const n = Number(v.replace(/\D+/g, ''));
+    if (!Number.isFinite(n)) return;
+    set_repeat_count(n || 1);
   };
 
-  const handleNumChange = (text: string) => {
-    const onlyNumbers = text.replace(/[^0-9]/g, '');
-    const num = parseInt(onlyNumbers || '0', 10);
-    if (num > 100) return;
-    setValue(onlyNumbers);
+  const pickMonthlyByStartDay = () => {
+    set_repeat_type('monthly');
+    set_monthly_option('day_of_month');
+    set_day_of_month(start_day_of_month);
+  };
+  const pickMonthlyByStartNthWeekday = () => {
+    set_repeat_type('monthly');
+    set_monthly_option('nth_weekday');
+    set_nth_week(start_nth);
+    set_weekday(start_weekday);
   };
 
   const handleConfirm = () => {
+    if (!repeat_type) {
+      dispatch({
+        type: 'UPDATE_DRAFT',
+        payload: {
+          is_recurring: false,
+          recurrence_rule: {
+            repeat_type: null,
+            repeat_weekdays: [],
+            monthly_option: null,
+            day_of_month: null,
+            nth_week: null,
+            weekday: null,
+            repeat_mode: 'count',
+            repeat_count: null,
+            repeat_until_date: null,
+          },
+        },
+      });
+      navigation.goBack();
+      return;
+    }
+
+    const nextRule = ensureRecurrenceRule({
+      repeat_type,
+      repeat_weekdays: repeat_type === 'weekly' ? repeat_weekdays : [],
+      monthly_option: repeat_type === 'monthly' ? monthly_option ?? null : null,
+      day_of_month: repeat_type === 'monthly' && monthly_option === 'day_of_month' ? day_of_month ?? null : null,
+      nth_week: repeat_type === 'monthly' && monthly_option === 'nth_weekday' ? nth_week ?? null : null,
+      weekday:
+        repeat_type === 'monthly' && monthly_option === 'nth_weekday' && weekday != null
+          ? weekday
+          : null,
+      repeat_mode,
+      repeat_count: repeat_mode === 'count' ? repeat_count : null,
+      repeat_until_date: repeat_mode === 'until' ? repeat_until_date : null,
+    });
+
     dispatch({
       type: 'UPDATE_DRAFT',
       payload: {
-        repeat: repeatType !== 'none',
-        repeat_type: repeatType,
-        repeat_days: repeatType === 'weekly' ? selectedWeekdays : undefined,
-        repeat_count: endType === 'setRepeatNum' ? parseInt(value) : undefined,
-        end_date: endType === 'setEndDay' ? selectedDate : undefined,
-        repeat_end_type: endType,
-        is_recurring: true
+        is_recurring: true,
+        recurrence_rule: nextRule,
       },
     });
+
     navigation.goBack();
   };
 
   return (
-    <View className="flex-1 bg-[#121212] pt-20 px-4">
+    <View className="flex-1 bg-[#121212] px-4">
+      {/* 종료 날짜 선택 BottomSheet */}
       <BottomSheetModal
         ref={bottomSheetModalRef}
         snapPoints={snapPoints}
@@ -77,117 +173,126 @@ export default function SetScheduleRepeatPage() {
         backgroundStyle={{ backgroundColor: '#33363B' }}
       >
         <BottomSheetView style={{ flex: 1, padding: 16 }}>
-          {selectedItem === '종료 날짜 설정' && (
-            <CustomCalendar
-              initialDate={form.start_date}
-              onSelectDate={(date) => {
-                setSelectedDate(date);
-              }}
-            />
-          )}
+          <CustomCalendar
+            initialDate={state.draft.start_date || undefined}
+            onSelectDate={(dateISO) => {
+              set_repeat_until_date(dateISO);
+              bottomSheetModalRef.current?.dismiss();
+            }}
+          />
         </BottomSheetView>
       </BottomSheetModal>
 
-      <View className="flex-row space-between">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <LeftArrowIcon />
-        </TouchableOpacity>
+      <BeforeHeader rightLabel="확인" onRightPress={handleConfirm} />
 
-        <TouchableOpacity
-          onPress={handleConfirm}
-          style={{ marginTop: 40, padding: 16, backgroundColor: '#007AFF', borderRadius: 8, alignItems: 'center' }}
-        >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>확인</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View className="flex-column ml-[16px] mr-[16px] pl-4 pt-4">
+      {/* 반복 주기 */}
+      <View className="ml-[16px] mr-[16px] pl-4">
         <Text className="text-white text-[20px]">반복 주기</Text>
 
+        {/* 주 반복 선택 */}
         <View className="flex-row p-4">
           <CheckBox
-            isChecked={repeatType === 'weekly'}
-            onValueChangeHandler={() => setRepeatType(prev => (prev === 'weekly' ? 'none' : 'weekly'))}
+            isChecked={repeat_type === 'weekly'}
+            onValueChangeHandler={() => set_repeat_type(prev => (prev === 'weekly' ? null : 'weekly'))}
             disabled={false}
           />
           <Text className="text-white text-[20px] ml-2 p-3">1주마다</Text>
         </View>
 
-        {repeatType === 'weekly' && (
+        {repeat_type === 'weekly' && (
           <View className="flex-row items-center justify-center mb-2">
-            {['일', '월', '화', '수', '목', '금', '토'].map(day => {
-              const engDay = dayMap[day];
-              const isSelected = selectedWeekdays[engDay];
+            {DAY_LABELS.map((label, idx) => {
+              const isSelected = repeat_weekdays.includes(idx);
               return (
                 <TouchableOpacity
-                  key={day}
-                  onPress={() => toggleWeekday(day)}
+                  key={label}
+                  onPress={() => onToggleWeeklyDay(idx)}
                   className={`w-8 h-8 mx-1 rounded-full items-center justify-center border ${isSelected ? 'border-white' : 'border-0'}`}
                 >
-                  <Text className="text-white text-[20px]">{day}</Text>
+                  <Text className="text-white text-[20px]">{label}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
         )}
 
+        {/* 월 반복 선택 */}
         <View className="flex-row pl-4">
           <CheckBox
-            isChecked={repeatType === 'monthly'}
-            onValueChangeHandler={() => setRepeatType(prev => (prev === 'monthly' ? 'none' : 'monthly'))}
+            isChecked={repeat_type === 'monthly'}
+            onValueChangeHandler={() => set_repeat_type(prev => (prev === 'monthly' ? null : 'monthly'))}
             disabled={false}
           />
           <Text className="text-white text-[20px] ml-2 p-3">1개월마다</Text>
         </View>
 
-        {repeatType === 'monthly' && (
+        {repeat_type === 'monthly' && (
           <View className="m-4">
-            <TouchableOpacity className="bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center">
-              <Text className="text-white text-[18px]">21일마다 반복</Text>
+            <TouchableOpacity
+              onPress={pickMonthlyByStartDay}
+              className={`bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center ${ is_day_of_month_selected ? 'bg-blue' : 'bg-gray'}`}
+            >
+              <Text className="text-white text-[18px]">
+                {start_day_of_month}일마다 반복
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center">
-              <Text className="text-white text-[18px]">세 번째 수요일마다 반복</Text>
+
+            <TouchableOpacity
+              onPress={pickMonthlyByStartNthWeekday}
+              className={`bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center ${ is_nth_weekday_selected ? 'bg-blue' : 'bg-gray'}`}
+            >
+              <Text className="text-white text-[18px]">
+                {start_nth}번째 {start_weekday_label}요일마다 반복
+              </Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      <View className="flex-column ml-[16px] mr-[16px] pl-4 pt-4">
+      {/* 반복 기간 */}
+      <View className="ml-[16px] mr-[16px] pl-4 pt-4">
         <Text className="text-white text-[20px]">반복 기간</Text>
 
+        {/* 횟수로 제한 */}
         <View className="flex-row p-4">
           <CheckBox
-            isChecked={endType === 'setRepeatNum'}
-            onValueChangeHandler={() => handleEndType('setRepeatNum')}
+            isChecked={repeat_mode === 'count'}
+            onValueChangeHandler={() => handleEndType('count')}
             disabled={false}
           />
           <Text className="text-white text-[20px] ml-2 p-3">일정 횟수 반복</Text>
         </View>
 
-        {endType === 'setRepeatNum' && (
+        {repeat_mode === 'count' && (
           <View className="flex-row justify-center items-center">
             <TextInput
               keyboardType="numeric"
-              value={value}
+              value={String(repeat_count)}
               onChangeText={handleNumChange}
-              className="text-white border-b border-white p-2 text-[25px]"
+              className="text-white border-b border-white p-2 text-[25px] w-20 text-center"
             />
-            <Text className="text-white text-[25px]">회 반복</Text>
+            <Text className="text-white text-[25px] ml-2">회 반복</Text>
           </View>
         )}
 
-        <View className="flex-row pl-4">
+        {/* 날짜로 제한 */}
+        <View className="flex-row pl-4 mt-2">
           <CheckBox
-            isChecked={endType === 'setEndDay'}
+            isChecked={repeat_mode === 'until'}
             onValueChangeHandler={() => {
-              handleEndType('setEndDay');
-              setSelectedItem('종료 날짜 설정');
+              handleEndType('until');
               bottomSheetModalRef.current?.present();
             }}
             disabled={false}
           />
           <Text className="text-white text-[20px] ml-2 p-3">종료 날짜 설정</Text>
         </View>
+
+        {repeat_mode === 'until' && (
+          <Text className="text-gray-300 ml-12 mt-1">
+            {repeat_until_date ? `선택한 종료일: ${repeat_until_date}` : '종료일을 선택하세요'}
+          </Text>
+        )}
       </View>
     </View>
   );

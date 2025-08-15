@@ -18,7 +18,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anit7215.TimeUp"
+      "package": "com.anit7215.TimeUp",
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +34,16 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "40d0fd6f-f59a-4cf6-a114-777cd4710876"
+      }
     }
   }
 }

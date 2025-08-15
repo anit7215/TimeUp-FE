@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -13,9 +13,21 @@ import Modal from '../components/common/Modal';
 import { formatMonthDay } from '../components/SetSchedule/formatDate';
 import ImportantScheduleModal from '../components/SetSchedule/ImportantScheduleModal';
 import { useSchedule } from '../context/ScheduleContext';
-import { Schedule } from '../types/schedule';
+import { toYyyyMm } from '../utils/userTimeFormat';
+import { getSchedules, getImportantSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
+import { dailyToEvents } from '../utils/dailyToEvents';
+import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
 
 const { width, height } = Dimensions.get('window');
+
+
+type ImportantSchedule = {
+  schedule_id: number; // 얘는 또 snake여
+  name: string;
+  start_date: string;
+  end_date: string;
+  color: string;
+}
 
 const CalendarPage = () => {
   const navigation = useNavigation<any>();
@@ -25,30 +37,15 @@ const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [isDaySelected, setIsDaySelected] = useState(false);
-  const [events, setEvents] = useState<{[key: string]: number}>({});
+  const [events, setEvents] = useState<Record<string, { count: number; colors: string[] }>>({});
   const [isPlusButtonPressed, setIsPlusButtonPressed] = useState(false);
   const [ModalOpen, setModalOpen] = useState(false);
+  const [importantSchedules, setImportantSchedules] = useState<ImportantSchedule[]>([]);
 
-  // 현재 연도와 월 가져오기
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  useEffect(() => {
-    if (selectedDate && isPlusButtonPressed) {
-      setModalOpen(true);
-      setIsPlusButtonPressed(false);
-     }
-    }, [selectedDate, isPlusButtonPressed]);
-  
-  
-  // selectedMonth 형식 수정: 월은 1부터 시작하도록, 두 자리로 패딩
-  const [selectedMonth, setSelectedMonth] = useState(
-    `${year}-${String(month + 1).padStart(2, '0')}`
-  );
-  const [isModalVisible, setIsModalVisible] = useState(true); // 항상 표시되도록 true로 설정
-
-  // 더미 데이터 날짜를 현재 연도로 수정
-  const schedules = [
+/*  const schedules = [
     {
       scheduleId: '1',
       name: '옷 사기',
@@ -67,12 +64,129 @@ const CalendarPage = () => {
       is_important: true,
       place_name: '회의실 B'
     }
-  ];
+  ]; */
 
-  // 중요 일정 모달 열기 함수 추가
-  const openImportantScheduleModal = () => {
-    setIsModalVisible(true);
+  const toDateKey = (isoOrDate: string | Date) => {
+    const d = typeof isoOrDate === 'string' ? new Date(isoOrDate) : isoOrDate;
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;      // 1~12 (0 padding 없이)
+    const day = d.getDate();         // 1~31 (0 padding 없이)
+    return `${y}-${m}-${day}`;
   };
+
+  const buildDotsFromByDay = (
+    schedulesByDay: Record<string, { color: string, scheduleId?: string }[]>,
+    year: number,
+    monthIndex0: number // 0~11
+  ) => {
+    const map: Record<string, { count: number; colors: string[] }> = {};
+  
+    Object.entries(schedulesByDay || {}).forEach(([dayStr, arr]) => {
+      const day = Number(dayStr); // "8" -> 8
+      const key = `${year}-${monthIndex0 + 1}-${day}`; // getEventCount 포맷과 동일
+
+      // 중복 제거를 위해 Map 사용
+      // scheduleId가 없으면 color와 랜덤값으로 고유 ID 생성
+      const uniqueSchedules = new Map();
+
+      (arr|| []).forEach(item => {
+        const id = item.scheduleId || `${item.color}-${Math.random()}`;
+        if (!uniqueSchedules.has(id)) {
+          uniqueSchedules.set(id, item.color);
+        }
+      });
+  
+      // 색상 배열(최대 6개까지만 도트로 표시)
+      const colors = Array.from(uniqueSchedules.values()).slice(0, 6);
+  
+      map[key] = {
+        count: uniqueSchedules.size, // 실제 일정 개수
+        colors,
+      };
+    });
+  
+    return map;
+  };
+
+  const loadMonth = async (dateOrISO: Date | string) => {
+    // setLoading(true);
+    // setError?.(null as any);
+  
+    try {
+      const monthKey = toYyyyMm(dateOrISO); // 'YYYY-MM'
+  
+      // 병렬 요청으로 살짝 더 빠르게
+      const [res, importantRes] = await Promise.all([
+        getSchedules(monthKey),
+        getImportantSchedules(monthKey),
+      ]);
+  
+      // 기준 날짜 파생
+      const base = typeof dateOrISO === 'string' ? new Date(dateOrISO) : dateOrISO;
+      const y = base.getFullYear();
+      const mIndex0 = base.getMonth();
+  
+      // 월별 도트 데이터 정규화: 색상 → HEX
+      const byDayRaw = res?.success?.schedulesByDay ?? {};
+      const byDay = Object.fromEntries(
+        Object.entries(byDayRaw).map(([dayStr, arr]: any) => [
+          dayStr,
+          (arr ?? []).map((item: any) => ({
+            ...item,
+            color: toHex(item.color), // 'red' → '#F7A1A1', 이미 hex면 그대로
+            // 도트 중복 제거용 key: 서버가 schedule_id만 주면 여기서 scheduleId로 통일
+            scheduleId: String(item.scheduleId ?? item.schedule_id ?? item.id ?? `${dayStr}-${Math.random()}`),
+          })),
+        ])
+      );
+  
+      setEvents(buildDotsFromByDay(byDay, y, mIndex0));
+      setSelectedMonth(monthKey);
+  
+      // 중요 일정 응답 파싱
+      const raw =
+        importantRes?.success?.schedules ??
+        importantRes?.success ??
+        importantRes?.data ??
+        importantRes;
+  
+      const list: any[] = Array.isArray(raw) ? raw : [];
+  
+      // 중요 일정도 색상을 HEX로 정규화 + 정렬
+      const normalizedImportant = list
+        .map((s) => ({
+          ...s,
+          color: toHex(s.color),
+        }))
+        .sort(
+          (a, b) =>
+            new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        );
+  
+      setImportantSchedules(normalizedImportant);
+    } catch (e) {
+      console.error('월별 일정 조회 실패:', e);
+      // setError?.('월별 일정 조회 실패');
+      setEvents({});
+      setImportantSchedules([]);
+    } finally {
+      // setLoading(false);
+    }
+  };
+  
+
+  useEffect(() => {
+    if (selectedDate && isPlusButtonPressed) {
+      setModalOpen(true);
+      setIsPlusButtonPressed(false);
+     }
+    }, [selectedDate, isPlusButtonPressed]);
+  
+  // 선택된 월을 표시하기 위한 상태
+  const [selectedMonth, setSelectedMonth] = useState(
+    `${year}-${String(month + 1).padStart(2, '0')}`
+  );
+  const [isModalVisible, setIsModalVisible] = useState(true); // 항상 표시되도록 true로 설정
 
   const closeImportantScheduleModal = () => {
     setIsModalVisible(false);
@@ -93,95 +207,52 @@ const CalendarPage = () => {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // 백엔드에서 일정 데이터를 가져오는 함수
-  const fetchEvents = async (year: number, month: number) => {
-    try {
-      // 실제 API 호출 예시
-      // const response = await fetch(`/api/events?year=${year}&month=${month + 1}`);
-      // const data = await response.json();
-      
-      // 임시 데이터 (실제로는 백엔드에서 받아올 데이터)
-      const mockData: {[key: string]: number} = {
-        '2025-7-3': 2,   // 7월 3일에 2개 일정
-        '2025-7-15': 1,  // 7월 15일에 1개 일정
-        '2025-7-20': 3,  // 7월 20일에 3개 일정
-        '2025-7-25': 1,  // 7월 25일에 1개 일정
-      };
-      
-      setEvents(mockData);
-    } catch (error) {
-      console.error('일정 데이터 가져오기 실패:', error);
-    }
-  };
+useEffect(() => {
+  loadMonth(currentDate);
+}, [currentDate]);
 
-  
-  // 월이 변경될 때마다 일정 데이터 가져오기
-  useEffect(() => {
-    fetchEvents(year, month);
-  }, [year, month]);
-
-  const handleAddSchedule = (date: string) => { // 이건 모달창 뜨고 확인 버튼 누르고 나서 이뤄져야 할 로직
+  const handleAddSchedule = (date: string) => { 
     const dateToUse = selectedDate;
     console.log('선택된 날짜:', dateToUse);
-    const initialSchedule: Schedule = {
-      scheduleId: '', // 등록 전에는 비워두기
-      name: '',
-      start_date: dateToUse,
-      end_date: dateToUse,
-      place_name: '',
-      address: '',
-      color: '#F7A1A1',
-      memo: '',
-      is_reminding: false,
-      remind_at: 0,
-      is_recurring: false,
-      is_important: false,
-      repeat: ''
-    };
 
     dispatch({ type: 'RESET_DRAFT'});
-    dispatch({ type: 'UPDATE_DRAFT', payload: { start_date: date, end_date: date}})
+    dispatch({ type: 'UPDATE_DRAFT', payload: { start_date: dateToUse, end_date: dateToUse}})
     navigation.navigate('AddSchedulePage');
   };
 
   // 날짜 선택 핸들러
   const handleDatePress = (day: any) => { // 이거 any타입이어도 될지 모르겠다...
     const dateString = `${year}-${month + 1}-${day.date}`;
-    navigation.navigate('SchedulePage', { selectedDate: dateString}) // selectedDate 삭제
+    navigation.navigate('SchedulePage', { selectedDate: dateString }) // selectedDate 삭제
     
   };
   
   // 특정 날짜의 일정 개수 가져오기
   const getEventCount = (date: number) => {
     const dateKey = `${year}-${month + 1}-${date}`;
-    return events[dateKey] || 0;
+    return events[dateKey]?.count || 0;
   };
   
   // 일정 dot 렌더링
-  const renderEventDots = (eventCount: number) => {
-    if (eventCount === 0) return null;
-    
-    const dots = [];
-    const maxDots = 6; // 최대 6개까지만 표시
-    const actualDots = Math.min(eventCount, maxDots);
-    
-    for (let i = 0; i < actualDots; i++) {
-      dots.push(
-        <View
-          key={i}
-          style={[
-            styles.eventDot,
-            { marginLeft: i > 0 ? 2 : 0 }
-          ]}
-        />
-      );
-    }
-    
+  const renderEventDots = (colors: string[], totalCount: number) => {
+    if (!totalCount) return null;
+  
+    const maxDots = 6;
+    const dotsToShow = colors.slice(0, maxDots);
+  
     return (
-    
       <View style={styles.eventDotsContainer}>
-        {dots}
-        {eventCount > maxDots && (
-          <Text style={styles.moreEventsText}>+{eventCount - maxDots}</Text>
+        {dotsToShow.map((c, i) => (
+          <View
+            key={i}
+            style={[
+              styles.eventDot,
+              { marginLeft: i > 0 ? 2 : 0, backgroundColor: c },
+            ]}
+          />
+        ))}
+        {totalCount > maxDots && (
+          <Text style={styles.moreEventsText}>+{totalCount - maxDots}</Text>
         )}
       </View>
     );
@@ -262,6 +333,7 @@ const CalendarPage = () => {
             const isTodayDate = isToday(day.date) && day.isCurrentMonth;
             const dayIndex = (i / 7) * 7 + index;
             const eventCount = day.isCurrentMonth ? getEventCount(day.date) : 0;
+            const colors = day.isCurrentMonth ? events[dateString]?.colors || [] : [];
             
             return (
               <TouchableOpacity
@@ -296,7 +368,7 @@ const CalendarPage = () => {
                 >
                   {day.date}
                 </Text>
-                {renderEventDots(eventCount)}
+                {renderEventDots(colors, eventCount)}
               </TouchableOpacity>
             );
           })}
@@ -387,7 +459,7 @@ const CalendarPage = () => {
     {/* ImportantScheduleModal을 GestureHandlerRootView 내부로 이동 */}
     <ImportantScheduleModal
       selectedMonth={selectedMonth}
-      schedules={schedules}
+      schedules={importantSchedules}
       isVisible={isModalVisible}
       onClose={closeImportantScheduleModal}
     />
