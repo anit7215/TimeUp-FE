@@ -16,7 +16,7 @@ export default function MyPage() {
   const [openLogout, setOpenLogout] = useState(false);
   const [email, setEmail]=useState<string|null>(null);
   const { data: userInfo, isLoading, error } = useGetUserInfo();
-  const { profileImage } = useProfileStore();
+  const profileImage = useProfileStore(state => state.profileImage);
   const [isChecking, setIsChecking] = useState(false);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; message: string }>({
     visible: false,

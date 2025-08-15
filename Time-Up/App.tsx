@@ -9,8 +9,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
-import { AlarmProvider } from './src/contexts/AlarmContext';
 import { ScheduleProvider } from './src/context/ScheduleContext';
+import { AlarmProvider } from './src/contexts/AlarmContext';
+import AddSchedulePage from './src/pages/AddSchedulePage';
 import AlarmPage from './src/pages/Alarm/AlarmPage';
 import EditMyAlarmPage from './src/pages/Alarm/EditMyAlarmPage';
 import EditWakeUpAlarmPage from './src/pages/Alarm/EditWakeUpAlarmPage';
@@ -31,11 +32,10 @@ import MyPage from './src/pages/Mypage/MyPage';
 import AddressSearchPage from './src/pages/Onboarding/AddressSearchPage';
 import OnboardingPage from './src/pages/Onboarding/OnboardingPage';
 import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
-import AddSchedulePage from './src/pages/AddSchedulePage';
+import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
-import ScheduleDetailEditPage from './src/pages/SetPage/ScheduleDetail';
-import SetLocationPage from './src/pages/SetLocationPage';
+import { getAccessToken } from './src/utils/storage';
 
 const queryClient = new QueryClient();
 
@@ -43,7 +43,7 @@ export default function App() {
   const Stack = createNativeStackNavigator();
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
-  
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -58,16 +58,17 @@ export default function App() {
     }
   }, []);
 
-  if (!mapsLoaded) {
-    return null;
-  }
-  
+  useEffect(() => {
+    const token = getAccessToken();
+    setInitialRoute(token ? 'AlarmPage' : 'OnboardingPage'); // 캘린더 페이지로 수정
+  }, []);
+  if (!mapsLoaded || !initialRoute) return null;
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <ScheduleProvider>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="OnboardingPage" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
               <Stack.Screen name="OnboardingPage" component={OnboardingPage} />
               <Stack.Screen name="CalendarPage" component={CalendarPage} />
               <Stack.Screen name="MyPage" component={MyPage} />
