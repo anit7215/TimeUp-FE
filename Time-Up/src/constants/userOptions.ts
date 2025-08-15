@@ -1,10 +1,11 @@
+import { JobType, TransportType } from '../stores/useProfileStore';
 export const yearOptions = Array.from({ length: 101 }, (_, i) => {
   const currentYear = new Date().getFullYear();
   const y = currentYear - i;
   return { label: String(y), value: String(y) };
 });
 
-export const jobOptions = [
+export const jobOptions: { label: string; value: JobType }[] = [
   { label: '직장인', value: 'worker' },
   { label: '공무원/군인', value: 'public_worker' },
   { label: '자영업자', value: 'self_employed' },
@@ -14,7 +15,15 @@ export const jobOptions = [
   { label: '기타', value: 'other' },
 ];
 
-export const transportOptions = [
+export const jobLabelToKey = jobOptions.reduce(
+  (acc, option) => {
+    acc[option.label] = option.value;
+    return acc;
+  },
+  {} as Record<string, JobType>,
+);  
+
+export const transportOptions: { label: string; value: TransportType }[] = [
   { label: '버스', value: 'bus' },
   { label: '지하철', value: 'subway' },
   { label: '자동차', value: 'car' },
@@ -23,19 +32,28 @@ export const transportOptions = [
 
 export const remindSoundOptions = [
   { label: '알림음 없음', value: 'no' },
-  { label: 'Ring Tone', value: 'ring' },
-  { label: 'Basic', value: 'vibrate' },
+  { label: 'Heavy Raindrop', value: 'rain' },
+  { label: 'Basic Ring', value: 'basic' },
+  { label: 'Ocean Wave', value: 'ocean' },
+  { label: 'Bird Chirp', value: 'bird' },
+  { label: 'Classic Bell', value: 'classic' }
 ];
 
 export const remindVibrationOptions = [
   { label: '진동 없음', value: 'no' },
-  { label: 'Ring Tone', value: 'ring' },
-  { label: 'Basic', value: 'vibrate' },
+  { label: 'short1', value: 'short1' },
+  { label: 'short2', value: 'short2' },
+  { label: 'long1', value: 'long1' },
+  { label: 'long2', value: 'long2' },
 ];
 
 export const alarmSoundOptions = [
   { label: '알림음 없음', value: 'no' },
   { label: 'Heavy Raindrop', value: 'rain' },
+  { label: 'Basic Ring', value: 'basic' },
+  { label: 'Ocean Wave', value: 'ocean' },
+  { label: 'Bird Chirp', value: 'bird' },
+  { label: 'Classic Bell', value: 'classic' }
 ];
 
 export const vibrationTypeOptions = [

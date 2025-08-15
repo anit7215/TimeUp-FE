@@ -17,6 +17,7 @@ import { toYyyyMm } from '../utils/userTimeFormat';
 import { getSchedules, getImportantSchedules } from '../apis/schedule'; // 백엔드에서 일정 데이터를 가져오는 함수
 import { dailyToEvents } from '../utils/dailyToEvents';
 import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
+import BottomLayout from '../Layouts/BottomLayout';
 
 const { width, height } = Dimensions.get('window');
 
@@ -380,6 +381,7 @@ useEffect(() => {
   
   return (
   <GestureHandlerRootView style={{ flex: 1 }}>
+    <BottomLayout>
     <View style={styles.container}>
       {/* 플러스 버튼 */}
       <View className="absolute top-0 left-0 right-0 z-10 mt-4 mb-4">
@@ -463,7 +465,9 @@ useEffect(() => {
       isVisible={isModalVisible}
       onClose={closeImportantScheduleModal}
     />
+    </BottomLayout>
   </GestureHandlerRootView>
+  </BottomLayout>
   );
 };
 

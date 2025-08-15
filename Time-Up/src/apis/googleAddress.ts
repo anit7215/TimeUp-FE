@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
-import axios from 'axios';
 import { GOOGLE_PLACES_API_KEY } from '@env';
+import axios from 'axios';
+import { Platform } from 'react-native';
 import { AddressItem } from '../types/address';
 
 declare global {
@@ -28,8 +28,12 @@ export const fetchAddress = async (input: string): Promise<AddressItem[]> => {
           language: 'ko',
         },
         (predictions: any[], status: string) => {
-          if (status !== window.google.maps.places.PlacesServiceStatus.OK || !predictions) {
-            reject(new Error('Google Autocomplete 실패: ' + status));
+          if ( 
+            status !== window.google.maps.places.PlacesServiceStatus.OK ||
+            !predictions ||
+            predictions.length === 0
+          ) {
+            resolve([]);
             return;
           }
 

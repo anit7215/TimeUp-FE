@@ -1,3 +1,4 @@
+import { axiosInstance } from '@/src/apis/axiosInstance';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useProfileStore } from '@/src/stores/useProfileStore';
 import { setAccessToken, setRefreshToken } from '@/src/utils/storage';
@@ -34,15 +35,15 @@ export default function OnboardingPage() {
         }
 
         try {
-          // const userInfoRes = await axiosInstance.get('https://www.googleapis.com/userinfo/v2/me', {
-          //   headers: {
-          //     Authorization: `Bearer ${authentication.accessToken}`,
-          //   },
-          // });
-          // const userInfo = userInfoRes.data;
-          // if (userInfo?.picture) {
-          //   setField('profileImage', userInfo.picture);
-          // }
+          const userInfoRes = await axiosInstance.get('https://www.googleapis.com/userinfo/v2/me', {
+            headers: {
+              Authorization: `Bearer ${authentication.accessToken}`,
+            },
+          });
+          const userInfo = userInfoRes.data;
+          if (userInfo?.picture) {
+            setField('profileImage', userInfo.picture);
+          }
 
           const data = await login(authentication.accessToken);
 
@@ -55,7 +56,7 @@ export default function OnboardingPage() {
           if (data.success?.isNew) {
             navigation.navigate('ProfileSettingPage',{});
           } else {
-            navigation.navigate('AlarmPage');
+            navigation.navigate('CalendarPage'); 
           }
         } catch (error: any) {
           console.error('로그인 요청 실패:', error);

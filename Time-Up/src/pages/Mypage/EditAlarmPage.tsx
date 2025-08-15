@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { getAutoAlarmCheckTime, putAutoAlarmCheckTime } from '@/src/apis/users';
+import { alarmSoundOptions, intervalOptions, remindSoundOptions, remindVibrationOptions, repeatCountOptions, vibrationTypeOptions } from '@/src/constants/userOptions';
+import useAppNavigation from '@/src/hooks/useAppNavigation';
+import { AutoAlarmSettings, loadAutoAlarmSettings, saveAutoAlarmSettings } from '@/src/utils/autoAlarmStorage';
+import { loadRemindSettings, saveRemindSettings } from '@/src/utils/remindStorage';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import DropDown3 from '../../components/common/DropDown3';
-import TimeModal from '../../components/Onboarding/TimeModal';
-import { putAutoAlarmCheckTime, getAutoAlarmCheckTime, updateAutoAlarm, getAlarmList, getAutoAlarm } from '@/src/apis/users';
-import { remindSoundOptions, remindVibrationOptions, alarmSoundOptions, vibrationTypeOptions, intervalOptions, repeatCountOptions } from '@/src/constants/userOptions';
+import DayTimeModal, { TimeModalRef } from '../../components/Onboarding/DayTimeModal';
 
 export default function EditrAlarmPage() {
+  const navigation = useAppNavigation();
   const [remindSound, setRemindSound] = useState<string | null>(null);
   const [remindVibration, setRemindVibration] = useState<string | null>(null);
   const [alarmSound, setAlarmSound] = useState<string | null>(null);
@@ -14,19 +18,26 @@ export default function EditrAlarmPage() {
   const [interval, setInterval] = useState<string | null>(null);
   const [repeatCount, setRepeatCount] = useState<string | null>(null);
 
-  const [open, setOpen] = useState(false);
-  const [isOptional, setIsOptional] = useState(false);
   const [alarmTime, setAlarmTime] = useState<{ hour: string; minute: string } | null>(null);
+  const timeModalRef = useRef<TimeModalRef>(null);
 
-  const [autoAlarmId, setAutoAlarmId] = useState<number | null>(null);
-
-  const handleSelect = (hour: string, minute: string) => {
-    setAlarmTime({ hour, minute });
-    setOpen(false);
-  };
+  const handleSelect = (hour: string, minute: string) => setAlarmTime({ hour, minute });
+  const handleOpenTimeModal = useCallback(() => timeModalRef.current?.present(), []);
 
   useEffect(() => {
-    const fetchAlarmData = async () => {
+    const fetchData = async () => {
+      const remindSettings = await loadRemindSettings();
+      if (remindSettings) {
+        setRemindSound(remindSettings.sound);
+        setRemindVibration(remindSettings.vibration);
+      }
+      const autoAlarmSettings: AutoAlarmSettings | null = await loadAutoAlarmSettings();
+      if (autoAlarmSettings) {
+        setAlarmSound(autoAlarmSettings.alarmSound);
+        setVibrationType(autoAlarmSettings.vibrationType);
+        setInterval(autoAlarmSettings.interval);
+        setRepeatCount(autoAlarmSettings.repeatCount);
+      }
       try {
         const response = await getAutoAlarmCheckTime();
         const timeStr = response?.alarm_check_time;
@@ -36,31 +47,11 @@ export default function EditrAlarmPage() {
           const minute = date.getUTCMinutes().toString().padStart(2, '0');
           setAlarmTime({ hour, minute });
         }
-
-        const alarmList = await getAlarmList();
-        if (alarmList?.auto_alarms?.length > 0) {
-          const id = alarmList.auto_alarms[0].auto_alarm_id;
-          setAutoAlarmId(id);
-
-          const alarmDetail = await getAutoAlarm(id);
-
-          console.log('alarmDetail', alarmDetail);
-
-          setAlarmSound(alarmDetail.is_sound ? 'defaultSound' : 'no'); 
-          setVibrationType(alarmDetail.is_vibrating ? alarmDetail.vibration_type : 'no');
-          setInterval(alarmDetail.repeat_interval?.toString() ?? '0');
-          setRepeatCount(alarmDetail.repeat_count?.toString() ?? '0');
-
-          if (alarmDetail.remind_sound) setRemindSound(alarmDetail.remind_sound);
-          if (alarmDetail.remind_vibration) setRemindVibration(alarmDetail.remind_vibration);
-        } else {
-          console.warn('자동 알람이 없습니다.');
-        }
       } catch (error) {
-        console.error('알람 데이터 불러오기 실패:', error);
+        console.error('자동 알람 확인 시간 불러오기 실패:', error);
       }
     };
-    fetchAlarmData();
+    fetchData();
   }, []);
 
   const handleSave = async () => {
@@ -68,12 +59,10 @@ export default function EditrAlarmPage() {
       Alert.alert('시간을 설정해주세요.');
       return;
     }
-    if (!autoAlarmId) {
-      Alert.alert('자동 알람 ID를 불러오지 못했습니다.');
-      return;
-    }
 
     try {
+      await saveRemindSettings({ sound: remindSound, vibration: remindVibration });
+      await saveAutoAlarmSettings({ alarmSound, vibrationType, interval, repeatCount, alarmTime });
       const timePayload = {
         alarm_check_time: new Date(
           Date.UTC(1970, 0, 1, Number(alarmTime.hour), Number(alarmTime.minute), 0)
@@ -81,21 +70,10 @@ export default function EditrAlarmPage() {
       };
       await putAutoAlarmCheckTime(timePayload);
 
-      const alarmPayload = {
-        is_repeating: interval !== '0',
-        is_sound: alarmSound !== 'no',
-        is_vibrating: vibrationType !== 'no',
-        vibration_type: vibrationType || 'default',
-        sound_id: alarmSound === 'no' ? null : 2,
-        repeat_interval: Number(interval) || 0,
-        repeat_count: Number(repeatCount) || 0,
-      };
-
-      await updateAutoAlarm(autoAlarmId, alarmPayload);
-
-      Alert.alert('저장 완료', '자동 알람 설정이 저장되었습니다.');
+      Alert.alert('저장 완료', '설정이 저장되었습니다.');
+      navigation.navigate('MyPage');
     } catch (error) {
-      console.error('자동 알람 저장 실패:', error);
+      console.error('설정 저장 실패:', error);
       Alert.alert('저장 실패', '다시 시도해주세요.');
     }
   };
@@ -145,10 +123,7 @@ export default function EditrAlarmPage() {
         </View>
       </View>
 
-      <TouchableOpacity
-        className="bg-gray-900 rounded-lg px-2 py-3 mb-2"
-        onPress={() => { setOpen(true); setIsOptional(true); }}
-      >
+      <TouchableOpacity className="bg-gray-900 rounded-lg px-2 py-3 mb-2" onPress={handleOpenTimeModal}>
         <View className="flex-row justify-between items-center">
           <Text className="text-white text-base">자동 알람 확인 시간</Text>
           <Text className="text-light">
@@ -163,14 +138,10 @@ export default function EditrAlarmPage() {
           </Text>
         </View>
       </TouchableOpacity>
-      {open && (
-        <TimeModal
-          visible={open}
-          onClose={() => setOpen(false)}
-          onSelect={handleSelect}
-          choice={isOptional ? 'optional' : undefined}
-        />
-      )}
+       <DayTimeModal
+        ref={timeModalRef}
+        onSelect={handleSelect}
+        choice={'optional'}/>
     </ScrollView>
   );
 }
