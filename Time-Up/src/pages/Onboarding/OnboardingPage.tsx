@@ -1,7 +1,6 @@
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useProfileStore } from '@/src/stores/useProfileStore';
 import { setAccessToken, setRefreshToken } from '@/src/utils/storage';
-import { axiosInstance } from '@/src/apis/axiosInstance'; 
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useRef } from 'react';
@@ -17,9 +16,9 @@ export default function OnboardingPage() {
   const { setField } = useProfileStore();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: process.env.GOOGLE_CLIENT_ID,
-    iosClientId: process.env.GOOGLE_CLIENT_ID,
-    androidClientId: process.env.GOOGLE_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
     scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar',],
   });
   const opacityAnim = useRef(new Animated.Value(0)).current;

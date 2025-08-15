@@ -1,15 +1,15 @@
-// src/pages/SelectAlarmReplayPage.tsx
+// src/pages/SelectMyAlarmReplayPage.tsx
 import ToggleSwitch from '@/src/components/common/ToggleSwitch';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Platform, Text, View } from 'react-native';
-import BottomLayout from '../../Layouts/BottomLayout';
-import TransparentButton from '../../components/alarm/TransparentButton';
-import CheckBox from '../../components/common/CheckBox';
-import PageBackButton from '../../components/common/PageBackButton';
-import useAppNavigation from '../../hooks/useAppNavigation';
+import BottomLayout from '../../../Layouts/BottomLayout';
+import TransparentButton from '../../../components/alarm/TransparentButton';
+import CheckBox from '../../../components/common/CheckBox';
+import PageBackButton from '../../../components/common/PageBackButton';
+import useAppNavigation from '../../../hooks/useAppNavigation';
 
-export default function SelectAlarmReplayPage() {
+export default function SelectMyAlarmReplayPage() {
   const navigation = useAppNavigation();
   const { selectedAlarmId, myAlarms, updateAlarmField } = useAlarmContext();
   const alarm = myAlarms.find(a => a.id === selectedAlarmId);
