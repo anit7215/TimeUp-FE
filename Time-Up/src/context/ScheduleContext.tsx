@@ -285,45 +285,4 @@ export function useSchedule() {
   return context;
 }
 
-// hooks/useScheduleActions.ts - 추가 편의 훅들
-export function useScheduleActions() {
-  const { addSchedule, updateSchedule, deleteSchedule, toggleImportant } = useSchedule();
-  
-  return {
-    addSchedule,
-    updateSchedule,
-    deleteSchedule,
-    toggleImportant,
-  };
-}
-
-export function useScheduleSelectors() {
-  const { state, getImportantSchedules, getScheduleById } = useSchedule();
-  
-  return {
-    schedules: state.schedules,
-    loading: state.loading,
-    error: state.error,
-    importantSchedules: getImportantSchedules(),
-    getScheduleById,
-    // 추가 셀렉터들
-    getTodaySchedules: () => {
-      const today = new Date().toISOString().split('T')[0];
-      return state.schedules.filter(schedule => 
-        schedule.start_date <= today && schedule.end_date >= today
-      );
-    },
-    getUpcomingSchedules: (days: number = 7) => {
-      const today = new Date();
-      const futureDate = new Date();
-      futureDate.setDate(today.getDate() + days);
-      
-      return state.schedules.filter(schedule => {
-        const scheduleDate = new Date(schedule.start_date);
-        return scheduleDate >= today && scheduleDate <= futureDate;
-      });
-    },
-  };
-}
-
 export default ScheduleContext;
