@@ -1,11 +1,6 @@
-export type JobType = 
-  | '직장인'
-  | '공무원/군인'
-  | '자영업자'
-  | '프리랜서'
-  | '학생'
-  | '무직'
-  | '기타';
+import { JobType as AppJobType } from '../stores/useProfileStore';
+
+export type JobType = AppJobType;
 
 export type TransportType = 'bus' | 'subway' | 'car' | 'walk';
 

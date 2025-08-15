@@ -1,4 +1,3 @@
-
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { FlatList, Text, TextInput, TouchableOpacity, View, } from 'react-native';
@@ -6,6 +5,7 @@ import SearchIcon from '../../../assets/images/SearchIcon.svg';
 import { fetchAddress } from '../../apis/googleAddress';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import AddressItemSkeleton from '../../components/skeleton/AddressItemSkeleton';
+import { useProfileStore } from '../../stores/useProfileStore';
 import { AddressItem } from '../../types/address';
 import { RootStackParamList } from '../../types/navigation';
 
@@ -13,22 +13,29 @@ export default function AddressSearchPage() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, 'AddressSearchPage'>>();
   const { type, onSelectAddress } = route.params;
-
+  const [hasSearched, setHasSearched] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [results, setResults] = useState<AddressItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const setField = useProfileStore((state) => state.setField);
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleSearch = async () => {
     if (!searchText.trim()) return;
+    setHasSearched(true);
     setLoading(true);
     setResults([]);
-    const res = await fetchAddress(searchText);
-    await sleep(1000);
-    setResults(res);
-    setLoading(false);
+    try {
+      const res = await fetchAddress(searchText);
+      await sleep(1000); 
+      setResults(res);
+    } catch (error) {
+      console.error(error);
+      setResults([]); 
+    } finally {
+      setLoading(false); 
+    }
   };
 
   const handleConfirm = () => {
@@ -81,7 +88,19 @@ export default function AddressSearchPage() {
         <Text className="text-white text-xl font-medium leading-7">
           주소 검색
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => {
+          setSelectedId(null);
+          setSearchText('');
+          setResults([]);
+          setHasSearched(false); 
+          if (type === 'home') {
+            setField('homeAddress', null);
+          } else if (type === 'work') {
+            setField('workAddress', null);
+          }
+          navigation.goBack();
+        }}>
           <Text className="text-gray-300 underline text-sm font-normal leading-tight">
             나중에 입력할게요.
           </Text>
@@ -107,9 +126,10 @@ export default function AddressSearchPage() {
           ))}
         </View>
       )}
-      {!loading && results.length === 0 && (
-        <View className="flex-1 justify-center items-center mt-10">
-          <Text className="text-gray-400 text-base">검색 결과가 없습니다.</Text>
+      {!loading && hasSearched && results.length === 0 && (
+        <View className="flex-1 justify-center items-center mt-10 gap-2">
+          <Text className="text-gray-400 text-xl">검색 결과가 없습니다</Text>
+          <Text className="text-gray-600 text-base">정확한 주소를 입력해주세요</Text>
         </View>
       )}
       <FlatList

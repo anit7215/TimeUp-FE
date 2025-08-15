@@ -1,10 +1,10 @@
 import { signout } from '@/src/apis/auth';
 import { jobOptions, transportOptions, yearOptions } from '@/src/constants/userOptions';
+import { useUpdateUserInfo } from '@/src/hooks/mutation/my/useUpdateUserInfo';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useGetUserInfo } from '@/src/hooks/users/useGetUserInfo';
-import { JobType } from '@/src/types/user';
 import { formatTime } from '@/src/utils/userTimeFormat';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import SignoutIcon from '../../../assets/images/SignoutIcon.svg';
 import BeforeHeader from '../../components/common/BeforeHeader';
@@ -13,22 +13,21 @@ import ConfirmButton from '../../components/common/ConfirmButton';
 import DropDown3 from '../../components/common/DropDown3';
 import Modal from '../../components/common/Modal';
 import StepTransport from '../../components/Onboarding/StepTransport';
-import TimeModal from '../../components/Onboarding/TimeModal';
+import TimeModal, { TimeModalRef } from '../../components/Onboarding/TimeModal';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { AddressItem } from '../../types/address';
-import { useUpdateUserInfo } from '@/src/hooks/mutation/my/useUpdateUserInfo';
 
 export default function EditInfoPage() {
   const navigation = useAppNavigation();
   const {birthYear, job, transport, homeAddress, workAddress, readyTime, commuteTime, setField, toggleTransport,} = useProfileStore();
   const { data: userInfo } = useGetUserInfo();
   const [openSignout, setOpenSignout] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [isOptional, setIsOptional] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<'missing' | 'confirm'>('missing');
   const updateUserInfoMutation = useUpdateUserInfo();
-  
+  const timeModalRef = useRef<TimeModalRef>(null);
+  const [timeModalType, setTimeModalType] = useState<'ready' | 'commute'>('ready');
+
   const handleSignout = async () => {
     setOpenSignout(false);
     try {
@@ -63,27 +62,26 @@ export default function EditInfoPage() {
   }, [userInfo]);
 
   const handleSelect = (hour: string, minute: string) => {
-    if (isOptional) {
+    if (timeModalType === 'commute') {
       setField('commuteTime', { hour, minute });
     } else {
       setField('readyTime', { hour, minute });
     }
-    setOpen(false);
   };
+
+  const handleOpenTimeModal = useCallback((type: 'ready' | 'commute') => {
+    setTimeModalType(type);
+    timeModalRef.current?.present();
+  }, []);
+
   const handleSelectAddress = (type: 'home' | 'work', address: AddressItem) => {
-    setField(type === 'home' ? 'homeAddress' : 'workAddress', address.region);
+        const addressString = address.address;
+    setField(type === 'home' ? 'homeAddress' : 'workAddress', addressString);
   };
 
   const onSelectTransport = (value: string) => {
     toggleTransport(value as any);
   };
-
-  const getApiJobLabel = (jobValue: string | null | undefined): JobType | undefined => {
-    if (!jobValue) return undefined;
-    const found = jobOptions.find((opt) => opt.value === jobValue);
-    return found ? (found.label as JobType) : undefined;
-  };
-
 
   const handleSave = () => {
   const isMissing =
@@ -109,13 +107,13 @@ export default function EditInfoPage() {
 
       const payload = {
         birth: Number(birthYear),
-        job: job ?? getApiJobLabel(job),
-        user_preference_transport: transport.map((t, idx) => ({
-          transport: t,
+        job: job || 'other', 
+        preferences: transport.map((t, idx) => ({
+          transportType: t,
           priority: idx + 1,
         })),
-        home_address: homeAddress ?? '',
-        work_address: workAddress ?? '',
+        home_address: homeAddress ?? null,
+        work_address: workAddress ?? null,
         avg_ready_time: avgReadyTime,
         duration_time: durationTime,
       };
@@ -132,8 +130,6 @@ export default function EditInfoPage() {
       });
     }
   };
-
-
 
   return (
     <>
@@ -161,35 +157,34 @@ export default function EditInfoPage() {
                 data={jobOptions}
                 placeholder="직업 선택"
                 value={job}
-                onChange={(v) => setField('job', v as JobType)} 
+                onChange={(v) => setField('job', v as any)}
               />
             </View>
           </View>
         </View>
 
         <View className="bg-gray-900 px-2 py-3 rounded-lg mb-2">
-          <View className="flex-row justify-between items-start gap-[71px] flex-wrap">
-            <Text className="text-white text-base">선호 이동 수단</Text>
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1"> 
+              <Text className="text-white text-base">선호 이동 수단</Text>
+            </View>
             <View className="flex-1">
               <StepTransport selected={transport} options={transportOptions} onSelect={onSelectTransport} />
             </View>
           </View>
         </View>
 
+
         <View className="mb-2">
           <TouchableOpacity className="bg-gray-900 px-2 py-3 rounded-t-lg"
-          onPress={() => {
-            setOpen(true);
-            setIsOptional(false);}}>
+          onPress={() => handleOpenTimeModal('ready')}>
             <View className="flex-row items-center justify-between">
               <Text className="text-white text-base">외출 준비 시간</Text>
               <Text className="text-light text-base">{formatTime(readyTime)}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity className="bg-gray-900 px-2 pt-1.5 pb-3 rounded-b-lg"
-          onPress={() => {
-            setOpen(true);
-            setIsOptional(true);}}>
+          onPress={() => handleOpenTimeModal('commute')}>
             <View className="flex-row items-center justify-between">
               <View className="flex-col">
                 <Text className="text-white text-base">직장/학교까지 이동 시간</Text>
@@ -198,14 +193,12 @@ export default function EditInfoPage() {
               <Text className="text-light text-base">{formatTime(commuteTime)}</Text>
             </View>
           </TouchableOpacity>
-          {open && (
-            <TimeModal
-              visible={open}
-              onClose={() => setOpen(false)}
-              onSelect={handleSelect}
-              choice={isOptional ? 'optional' : undefined}
-            />
-          )}
+          <TimeModal
+        ref={timeModalRef}
+        onSelect={handleSelect}
+        onClose={() => console.log('TimeModal closed')}
+        choice={timeModalType === 'commute' ? 'optional' : 'required'}
+      />
         </View>
 
         <View>
@@ -217,7 +210,12 @@ export default function EditInfoPage() {
             })}
             className="flex-row items-center justify-between">
               <Text className="text-white text-base">집</Text>
-              <Text className="text-light text-base">{homeAddress ?? '-'}</Text>
+              <Text className="text-light text-base"
+                style={{ maxWidth: '60%' }}
+                numberOfLines={2}
+                ellipsizeMode="tail">
+                {homeAddress ?? '-'}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -232,7 +230,9 @@ export default function EditInfoPage() {
                 <Text className="text-white text-base">직장/학교</Text>
                 <Text className="text-gray-200 text-[10px]">*선택 사항</Text>
               </View>
-              <Text className="text-light text-base text-normal leading-tight">{workAddress ?? '-'}</Text>
+              <Text className="text-light text-base text-normal leading-tight" style={{ maxWidth: '60%' }}
+                numberOfLines={2}
+                ellipsizeMode="tail">{workAddress ?? '-'}</Text>
             </TouchableOpacity>
           </View>
         </View>

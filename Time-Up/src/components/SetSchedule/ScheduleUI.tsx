@@ -11,48 +11,58 @@ import {
 import PlusIcon from '../../../assets/icons/plusIcon.svg';
 import PageBackButton from '../common/PageBackButton';
 import { formatKoreanDate } from './formatDate';
+import { Dispatch } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useSchedule } from '@/src/context/ScheduleContext';
 
-interface Event {
+
+const GRID_START = 0;        // 0시 시작
+const ROW_HEIGHT = 90;       // 1시간(60+30) = 90px
+const TIMELINE_PADDING_TOP = 0;  // 타임라인 위쪽 여백을 주고 싶으면 스타일에서 paddingTop으로만 제어
+
+
+export interface UIEvent {
   id: string;
   title: string;
   startTime: number; // 시간 (7, 8, 9, etc.)
   duration: number; // 지속 시간 (1 = 1시간)
   color: string;
+  scheduleId: string; // 백엔드 스케줄 ID 추가
+  url?: string;
 }
 
 interface ScheduleUIProps {
   date?: string;
-  events?: Event[];
-  onEventPress?: (event: Event) => void;
+  events?: UIEvent[];
+  onEventPress?: (event: UIEvent) => void;
   onTimeSlotPress?: (time: number) => void;
   onBackPress?: () => void;
 }
 
 const ScheduleUI: React.FC<ScheduleUIProps> = ({
   date,
-  events = [
-    { id: '1', title: '대학 탐방 회의', startTime: 9, duration: 1, color: '#FFB366' }, // 일정아이디, 일정명, 일정 날짜, 일정 시작-끝 시간, 컬러를 불러옴
-    { id: '2', title: '머리 2차 과제', startTime: 15, duration: 1, color: '#90EE90' },
-  ],
+  events = [],
   onEventPress,
-  onTimeSlotPress,
-  onBackPress,
+  onTimeSlotPress
 }) => {
-  const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6시부터 23시까지
+  const hours = Array.from({ length: 24 }, (_, i) => i); // 0시부터 24시까지
   const SLOT_HEIGHT = 60;
-  const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정 된건가???????????
+  const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정
 
-  const getEventStyle = (event: Event) => {
-    const startIndex = event.startTime - 6;
-    const top = startIndex * FULL_SLOT_HEIGHT + 30;
-    const height = event.duration * FULL_SLOT_HEIGHT - 2;
+  const getEventStyle = (event: UIEvent) => {
+    // const startIndex = event.startTime - 6;
+    // const top = startIndex * FULL_SLOT_HEIGHT + 30;
+    // const height = event.duration * FULL_SLOT_HEIGHT - 2;
+      
+    const top = (event.startTime - GRID_START) * ROW_HEIGHT + TIMELINE_PADDING_TOP;
+    const height = event.duration * ROW_HEIGHT;
 
     return {
       position: 'absolute' as const,
-      top: top+10,
+      top,
       left: 50,
       right: 16,
-      height: height-20,
+      height,
       backgroundColor: event.color,
       borderRadius: 8,
       padding: 8,
@@ -79,7 +89,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
     );
   };
 
-  const renderEvent = (event: Event) => { // 이벤트 렌더링
+  const renderEvent = (event: UIEvent) => { // 이벤트 렌더링
     return (
       <TouchableOpacity
         key={event.id}
@@ -92,7 +102,22 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
     );
   };
 
+  
+    const navigation = useNavigation<any>();
+    const { dispatch } = useSchedule();
+    const selectedDate = date;
+
+  const handleAddSchedule = () => {
+    const dateToUse = selectedDate;
+    console.log('선택된 날짜:', dateToUse);
+
+    dispatch({ type: 'RESET_DRAFT'});
+    dispatch({ type: 'UPDATE_DRAFT', payload: { start_date: dateToUse, end_date: dateToUse}})
+    navigation.navigate('AddSchedulePage');
+  };
+
   return (
+    
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2A2A2A" />
       
@@ -100,7 +125,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       <View style={styles.header}>
         <PageBackButton/>
         <Text style={styles.headerTitle}>{formatKoreanDate(date)}</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity onPress={handleAddSchedule}>
           <PlusIcon />
         </TouchableOpacity>
       </View>
@@ -164,6 +189,7 @@ const styles = StyleSheet.create({
   timelineContainer: {
     position: 'relative',
     paddingHorizontal: 16,
+    paddingTop: 0,
   },
   halfSlot: {
     height: 30,

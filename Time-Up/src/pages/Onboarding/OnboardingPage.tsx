@@ -67,9 +67,19 @@ export default function OnboardingPage() {
           }
 
           if (data.success?.isNew) {
+            // try {
+            //   await refreshAlarms();
+            // } catch (e) {
+            //   console.warn('초기 알람 동기화 실패(무시 가능):', e);
+            // }
             navigation.navigate('ProfileSettingPage', {});
           } else {
-            navigation.navigate('CalendarPage'); 
+            // try {
+            //   await refreshAlarms();
+            // } catch (e) {
+            //   console.warn('초기 알람 동기화 실패(무시 가능):', e);
+            // }
+            navigation.navigate('CalendarPage');
           }
         } catch (error: any) {
           console.error('로그인 요청 실패:', error);

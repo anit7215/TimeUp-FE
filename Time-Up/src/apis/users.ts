@@ -7,7 +7,7 @@ export const getUserInfo = async (): Promise<UserInfo> => {
 };
 
 export const putUserInfo = async (payload: Partial<UserInfo>): Promise<void> => {
-  await axiosInstance.put('/users/me', payload);
+  await axiosInstance.patch('/users/me', payload);
 };
 
 export const getAutoAlarmCheckTime = async (): Promise<AutoAlarmCheckTime> => {
