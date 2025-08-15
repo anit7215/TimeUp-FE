@@ -24,7 +24,7 @@ export default function EditWakeUpAlarmPage() {
   const navigation = useAppNavigation();
   const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, wakeupAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, setSelectedDay, updateWakeupAlarmField } = useAlarmContext();
+  const { selectedAlarmId, wakeupAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, toggleWakeupAlarmActiveById, updateWakeupAlarmField } = useAlarmContext();
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['65%'], [])
@@ -46,6 +46,7 @@ export default function EditWakeUpAlarmPage() {
   );
   const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
   const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
+  const [isToggling, setIsToggling] = useState(false);
 
   const handleToggleSwitchForDay = (day: Day) => {
     setWeekdaySwitchStates((prev) => {

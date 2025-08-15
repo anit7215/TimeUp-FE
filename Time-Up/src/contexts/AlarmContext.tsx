@@ -1,5 +1,5 @@
 // src/contexts/AlarmContext.tsx
-import { deleteMyAlarm, toggleAutoAlarmActivation, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
+import { deleteMyAlarm, patchToggleWakeupAlarmActive, toggleAutoAlarmActivation, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
 import { transformAlarmResponseToItem, transformWakeupSummaryToAlarmItem } from '@/src/utils/alarmTransform';
 import moment from 'moment';
 import React, { createContext, useContext, useState } from 'react';
@@ -45,6 +45,7 @@ interface AlarmContextProps {
 
   toggleAlarmActivation: (alarmId: number) => Promise<void>;
   deleteAlarmById: (alarmId: number) => Promise<void>;
+  toggleWakeupAlarmActiveById: (wakeupAlarmId: number) => Promise<void>;
 
   isLoadingAlarms: boolean;
   refreshAlarms: () => Promise<void>;
@@ -149,6 +150,19 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const toggleWakeupAlarmActiveById = async (wakeupAlarmId: number) => {
+    try {
+      await patchToggleWakeupAlarmActive(wakeupAlarmId); // 서버 토글
+      setWakeupAlarms(prev =>
+        prev.map(a => (a.serverId === wakeupAlarmId ? { ...a, isActive: !a.isActive } : a))
+      ); // 로컬 반영
+      console.log(`기상 알람 ${wakeupAlarmId} 상태를 토글했습니다.`);
+    } catch (error) {
+      console.error(`기상 알람 ${wakeupAlarmId} 토글 실패:`, error);
+      throw error;
+    }
+  };
+
   // 자동알람 토글
   const toggleAutoAlarmActiveById = async (autoAlarmId: number) => {
     setAutoAlarms(prev =>
@@ -219,6 +233,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         autoAlarms,
         setAutoAlarms,
         toggleAutoAlarmActiveById,
+        toggleWakeupAlarmActiveById,
       }}
     >
       {children}
