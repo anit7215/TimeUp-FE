@@ -2,7 +2,7 @@
 import { deleteMyAlarm, toggleAutoAlarmActivation, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
 import { transformAlarmResponseToItem, transformWakeupSummaryToAlarmItem } from '@/src/utils/alarmTransform';
 import moment from 'moment';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { axiosInstance } from '../apis/axiosInstance';
 import { AlarmItem, AutoAlarmSummary, GetAllAlarmsResponse } from '../types/alarm';
 import { getAccessToken } from '../utils/storage';
@@ -71,7 +71,6 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [autoAlarms, setAutoAlarms] = useState<AutoAlarmSummary[]>([]);
 
   // 서버에서 목록 불러와 컨텍스트 상태 갱신
-  //debugger;
   const refreshAlarms = async () => {
     setIsLoadingAlarms(true);
     try {
@@ -116,76 +115,12 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('알람 동기화 실패:', e);
     }
   };
-  // 자동 알람 따로 처리한 코드
-  // const refreshAlarms = async () => {
-  //   setIsLoadingAlarms(true);
-  //   try {
-  //     const { myAlarms: myList, wakeupAlarms: wakeList } = await fetchAllAlarms();
 
-  //     const mappedMy = myList.map((a, idx) => {
-  //       const serverId = (a as any).alarm_id ?? (a as any).my_alarm_id;
-  //       const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단임.. 이거 쓰면 안됨.. 에러 방지용..^^;;
-  //       // 화면 id는 서버ID가 있으면 서버ID로 고정
-  //       const uiId = serverId ?? tsId;
-  //       const item = transformAlarmResponseToItem(a);
-  //       return { ...item, id: uiId, serverId };
-  //     });
-  //     const mappedWake = wakeList.map((w, idx) => {
-  //       const serverId = (w as any).wakeup_alarm_id;
-  //       const dayFromApi = typeof (w as any).day === 'number' ? (w as any).day : new Date(w.wakeup_time).getDay();
-  //       const dayId = ((dayFromApi % 7) + 7) % 7; // 안전한 0~6
-
-  //       const item = transformWakeupSummaryToAlarmItem(w);
-  //       return {
-  //         ...item,
-  //         id: dayId,                            // 화면용 id = 요일(0~6)
-  //         serverId: (w as any).wakeup_alarm_id, // 서버ID 따로 보관(삭제/수정용)
-  //       };
-  //     });
-
-  //     setMyAlarms(mappedMy);
-  //     setWakeupAlarms(mappedWake);
-  //     console.log('알람 동기화 완료:', mappedMy.length, mappedWake.length);
-  //   } catch (e) {
-  //     console.error('알람 동기화 실패:', e);
-  //   } finally {
-  //     setIsLoadingAlarms(false);
-  //   }
-  // };
-
-
-  //앱 시작 시 한 번 자동 동기화
-  useEffect(() => {
-    refreshAlarms();
-  }, []);
-
+  // 앱 시작 시 한 번 자동 동기화
   // useEffect(() => {
-  //   const fetchAlarms = async () => {
-  //     try {
-  //       const token = await getAccessToken();
-  //       const res = await axiosInstance.get<GetAllAlarmsResponse>(
-  //         '/alarm/alarmlist',
-  //         { headers: { Authorization: `Bearer ${token}` } }
-  //       );
-
-  //       const autoList = res.data.success?.auto_alarms ?? [];
-  //       setAutoAlarms(autoList);
-
-  //       // 첫 번째 자동 알람의 on/off를 상단 토글 기본값으로 반영
-  //       if (autoList.length > 0) {
-  //         setAutoAlarmOn(!!autoList[0].is_active);
-  //       } else {
-  //         setAutoAlarmOn(false);
-  //       }
-
-  //       // (기존에 쓰던 wakeup/my 알람 세팅 로직이 있다면 그대로 유지)
-  //     } catch (err) {
-  //       console.error('전체 알람 조회 실패:', err);
-  //     }
-  //   };
-
-  //   fetchAlarms();
+  //   refreshAlarms();
   // }, []);
+
 
   // 아래 서버 id로 바꾸기?
   const updateAlarmField = <K extends keyof AlarmItem>(alarmId: number, field: K, value: AlarmItem[K]) => {
