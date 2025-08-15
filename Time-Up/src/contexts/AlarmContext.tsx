@@ -1,11 +1,8 @@
 // src/contexts/AlarmContext.tsx
 import { deleteMyAlarm, toggleAutoAlarmActivation, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
-import { transformAlarmResponseToItem, transformWakeupSummaryToAlarmItem } from '@/src/utils/alarmTransform';
 import moment from 'moment';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { axiosInstance } from '../apis/axiosInstance';
-import { AlarmItem, AutoAlarmSummary, GetAllAlarmsResponse } from '../types/alarm';
-import { getAccessToken } from '../utils/storage';
+import React, { createContext, useContext, useState } from 'react';
+import { AlarmItem, AutoAlarmSummary } from '../types/alarm';
 
 export type Day = '월' | '화' | '수' | '목' | '금' | '토' | '일';
 const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
@@ -47,7 +44,6 @@ interface AlarmContextProps {
   deleteAlarmById: (alarmId: number) => Promise<void>;
 
   isLoadingAlarms: boolean;
-  refreshAlarms: () => Promise<void>;
 }
 
 const AlarmContext = createContext<AlarmContextProps | undefined>(undefined);
@@ -72,50 +68,50 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // 서버에서 목록 불러와 컨텍스트 상태 갱신
   //debugger;
-  const refreshAlarms = async () => {
-    setIsLoadingAlarms(true);
-    try {
-      // 한 번만 /alarm/alarmlist 호출해서 모두 세팅
-      const token = await getAccessToken();
-      const res = await axiosInstance.get<GetAllAlarmsResponse>(
-        '/alarm/alarmlist',
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  // const refreshAlarms = async () => {
+  //   setIsLoadingAlarms(true);
+  //   try {
+  //     // 한 번만 /alarm/alarmlist 호출해서 모두 세팅
+  //     const token = await getAccessToken();
+  //     const res = await axiosInstance.get<GetAllAlarmsResponse>(
+  //       '/alarm/alarmlist',
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
 
-      const myList = res.data.success?.my_alarms ?? [];
-      const wakeList = res.data.success?.wakeup_alarms ?? [];
-      const autoList = res.data.success?.auto_alarms ?? [];
+  //     const myList = res.data.success?.my_alarms ?? [];
+  //     const wakeList = res.data.success?.wakeup_alarms ?? [];
+  //     const autoList = res.data.success?.auto_alarms ?? [];
 
-      const mappedMy = myList.map((a, idx) => {
-        const serverId = (a as any).alarm_id ?? (a as any).my_alarm_id;
-        const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단임.. 이거 쓰면 안됨.. 에러 방지용..^^;;
-        // 화면 id는 서버ID가 있으면 서버ID로 고정
-        const uiId = serverId ?? tsId;
-        const item = transformAlarmResponseToItem(a);
-        return { ...item, id: uiId, serverId };
-      });
-      const mappedWake = wakeList.map((w, idx) => {
-        const serverId = (w as any).wakeup_alarm_id;
-        const dayFromApi = typeof (w as any).day === 'number' ? (w as any).day : new Date(w.wakeup_time).getDay();
-        const dayId = ((dayFromApi % 7) + 7) % 7; // 안전한 0~6
+  //     const mappedMy = myList.map((a, idx) => {
+  //       const serverId = (a as any).alarm_id ?? (a as any).my_alarm_id;
+  //       const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단임.. 이거 쓰면 안됨.. 에러 방지용..^^;;
+  //       // 화면 id는 서버ID가 있으면 서버ID로 고정
+  //       const uiId = serverId ?? tsId;
+  //       const item = transformAlarmResponseToItem(a);
+  //       return { ...item, id: uiId, serverId };
+  //     });
+  //     const mappedWake = wakeList.map((w, idx) => {
+  //       const serverId = (w as any).wakeup_alarm_id;
+  //       const dayFromApi = typeof (w as any).day === 'number' ? (w as any).day : new Date(w.wakeup_time).getDay();
+  //       const dayId = ((dayFromApi % 7) + 7) % 7; // 안전한 0~6
 
-        const item = transformWakeupSummaryToAlarmItem(w);
-        return {
-          ...item,
-          id: dayId,                            // 화면용 id = 요일(0~6)
-          serverId: (w as any).wakeup_alarm_id, // 서버ID 따로 보관(삭제/수정용)
-        };
-      });
+  //       const item = transformWakeupSummaryToAlarmItem(w);
+  //       return {
+  //         ...item,
+  //         id: dayId,                            // 화면용 id = 요일(0~6)
+  //         serverId: (w as any).wakeup_alarm_id, // 서버ID 따로 보관(삭제/수정용)
+  //       };
+  //     });
 
-      setMyAlarms(mappedMy);
-      setWakeupAlarms(mappedWake);
-      setAutoAlarms(autoList);
-      setAutoAlarmOn(autoList.length > 0 ? !!autoList[0].is_active : false);
-      console.log('알람 동기화 완료:', mappedMy.length, mappedWake.length);
-    } catch (e) {
-      console.error('알람 동기화 실패:', e);
-    }
-  };
+  //     setMyAlarms(mappedMy);
+  //     setWakeupAlarms(mappedWake);
+  //     setAutoAlarms(autoList);
+  //     setAutoAlarmOn(autoList.length > 0 ? !!autoList[0].is_active : false);
+  //     console.log('알람 동기화 완료:', mappedMy.length, mappedWake.length);
+  //   } catch (e) {
+  //     console.error('알람 동기화 실패:', e);
+  //   }
+  // };
   // 자동 알람 따로 처리한 코드
   // const refreshAlarms = async () => {
   //   setIsLoadingAlarms(true);
@@ -155,9 +151,9 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 
   //앱 시작 시 한 번 자동 동기화
-  useEffect(() => {
-    refreshAlarms();
-  }, []);
+  // useEffect(() => {
+  //   refreshAlarms();
+  // }, []);
 
   // useEffect(() => {
   //   const fetchAlarms = async () => {
@@ -280,7 +276,6 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleAlarmActivation,
         deleteAlarmById,
         isLoadingAlarms,
-        refreshAlarms,
         autoAlarms,
         setAutoAlarms,
         toggleAutoAlarmActiveById,
