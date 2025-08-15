@@ -91,5 +91,5 @@ const DayTimeModal = forwardRef<TimeModalRef, TimeModalProps>(
     </BottomSheetView>
   </BottomSheetModal>
 );});
-
+DayTimeModal.displayName = 'DayTimeModal';
 export default DayTimeModal;
