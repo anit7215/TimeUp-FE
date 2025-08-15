@@ -115,8 +115,44 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (e) {
       console.error('알람 동기화 실패:', e);
     }
-
   };
+  // 자동 알람 따로 처리한 코드
+  // const refreshAlarms = async () => {
+  //   setIsLoadingAlarms(true);
+  //   try {
+  //     const { myAlarms: myList, wakeupAlarms: wakeList } = await fetchAllAlarms();
+
+  //     const mappedMy = myList.map((a, idx) => {
+  //       const serverId = (a as any).alarm_id ?? (a as any).my_alarm_id;
+  //       const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단임.. 이거 쓰면 안됨.. 에러 방지용..^^;;
+  //       // 화면 id는 서버ID가 있으면 서버ID로 고정
+  //       const uiId = serverId ?? tsId;
+  //       const item = transformAlarmResponseToItem(a);
+  //       return { ...item, id: uiId, serverId };
+  //     });
+  //     const mappedWake = wakeList.map((w, idx) => {
+  //       const serverId = (w as any).wakeup_alarm_id;
+  //       const dayFromApi = typeof (w as any).day === 'number' ? (w as any).day : new Date(w.wakeup_time).getDay();
+  //       const dayId = ((dayFromApi % 7) + 7) % 7; // 안전한 0~6
+
+  //       const item = transformWakeupSummaryToAlarmItem(w);
+  //       return {
+  //         ...item,
+  //         id: dayId,                            // 화면용 id = 요일(0~6)
+  //         serverId: (w as any).wakeup_alarm_id, // 서버ID 따로 보관(삭제/수정용)
+  //       };
+  //     });
+
+  //     setMyAlarms(mappedMy);
+  //     setWakeupAlarms(mappedWake);
+  //     console.log('알람 동기화 완료:', mappedMy.length, mappedWake.length);
+  //   } catch (e) {
+  //     console.error('알람 동기화 실패:', e);
+  //   } finally {
+  //     setIsLoadingAlarms(false);
+  //   }
+  // };
+
 
   //앱 시작 시 한 번 자동 동기화
   useEffect(() => {
