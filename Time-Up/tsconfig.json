@@ -4,7 +4,7 @@
     "strict": true,
     "jsx": "react-native",             
     "types": ["nativewind/types"],
-    "lib": ["ES2015", "DOM"],
+    "lib": ["ES2017", "DOM"],
     "paths": {
       "@/*": ["./*"]
     }

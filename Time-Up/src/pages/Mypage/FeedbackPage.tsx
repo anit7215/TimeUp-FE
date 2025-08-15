@@ -1,5 +1,6 @@
+import { getAlarmList, postAutoAlarmFeedback } from '@/src/apis/users';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BeforeHeader from '../../components/common/BeforeHeader';
 import Modal from '../../components/common/Modal';
@@ -10,6 +11,60 @@ export default function FeedbackPage() {
   const [alarmTimeScore, setAlarmTimeScore] = useState<number | null>(null);
   const [wakeUpScore, setWakeUpScore] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const [alarmId, setAlarmId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchTodayAlarmId = async () => {
+      try {
+        const alarmList = await getAlarmList();
+        const today = new Date().toISOString().slice(0, 10);
+
+        if (alarmList?.auto_alarms?.length > 0) {
+          const todayAlarm = alarmList.auto_alarms.find((alarm: any) => {
+            const alarmDate = alarm.alarm_time?.slice(0, 10);
+            return alarmDate === today;
+          });
+
+          if (todayAlarm) {
+            setAlarmId(todayAlarm.auto_alarm_id);
+          } else {
+            console.warn('오늘 울린 알람이 없습니다.');
+          }
+        } else {
+          console.warn('자동 알람이 없습니다.');
+        }
+      } catch (error) {
+        console.error('알람 데이터 불러오기 실패:', error);
+      }
+    };
+
+    fetchTodayAlarmId();
+  }, []);
+
+  const submitFeedback = async () => {
+    if (alarmTimeScore == null || wakeUpScore == null) {
+      alert('모든 항목을 선택해주세요.');
+      return;
+    }
+    if (!alarmId) {
+      alert('제출할 알람이 없습니다.');
+      return;
+    }
+
+    try {
+      await postAutoAlarmFeedback({
+        time_rating: alarmTimeScore,
+        wakeup_rating: wakeUpScore,
+        comment: opinion,
+        alarm_id: alarmId,
+      });
+      alert('피드백이 제출되었습니다.');
+      navigation.navigate('MyPage');
+    } catch (error) {
+      console.error(error);
+      alert('제출 실패! 다시 시도해주세요.');
+    }
+  };
 
   return (
     <>
@@ -76,9 +131,7 @@ export default function FeedbackPage() {
           onClose={() => setOpenModal(false)}
           onConfirm={() => {
             setOpenModal(false);
-            navigation.navigate('MyPage');
-            alert('제출됨');
-            console.log('제출 내용:', { alarmTimeScore, wakeUpScore, opinion });
+            submitFeedback();
           }}
         >
           피드백을 제출하시겠습니까?

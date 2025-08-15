@@ -1,31 +1,45 @@
-// src/pages/SelectAlarmSoundPage.tsx
+// src/pages/SelectMyAlarmSoundPage.tsx
 import ToggleSwitch from '@/src/components/common/ToggleSwitch';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import React, { useCallback, useState } from 'react';
-import { Text, View } from 'react-native';
-import BottomLayout from '../../Layouts/BottomLayout';
-import TransparentButton from '../../components/alarm/TransparentButton';
-import CheckBox from '../../components/common/CheckBox';
-import PageBackButton from '../../components/common/PageBackButton';
-import useAppNavigation from '../../hooks/useAppNavigation';
+import { Alert, Platform, Text, View } from 'react-native';
+import BottomLayout from '../../../Layouts/BottomLayout';
+import TransparentButton from '../../../components/alarm/TransparentButton';
+import CheckBox from '../../../components/common/CheckBox';
+import PageBackButton from '../../../components/common/PageBackButton';
+import useAppNavigation from '../../../hooks/useAppNavigation';
 
-export default function SelectAlarmSoundPage() {
+export default function SelectMyAlarmSoundPage() {
   const navigation = useAppNavigation();
-  const { selectedAlarmId, myAlarms, updateAlarmField } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, updateAlarmField, setSelectedAlarmId } = useAlarmContext();
   const alarm = myAlarms.find(a => a.id === selectedAlarmId);
   const [selectedSound, setSelectedSound] = useState<string | null>(alarm?.sound ?? null);
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(alarm?.isSound ?? false);
 
   const handleToggleSwitch = useCallback(() => {
-    setOn((prev) => !prev);
-  }, []);
+    if (!selectedSound || selectedSound === '선택') {
+      if (Platform.OS === 'web') {
+        window.alert('알람음을 선택해 주세요');
+      } else {
+        Alert.alert('알림', '알람음을 선택해 주세요');
+      }
+      return;
+    }
+
+    const newState = !on;
+    setOn(newState);
+    if (selectedAlarmId != null) {
+      updateAlarmField(selectedAlarmId, 'isSound', newState);
+    }
+  }, [on, selectedAlarmId, selectedSound]);
 
   const soundOptions = ['Heavy Raindrop', 'Basic Ring', 'Ocean Wave', 'Bird Chirp', 'Classic Bell'];
 
   const handleConfirm = () => {
+     
     if (selectedAlarmId && selectedSound) {
       updateAlarmField(selectedAlarmId, 'sound', selectedSound);
-      console.log('알람음 저장됨:', selectedSound);
+      console.log(`알람음 저장됨: ${selectedSound} / ${on ? '활성화됨' : '비활성화됨'}`);
     }
     navigation.goBack();
   };
