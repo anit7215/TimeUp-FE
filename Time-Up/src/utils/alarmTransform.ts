@@ -1,5 +1,5 @@
 // src/utils/alarmTransform.ts
-import { AlarmItem, PostMyAlarmRequest, PutMyAlarmRequest, UpdateWakeupAlarmRequest, WakeupAlarmSummary } from '@/src/types/alarm';
+import { AlarmItem, MyAlarmSummary, PostMyAlarmRequest, PutMyAlarmRequest, UpdateWakeupAlarmRequest, WakeupAlarmSummary } from '@/src/types/alarm';
 import moment from 'moment-timezone';
 
 export type AlarmWithoutId = Omit<AlarmItem, 'id'>;
@@ -149,29 +149,34 @@ const convertAlarmTimeToISOString = (date: string, period: string, hour: number,
 
 
 // 알람 조회 변환
-// 상세 정보들 조회 어떻게 하지....
+// 상세 정보들 조회 어떻게 하지...
 // ? 연산자 활용해서... 있으면 alarm.머시기 없으면 "선택"
-export const transformWakeupSummaryToAlarmItem = (
-  summary: WakeupAlarmSummary
-): AlarmItem => {
-  const date = new Date(summary.wakeup_time);
-  const hour = date.getHours();
-  const minute = date.getMinutes();
+export const transformWakeupSummaryToAlarmItem = (summary: WakeupAlarmSummary): AlarmItem => {
+  // 서버가 주는 ISO Z(UTC) 그대로 시간/분을 읽는다
+  const d = new Date(summary.wakeup_time);
+  const hourUTC = d.getUTCHours();
+  const minuteUTC = d.getUTCMinutes();
 
+  // 요일은 서버가 준 day(0=일, 6=토)를 신뢰
   const dayOfWeekMap: Record<number, '일' | '월' | '화' | '수' | '목' | '금' | '토'> = {
     0: '일', 1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토',
   };
-
   const dayOfWeek = dayOfWeekMap[summary.day];
-  const fullDate = summary.wakeup_time.split('T')[0];
+
+  // 날짜 문자열도 UTC 기준 그대로 잘라서 사용
+  const fullDate = summary.wakeup_time.slice(0, 10); // 'YYYY-MM-DD'
+
+  const period: '오전' | '오후' = hourUTC < 12 ? '오전' : '오후';
+  const hour12 = hourUTC % 12 === 0 ? 12 : hourUTC % 12;
 
   return {
-    id: summary.wakeup_alarm_id ?? Date.now(), // fallback ID
+    id: summary.wakeup_alarm_id ?? Date.now(), // 필요 시 대체 ID
+    serverId: summary.wakeup_alarm_id,
     title: `${dayOfWeek}요일 기상 알람`,
     time: {
-      period: hour < 12 ? '오전' : '오후',
-      hour: hour % 12 === 0 ? 12 : hour % 12,
-      minute,
+      period,
+      hour: hour12,
+      minute: minuteUTC,
     },
     date: {
       fullDate,
@@ -187,6 +192,97 @@ export const transformWakeupSummaryToAlarmItem = (
     isRepeating: false,
   };
 };
+
+// MyAlarmSummary → AlarmItem
+// export const transformAlarmResponseToItem = (alarm: MyAlarmSummary): AlarmItem => {
+//   const dayNames: Record<number, '일' | '월' | '화' | '수' | '목' | '금' | '토'> = {
+//     0: '일', 1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토',
+//   };
+
+//   const raw = alarm.my_alarm_time;
+//   const isISO = /\d{4}-\d{2}-\d{2}T/.test(raw);
+
+//   // Asia/Seoul 기준 파싱
+//   const today = moment().tz('Asia/Seoul').format('YYYY-MM-DD');
+//   const m = isISO
+//     ? moment.tz(raw, 'Asia/Seoul')
+//     : /^\d{2}:\d{2}:\d{2}$/.test(raw)
+//       ? moment.tz(`${today} ${raw}`, 'YYYY-MM-DD HH:mm:ss', 'Asia/Seoul')
+//       : moment.tz(`${today} ${raw}`, 'YYYY-MM-DD HH:mm', 'Asia/Seoul');
+
+//   const hour24 = m.hour();
+//   const minute = m.minute();
+//   const period: '오전' | '오후' = hour24 < 12 ? '오전' : '오후';
+//   const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+
+//   const fullDate = m.format('YYYY-MM-DD');
+//   const dayOfWeek = dayNames[m.day()];
+
+//   return {
+//     id: alarm.alarm_id ?? Date.now()-Math.random(),     // 서버 id 없을 때 임시 fallback
+//     title: alarm.my_alarm_name,
+//     time: { period, hour: hour12, minute },
+//     date: { fullDate, dayOfWeek },
+//     sound: '선택',
+//     vibrate: '선택',
+//     repeat: '선택',
+//     memo: '',
+//     isActive: !!alarm.is_active,
+//     isSound: false,
+//     isVibrating: false,
+//     isRepeating: false,
+//   };
+// };
+
+// export const transformMyAlarmSummaryToItem = transformAlarmResponseToItem;
+
+// 내 알람 조회 변환
+export const transformAlarmResponseToItem = (alarm: MyAlarmSummary): AlarmItem => {
+  const dayNames: Record<number, '일' | '월' | '화' | '수' | '목' | '금' | '토'> = {
+    0: '일', 1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토',
+  };
+
+  const raw = alarm.my_alarm_time;
+
+  // 시간 파싱: ISO(UTC Z) → KST, 아니면 KST 기준으로 파싱
+  const m = /\d{4}-\d{2}-\d{2}T/.test(raw)
+    ? moment.utc(raw).tz('Asia/Seoul')
+    : (/^\d{2}:\d{2}:\d{2}$/.test(raw)
+        ? moment.tz(`${moment().tz('Asia/Seoul').format('YYYY-MM-DD')} ${raw}`, 'YYYY-MM-DD HH:mm:ss', 'Asia/Seoul')
+        : moment.tz(`${moment().tz('Asia/Seoul').format('YYYY-MM-DD')} ${raw}`, 'YYYY-MM-DD HH:mm', 'Asia/Seoul'));
+
+  const hour24 = m.hour();
+  const minute = m.minute();
+  const period: '오전' | '오후' = hour24 < 12 ? '오전' : '오후';
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+
+  const fullDate = m.format('YYYY-MM-DD');
+  const dayOfWeek = dayNames[m.day()];
+
+  // 고유 id 보강: 서버 id 없을 때 시간(ms) + 이름 해시
+  const base = m.valueOf();
+  const nameSeed = (alarm.my_alarm_name || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const safeId = (alarm as any).alarm_id ?? (base + nameSeed);
+
+  return {
+    id: safeId,
+    serverId: alarm.alarm_id,
+    title: alarm.my_alarm_name,
+    time: { period, hour: hour12, minute },
+    date: { fullDate, dayOfWeek },
+    sound: '선택',
+    vibrate: '선택',
+    repeat: '선택',
+    memo: '',
+    isActive: !!alarm.is_active,
+    isSound: false,
+    isVibrating: false,
+    isRepeating: false,
+  };
+};
+
+export const transformMyAlarmSummaryToItem = transformAlarmResponseToItem;
+
 
 
 // 유틸 함수들

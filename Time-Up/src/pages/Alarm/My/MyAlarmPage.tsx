@@ -1,12 +1,14 @@
 // src/pages/MyAlarmPage.tsx
 import { postMyAlarm } from '@/src/apis/alarmApi';
+import { axiosInstance } from '@/src/apis/axiosInstance';
 import { useAlarmContext } from '@/src/contexts/AlarmContext';
-import type { AlarmItem } from '@/src/types/alarm';
+import type { AlarmItem, GetAllAlarmsResponse } from '@/src/types/alarm';
 import { formatDate, formatTime } from '@/src/utils/AlarmFormat';
 import { AlarmWithoutId, toPostMyAlarmRequest } from '@/src/utils/alarmTransform';
+import { getAccessToken } from '@/src/utils/storage';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import BottomLayout from '../../../Layouts/BottomLayout';
@@ -15,11 +17,62 @@ import useAppNavigation from '../../../hooks/useAppNavigation';
 
 export default function MyAlarmPage() {
   const navigation = useAppNavigation();
-  const { autoAlarmOn, setAutoAlarmOn } = useAlarmContext();
-  const { myAlarms, setMyAlarms } = useAlarmContext();
-  const { setSelectedAlarmId } = useAlarmContext();
-  const { updateAlarmField } = useAlarmContext();
-  const { toggleAlarmActivation } = useAlarmContext();
+  const {
+    autoAlarmOn, setAutoAlarmOn,
+    autoAlarms, setAutoAlarms,
+    myAlarms, setMyAlarms,
+    setSelectedAlarmId, updateAlarmField, toggleAlarmActivation,
+    toggleAutoAlarmActiveById,
+  } = useAlarmContext();
+
+  useEffect(() => {
+    const fetchAlarms = async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await axiosInstance.get<GetAllAlarmsResponse>(
+          '/alarm/alarmlist',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+  
+          // 전체 응답 출력
+          console.log('전체 알람 응답:', res.data);
+  
+          console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+          console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+          console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+  
+        } catch (err) {
+          console.error('전체 알람 조회 실패:', err);
+        }
+      };
+  
+      fetchAlarms();
+    }, []);
+  
+  // 가장 가까운 자동 알람 선택
+  const nextAutoAlarm = React.useMemo(() => {
+    if (!autoAlarms || autoAlarms.length === 0) return null;
+    const sorted = [...autoAlarms].sort(
+      (a, b) => new Date(a.wakeup_time).getTime() - new Date(b.wakeup_time).getTime()
+    );
+    return sorted[0];
+  }, [autoAlarms]);
+  
+  // 날짜/시간 포맷터 (KST 기준, 디바이스 로컬 시간 사용)
+  const formatAutoDateLine = (iso: string) => {
+    const d = new Date(iso);
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  };
+  const formatAutoTimeLine = (iso: string) => {
+    const d = new Date(iso);
+    const h = d.getHours();
+    const m = d.getMinutes();
+    const period = h < 12 ? '오전' : '오후';
+    const hh = (h % 12) || 12;
+    return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
+  };
+
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -29,6 +82,21 @@ export default function MyAlarmPage() {
     }
     setAutoAlarmOn((prev) => !prev);
   };
+
+  //   const handleToggleAutoAlarm = async () => {
+  //   try {
+  //     if (nextAutoAlarm?.auto_alarm_id != null) {
+  //       await toggleAutoAlarmActiveById(nextAutoAlarm.auto_alarm_id);
+  //       // nextAutoAlarm이 갱신되므로 autoAlarmOn은 컨텍스트에서 이미 반영됨.
+  //       console.log('자동알람 토글 완료');
+  //     } else {
+  //       // 아직 자동 알람이 계산/생성 전: 로컬 스위치만 반전
+  //       setAutoAlarmOn(prev => !prev);
+  //     }
+  //   } catch (e) {
+  //     console.error('자동알람 토글 실패:', e);
+  //   }
+  // };
 
   const handleGoToWakeUpPage = () => {
     console.log('기상 알람 페이지로 이동합니다.');
@@ -54,7 +122,7 @@ export default function MyAlarmPage() {
   };
 
   const handleNewAlarm = async () => {
-    debugger;
+    //debugger;
     // 날짜-시간 조정하기. 오전 오후 시간 계산? 우선 안전하게 하루 뒤로 지정해 둠.
     try {
       const now = new Date();
@@ -85,6 +153,7 @@ export default function MyAlarmPage() {
       const requestBody = toPostMyAlarmRequest(defaultAlarm);
       console.log('보낼 요청 데이터:', requestBody);
       const response = await postMyAlarm(requestBody);
+      console.log('응답 데이터:', response);
 
       const newAlarmId = response.success?.alarm_id;
       if (!newAlarmId) throw new Error('alarm_id 없음');
@@ -117,8 +186,20 @@ export default function MyAlarmPage() {
       >
         <View className="h-[8.5rem] w-full bg-dark rounded-full self-center flex-row items-center justify-between px-[4%]">
           <View className="flex-1 items-center justify-center">
-            <Text className="font-pretendard text-white text-xl">6월 28일 (일)</Text>
-            <Text className="font-pretendard text-white text-4xl mt-1">오전 07 : 30</Text>
+            {nextAutoAlarm ? (
+              <>
+                <Text className="font-pretendard text-white text-xl">
+                  {formatAutoDateLine(nextAutoAlarm.wakeup_time)}
+                </Text>
+                <Text className="font-pretendard text-white text-4xl mt-1">
+                  {formatAutoTimeLine(nextAutoAlarm.wakeup_time)}
+                </Text>
+              </>
+            ) : (
+              <Text className="font-pretendard text-white text-xl">
+                설정된 자동 알람이 없습니다.
+              </Text>
+            )}
           </View>
         </View>
       </LinearGradient>

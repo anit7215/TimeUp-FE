@@ -16,11 +16,15 @@ const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
 export default function WakeUpAlarmPage() {
   const navigation = useAppNavigation();
-  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, wakeupAlarms, setMyAlarms, setSelectedAlarmId, } = useAlarmContext();
+  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, wakeupAlarms, setSelectedAlarmId, autoAlarms } = useAlarmContext();
 
-  // useEffect(() => {
-  //   console.log('전체 기상 알람 (wakeupAlarms):', wakeupAlarms);
-  // }, [wakeupAlarms]); // 상태가 바뀔 때마다 출력
+  const dayToIndex: Record<Day, number> = {
+    '일': 0, '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6,
+  };
+
+  useEffect(() => {
+    console.log('전체 기상 알람 (wakeupAlarms):', wakeupAlarms);
+  }, [wakeupAlarms]); // 상태가 바뀔 때마다 출력
 
   useEffect(() => {
     const fetchAlarms = async () => {
@@ -30,23 +34,47 @@ export default function WakeUpAlarmPage() {
           '/alarm/alarmlist',
           { headers: { Authorization: `Bearer ${token}` } }
         );
-  
+
         // 전체 응답 출력
-      // console.log('전체 알람 응답:', res.data);
-  
-      // console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
-      // console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
-      // console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
-  
-  
+        console.log('전체 알람 응답:', res.data);
+
+        console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+        console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+        console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+
+
       } catch (err) {
         console.error('전체 알람 조회 실패:', err);
       }
     };
-  
+
     fetchAlarms();
   }, []);
-  
+
+  // 가장 가까운 자동 알람 선택
+  const nextAutoAlarm = React.useMemo(() => {
+    if (!autoAlarms || autoAlarms.length === 0) return null;
+    // wakeup_time 기준 오름차순 정렬 후 첫 번째 사용
+    const sorted = [...autoAlarms].sort(
+      (a, b) => new Date(a.wakeup_time).getTime() - new Date(b.wakeup_time).getTime()
+    );
+    return sorted[0];
+  }, [autoAlarms]);
+
+  // 날짜/시간 포맷터 (KST 기준, 디바이스 로컬 시간 사용)
+  const formatAutoDateLine = (iso: string) => {
+    const d = new Date(iso);
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  };
+  const formatAutoTimeLine = (iso: string) => {
+    const d = new Date(iso);
+    const h = d.getHours();
+    const m = d.getMinutes();
+    const period = h < 12 ? '오전' : '오후';
+    const hh = (h % 12) || 12;
+    return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
+  };
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
@@ -70,20 +98,19 @@ export default function WakeUpAlarmPage() {
     navigation.navigate('MyAlarmPage');
   };
 
-const handleDetailPage = (day: Day) => {
-  //debugger;
-  const alarm = wakeupAlarms.find(a => a.date.dayOfWeek === day);
+  const handleDetailPage = (day: Day) => {
+    const alarm = wakeupAlarms.find(a => a.date.dayOfWeek === day);
 
-  if (!alarm) {
-    console.warn(`${day}요일에 대한 기상 알람이 없습니다.`);
-    return;
-  }
+    if (!alarm) {
+      console.warn(`${day}요일에 대한 기상 알람이 없습니다.`);
+      return;
+    }
 
-  setSelectedDay(day);             // 요일 상태 저장
-  setSelectedAlarmId(alarm.id);    // wakeup_alarm_id 저장
-  console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
-  navigation.navigate('WakeUpAlarmDetailPage');
-};
+    setSelectedDay(day);             // 요일 상태 저장
+    setSelectedAlarmId(alarm.id);    // wakeup_alarm_id 저장
+    console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
+    navigation.navigate('WakeUpAlarmDetailPage');
+  };
 
 
   return (
@@ -101,8 +128,20 @@ const handleDetailPage = (day: Day) => {
       >
         <View className="h-[8.5rem] w-full bg-dark rounded-full self-center flex-row items-center justify-between px-[4%]">
           <View className="flex-1 items-center justify-center">
-            <Text className="font-pretendard text-white text-xl">6월 28일 (일)</Text>
-            <Text className="font-pretendard text-white text-4xl mt-1">오전 07 : 30</Text>
+            {nextAutoAlarm ? (
+              <>
+                <Text className="font-pretendard text-white text-xl">
+                  {formatAutoDateLine(nextAutoAlarm.wakeup_time)}
+                </Text>
+                <Text className="font-pretendard text-white text-4xl mt-1">
+                  {formatAutoTimeLine(nextAutoAlarm.wakeup_time)}
+                </Text>
+              </>
+            ) : (
+              <Text className="font-pretendard text-white text-xl">
+                설정된 자동 알람이 없습니다.
+              </Text>
+            )}
           </View>
         </View>
       </LinearGradient>

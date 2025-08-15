@@ -6,6 +6,7 @@ export type VibrationCode = 'default' | 'short1' | 'short2' | 'long1' | 'long2';
 // 내 알람 화면 출력용 타입
 export interface AlarmItem {
   id: number;
+  serverId?: number;
   title: string;
   time: {
     period: '오전' | '오후';
@@ -80,7 +81,7 @@ export interface PostMyAlarmResponse {
   } | null;
 }
 
-// 내 알람 수정 요청용 타입 (PUT / PATCH)
+// 내 알람 수정 요청용 타입 (PUT)
 export interface PutMyAlarmRequest {
   my_alarm_name: string;
   my_alarm_time: string;

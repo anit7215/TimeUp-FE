@@ -20,6 +20,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const { updateAlarmField } = useAlarmContext();
 
+  //debugger;
+  //console.log('NotificationProvider 렌더링됨');
   useEffect(() => {
     (async () => {
       const token = await registerForPushNotificationsAsync();
@@ -37,7 +39,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // 앱이 포그라운드에서 알림 수신
     receivedListener.current = Notifications.addNotificationReceivedListener((notification) => {
       setLastNotification(notification);
-      // 서버가 보내는 데이터 형식에 맞춰 처리해야 함.
+      // 서버가 보내는 데이터 형식에 맞춰 처리해야 함. 수정 필요.
       const data: any = notification.request.content.data || {};
       // 예시임: { type: 'ALARM_STATUS', alarm_id: 123, isActive: true }
       if (data.type === 'ALARM_STATUS' && typeof data.alarm_id === 'number') {
@@ -48,8 +50,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // 사용자가 알림 클릭한 경우
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       const data: any = response.notification.request.content.data || {};
-      // 예: 알림 탭 시 특정 알람 상세로 이동하려면 여기에서 navigation 처리
+      // 알림 탭 시 특정 알람 상세로 이동하려면 여기에서 navigation 처리
       // ex) navigate('MyAlarmDetailPage') 등
+      // 자동, 기상, 내 알람 별로 분기 처리 필요.
       console.log('알림 클릭 응답:', data);
     });
 

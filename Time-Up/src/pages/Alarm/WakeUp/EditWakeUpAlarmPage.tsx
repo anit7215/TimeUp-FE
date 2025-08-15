@@ -1,4 +1,4 @@
-// src/pages/WakeUpAlarmDetailPage.tsx
+// src/pages/EditWakeUpAlarmPage.tsx
 import { putWakeupAlarm } from '@/src/apis/alarmApi';
 import AlarmButton from '@/src/components/alarm/AlarmButton';
 import HalfTimeScrollPanel from '@/src/components/common/HalfTimeScrollPanel';
@@ -20,11 +20,11 @@ import IconMusic from '../../../../assets/images/AlarmMusic.svg';
 import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 
 
-export default function WakeUpAlarmDetailPage() {
+export default function EditWakeUpAlarmPage() {
   const navigation = useAppNavigation();
   const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, setSelectedDay, updateAlarmField } = useAlarmContext();
+  const { selectedAlarmId, wakeupAlarms, selectedDay, weekdaySwitchStates, setWeekdaySwitchStates, setSelectedDay, updateWakeupAlarmField } = useAlarmContext();
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['65%'], [])
@@ -33,8 +33,9 @@ export default function WakeUpAlarmDetailPage() {
   }, [])
 
   // 테스트 초기값 설정. 알람 상세 설정 상태 관리 구현 후 제거하기.
-  // 제목, 시간, 날짜, 사운드, 진동, 반복, 메모 구현 완료. 알람 온오프 상태 관리 추가 필요.  
-  const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
+  // 제목, 시간, 날짜, 사운드, 진동, 반복, 메모, 알람 온오프 구현 완료.
+  const alarmToEdit = wakeupAlarms.find(a => a.serverId === selectedAlarmId);
+  //const alarmToEdit = wakeupAlarms.find(a => a.id === selectedAlarmId);
 
   const [title, setTitle] = useState(alarmToEdit?.title ?? '');
   const [time, setTime] = useState<AlarmItem['time']>(
@@ -66,15 +67,15 @@ export default function WakeUpAlarmDetailPage() {
     console.log('기상 알람을 저장합니다.');
     if (!selectedAlarmId) return;
 
-    const alarmToEdit = myAlarms.find(a => a.id === selectedAlarmId);
+    const alarmToEdit = wakeupAlarms.find(a => a.id === selectedAlarmId);
     if (!alarmToEdit) return;
 
     try {
-      updateAlarmField(selectedAlarmId, 'title', title);
-      updateAlarmField(selectedAlarmId, 'time', time);
-      updateAlarmField(selectedAlarmId, 'date', date);
-      updateAlarmField(selectedAlarmId, 'memo', memo);
-      updateAlarmField(selectedAlarmId, 'isActive', isActive);
+      updateWakeupAlarmField (selectedAlarmId, 'title', title);
+      updateWakeupAlarmField (selectedAlarmId, 'time', time);
+      updateWakeupAlarmField (selectedAlarmId, 'date', date);
+      updateWakeupAlarmField (selectedAlarmId, 'memo', memo);
+      updateWakeupAlarmField (selectedAlarmId, 'isActive', isActive);
 
       // API 바디 변환
       const requestBody = toPutWakeupAlarmRequest({
@@ -85,12 +86,16 @@ export default function WakeUpAlarmDetailPage() {
         isActive,
       });
 
-      console.log('보낼 wakeup 알람 데이터:', requestBody);
+      const remoteId = (alarmToEdit as any).serverId ?? alarmToEdit.id;
+      console.log('보낼 wakeup 알람 데이터:', requestBody, '서버ID:', remoteId);
 
       // API 호출
-      const response = await putWakeupAlarm(selectedAlarmId, requestBody);
+      const response = await putWakeupAlarm(remoteId, requestBody);
       console.log('기상 알람 수정 성공:', response);
-    } catch (error) {
+      // (아래 선택) 성공 후 서버와 재동기화
+      // await refreshAlarms();
+    } catch (error: any) {
+      console.log('서버 응답:', error?.response?.data);
       console.error('기상 알람 수정 실패:', error);
     }
 
@@ -199,7 +204,8 @@ export default function WakeUpAlarmDetailPage() {
 
         <View className="flex-row items-center justify-between mr-[4%]"
           style={{ marginTop: Platform.OS === 'web' ? 30 : 15 }}>
-          <Text className='font-pretendard text-white text-[24px] mr-[4%]'>
+          <Text className='font-pretendard text-white text-[24px]'
+            style={{ marginLeft: Platform.OS === 'web' ? 20 : 0 }}>
             {selectedDay}요일 기상 알람
           </Text>
           <ToggleSwitch
@@ -237,7 +243,8 @@ export default function WakeUpAlarmDetailPage() {
               <Text className="font-pretendard text-gray-200 text-xl ml-2">반복요일</Text>
             </View>
 
-            <View className="flex-row items-center justify-center gap-x-4 mt-[4%] mx-4">
+            <View className="flex-row items-center justify-center gap-x-4 mt-[2%] mx-4"
+              style={{ marginLeft: Platform.OS === 'web' ? 40 : 0 }}>
               {weekdays.map((day) => {
                 const isSelected = selectedDay === day;
                 return (

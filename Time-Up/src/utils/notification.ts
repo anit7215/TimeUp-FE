@@ -10,7 +10,7 @@ Notifications.setNotificationHandler({
     shouldPlaySound: true,      // 사운드
     shouldSetBadge: false,      // 앱 아이콘 배지
 
-    // iOS 15+에서 필요한 새로운 필드
+    // iOS 15+에서 필요한 새로운 필드. 안 넣으면 오류.
     shouldShowBanner: true,     // 배너 표시
     shouldShowList: true        // 알림 센터 리스트 표시
   }),
@@ -18,6 +18,7 @@ Notifications.setNotificationHandler({
 
 // Expo Push Token 발급 + 안드 채널 설정
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  //debugger;
   if (!Device.isDevice) {
     alert('푸시 알림은 실제 기기에서만 작동합니다.');
     return null;
@@ -49,7 +50,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   return token;
 }
 
-// 개발 중 로컬 알림 테스트용 (원하면 삭제해도 됨)
+// 개발 중 로컬 알림 테스트용
 export async function triggerLocalNotificationTest(payload?: Record<string, any>) {
   await Notifications.scheduleNotificationAsync({
     content: {
