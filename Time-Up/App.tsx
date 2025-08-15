@@ -1,4 +1,3 @@
-import { NotificationProvider } from '@/src/contexts/NotificationContext';
 import { GOOGLE_PLACES_API_KEY } from '@env';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
@@ -109,7 +108,6 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <PaperProvider>
         <AlarmProvider>
-          <NotificationProvider>
             <SafeAreaView
               edges={['top', 'bottom']}
               className="flex-1 bg-black"
@@ -121,7 +119,6 @@ export default function App() {
             >
               {content}
             </SafeAreaView>
-          </NotificationProvider>
         </AlarmProvider>
       </PaperProvider>
     </QueryClientProvider>
