@@ -21,19 +21,23 @@ import LocationIcon from '../../assets/icons/addSchedulePage/LocationIcon.svg';
 import MemoIcon from '../../assets/icons/addSchedulePage/MemoIcon.svg';
 import RepeatIcon from '../../assets/icons/addSchedulePage/RepeatIcon.svg';
 import RightArrowIcon from '../../assets/icons/RightArrowIcon.svg';
-// import StarIcon from '../../assets/icons/StarIcon.svg';
+import StarIcon from '../../assets/icons/StarIcon.svg';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createSchedule } from '../apis/schedule';
 import HalfTimeScrollPanel from '../components/common/HalfTimeScrollPanel';
 import CustomCalendar from '../components/SetSchedule/CustomCalendar';
 import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate';
 import { useSchedule } from '../context/ScheduleContext';
+import { RootStackParamList } from '../types/navigation';
+import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
 
 const { width, height } = Dimensions.get('window');
 
 export default function AddSchedulePage() {
   const { state, dispatch, addSchedule } = useSchedule();
+  const { fullText } = buildRecurrenceSummary(state.draft);
   const form = state.draft;
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -42,17 +46,34 @@ export default function AddSchedulePage() {
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"];
 
+  const colorMap: Record<string, string> = {
+    "#F7A1A1": "red",
+    "#FACA9E": "orange",
+    "#FAE39E": "yellow",
+    "#B9DFBB": "green",
+    "#A5C6F3": "blue",
+    "#B6A3F5": "purple",
+    "#F8A0DA": "pink",
+    "#CCCCCC": "gray",
+  };
+  
+
 const handleSave = async () => {
+  const formToSend = {
+    ...form,
+    start_date: moment(form.start_date).format('YYYY-MM-DDTHH:mm:ss'),
+    end_date: moment(form.end_date).format('YYYY-MM-DDTHH:mm:ss'),
+  }
   try {
-    const savedSchedule = await createSchedule(form);
+    await createSchedule(formToSend);
     dispatch({ type: 'RESET_DRAFT' });
-    navigation.navigate('CalendarPage', { newSchedule: savedSchedule });
+    navigation.navigate('CalendarPage');
   } catch (err: any) {
     console.error('❌ Axios Error:', err);
 
     if (err.response) {
       console.log('🔥 status:', err.response.status);
-      console.log('🔥 message:', err.response.data); // 이거 중요
+      console.log('🔥 message:', err.response.data); 
       Alert.alert('서버 응답 오류', err.response.data?.message || '입력값을 다시 확인해주세요');
     } else if (err.request) {
       Alert.alert('요청 실패', '서버로 요청을 보내지 못했습니다');
@@ -65,14 +86,17 @@ const handleSave = async () => {
   const gotoRemindPage = () => navigation.navigate('SetRemindAlarmPage');
   const gotoRepeatPage = () => navigation.navigate('SetScheduleRepeatPage');
   const gotoLocationPage = () => navigation.navigate('SetLocationPage');
+
+  const toInt = (s: string, fallback = 0) => {
+    const n = Number(s);
+    return Number.isFinite(n) ? n : fallback;
+  };
+  
   // 12시간 형식을 24시간 형식으로 변환하는 함수
-const convertTo24Hour = (hour: number, period: string): number => {
-  if (period === '오전') {
-    return hour === 12 ? 0 : hour;
-  } else { // PM
-    return hour === 12 ? 12 : hour + 12;
-  }
-};
+  const convertTo24Hour = (hour12: number, period: '오전' | '오후'): number => {
+    const h = hour12 % 12;              // 12 → 0 보정
+    return period === '오전' ? h : h + 12;
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -93,6 +117,10 @@ const convertTo24Hour = (hour: number, period: string): number => {
               placeholderTextColor={'#979B9F'}
               value={form.name}
               onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
+                  onSubmitEditing={() => {
+                  bottomSheetModalRef.current?.dismiss();
+                  setSelectedItem(null);
+                  }}
             />
           )}
 
@@ -124,34 +152,43 @@ const convertTo24Hour = (hour: number, period: string): number => {
           )}
 
           {['시작 시간', '종료 시간'].includes(selectedItem || '') && (
-          <HalfTimeScrollPanel
-          onTimeChange={(hour: number, minute: number, period ) => {
-            const targetField = selectedItem === '시작 시간' ? 'start_date' : 'end_date';
-            const currentDate = moment(form[targetField]);
+            <HalfTimeScrollPanel
+            onTimeChange={(hourStr: string, minuteStr: string, period: string) => {
+              const targetField = (selectedItem === '시작 시간' ? 'start_date' : 'end_date') as
+                | 'start_date'
+                | 'end_date';
 
-            const convertedHour = convertTo24Hour(hour, period)
+              const h12 = toInt(hourStr, 0);    // '05' → 5
+              const m   = toInt(minuteStr, 0);  // '07' → 7
+              const p: '오전' | '오후' = period === '오전' ? '오전' : '오후'
 
-            const updatedDate = currentDate
-              .set({ hour: convertedHour, minute, second: 0, millisecond: 0 })
-              .format('YYYY-MM-DDTHH:mm:ss'); // 예: 2025-08-01T14:30:00
+              const h24 = convertTo24Hour(h12, p);
 
-            console.log('수정된 날짜시간:', updatedDate); // 확인용
+              const updatedDate = moment(form[targetField])
+                .set({ hour: h24, minute: m, second: 0, millisecond: 0 })
+                .format('YYYY-MM-DDTHH:mm:ss');
 
-            dispatch({
-              type: 'UPDATE_DRAFT',
-              payload: { [targetField]: updatedDate },
-            });
-          }}
-        />
+              dispatch({
+                type: 'UPDATE_DRAFT',
+                payload: { [targetField]: updatedDate },
+    });
+  }}
+/>
 
           )}
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 }}>
-            <TouchableOpacity onPress={() => { bottomSheetModalRef.current?.dismiss(); setSelectedItem(null); }}>
-              <Text style={{ color: 'white' }}>취소</Text>
+          <View  className="flex-row mx-2 py-4 rounded-2xl justify-between bg-[#33363B]">
+            <TouchableOpacity
+              onPress={() => {
+                bottomSheetModalRef.current?.dismiss();
+                setSelectedItem(null);
+              }}
+              className="flex-1 items-center justify-center px-4 py-2 rounded-[20px] bg-[#52565A] mr-4"
+            >
+              <Text className="text-white text-[18px]">취소</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}>
-              <Text style={{ color: 'white' }}>선택</Text>
+            <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}
+              className="flex-1 items-center justify-center px-4 py-2 rounded-[20px] bg-[#CCCCFF] ml-4">
+              <Text className="text-black text-[18px]">선택</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>
@@ -200,9 +237,9 @@ const convertTo24Hour = (hour: number, period: string): number => {
               onPress={()=>dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important }})}
               style={{ marginLeft: 18}}
             >
-              {/* <StarIcon 
+              { <StarIcon 
                 fill={form.is_important ? 'white' : 'none'}
-              /> */}
+              /> }
             </TouchableOpacity>
           </View>
 
@@ -337,7 +374,7 @@ const convertTo24Hour = (hour: number, period: string): number => {
                   <TouchableOpacity
                     key={index}
                     onPress={() => {
-                     dispatch({ type: 'UPDATE_DRAFT', payload: { color }}) // 선택한 색상을 schedule에 저장
+                     dispatch({ type: 'UPDATE_DRAFT', payload: {...form, color: colorMap[color]} }) // 선택한 색상을 schedule에 저장
                       console.log('선택한 색상:', color) // 선택한 색상 확인
                     }}
                     style={{ marginRight: 12, marginBottom: 8 }}
@@ -446,7 +483,7 @@ const convertTo24Hour = (hour: number, period: string): number => {
                     fontSize: width > 400 ? 14 : 12,
                     textAlign: 'center'
                   }}>
-                    {form.is_recurring ? '1주마다' : '반복 설정 안함'}
+                    {fullText}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -483,7 +520,7 @@ const convertTo24Hour = (hour: number, period: string): number => {
 
               <TouchableOpacity
                 onPress={(() => {
-                  navigation.navigate('SetLocationPage') // 폼 객체 보내기. 근데 보낼 필요가 있나 모르겠네
+                  navigation.navigate('SetLocationPage')
                 })}
                 style={{
                   marginVertical: 16,

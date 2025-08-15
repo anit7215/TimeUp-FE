@@ -1,5 +1,6 @@
 
 import { AddressItem } from './address';
+import ViewScheduleDetailPage from '../pages/ViewScheduleDetailPage';
 export type RootStackParamList = {
   CalendarPage: undefined;
   OnboardingPage: undefined;
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   SetRemindAlarmPage: undefined;
   SetScheduleRepeatPage: undefined;
   SetLocationPage: undefined;
+  ViewScheduleDetailPage: undefined;
   SelectWakeupAlarmReplayPage: undefined;
   SelectWakeupAlarmSoundPage: undefined;
   SelectWakeupAlarmVibratePage: undefined;

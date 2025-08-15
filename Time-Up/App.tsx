@@ -39,6 +39,10 @@ import ProfileSettingPage from './src/pages/Onboarding/ProfileSettingPage';
 import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
+import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
+import SchedulePage from './src/pages/SchedulePage';
+import SetLocationPage from './src/pages/SetLocationPage';
+
 
 const queryClient = new QueryClient();
 
@@ -95,6 +99,8 @@ export default function App() {
               <Stack.Screen name="SetLocationPage" component={SetLocationPage} />
               <Stack.Screen name="SetScheduleRepeatPage" component={SetScheduleRepeatPage} />
               <Stack.Screen name="SetRemindAlarmPage" component={SetRemindAlarmPage} />
+              <Stack.Screen name="SchedulePage" component={SchedulePage} />
+              <Stack.Screen name="ViewScheduleDetailPage" component={ViewScheduleDetailPage} />
               <Stack.Screen name="SelectWakeupAlarmReplayPage" component={SelectWakeupAlarmReplayPage} />
               <Stack.Screen name="SelectWakeupAlarmSoundPage" component={SelectWakeupAlarmSoundPage} />
               <Stack.Screen name="SelectWakeupAlarmVibratePage" component={SelectWakeupAlarmVibratePage} />
