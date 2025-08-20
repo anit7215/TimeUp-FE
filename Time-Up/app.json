@@ -17,9 +17,11 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
+      "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
       "package": "com.anit7215.TimeUp",
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "permissions": ["POST_NOTIFICATIONS"]
     },
     "web": {
       "bundler": "metro",

@@ -3,7 +3,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -40,8 +40,8 @@ import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
-
 import { getAccessToken } from './src/utils/storage';
+import { requestWebPushToken } from './src/utils/webPush';
 
 const queryClient = new QueryClient();
 
@@ -50,6 +50,7 @@ export default function App() {
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const webPushInitRef = useRef(false);
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -68,6 +69,58 @@ export default function App() {
     const token = getAccessToken();
     setInitialRoute(token ? 'CalendarPage' : 'OnboardingPage'); 
   }, []);
+
+  useEffect(() => {
+    //debugger;
+    console.log('현재 Platform.OS:', Platform.OS);
+    if (Platform.OS !== 'web') return;
+    if (webPushInitRef.current) return;
+    webPushInitRef.current = true;
+
+    // if (sessionStorage.getItem('web-push-init') === 'done') return;
+    // sessionStorage.setItem('web-push-init', 'done');
+
+    let cancelled = false;
+
+    (async () => {
+      console.log('실행됨');
+      try {
+        const token = await requestWebPushToken(); // SW ready 이후 getToken
+        if (!token || cancelled) {
+          console.warn('웹 푸시 권한 거부 또는 토큰 없음');
+          return;
+        }
+        console.log('Web FCM Token:', token);
+
+        // CORS 미설정 서버로 보내면 에러 → 반복 금지(throw 금지)
+        // await axiosInstance.post('/alarm/push-token', { token, type: 'web' }).catch(err => {
+        //   console.warn('웹 토큰 저장 실패(서버/CORS 확인 필요):', err?.message || err);
+        // });
+
+        // (선택) 포그라운드 수신
+        // listenForegroundMessages(payload => console.log('웹 포그라운드 메시지:', payload));
+      } catch (e) {
+        console.warn('웹 푸시 토큰 발급/저장 실패:', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;                        // 언마운트 후 setState/요청 방지
+    };
+  }, []);
+
+  // 포그라운드에서 온 메시지(탭 열려있을 때) 수신
+  // const off = listenForegroundMessages((payload) => {
+    //   console.log('웹 포그라운드 메시지:', payload);
+      // 필요하면 즉시 브라우저 알림으로도 띄울 수 있음.
+      // const title = payload?.notification?.title ?? 'Time-Up';
+      // const body  = payload?.notification?.body  ?? '';
+      // new Notification(title, { body });
+    // });
+
+    // onMessage는 자체적으로 구독 해제가 필요 없지만,
+    // 유사시 정리 콜백을 두고 싶다면 아래처럼 noop 리턴
+
   if (!mapsLoaded || !initialRoute) return null;
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
