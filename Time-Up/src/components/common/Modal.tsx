@@ -35,9 +35,11 @@ const Modal = ({ onClose, onConfirm, children }: ModalProps) =>{
         </View>
 
         <View className="flex-row px-[34px] pb-4 gap-4">
-          <View className="flex-1">
-            <CancelButton onPress={onClose} />
-          </View>
+          {onConfirm && (
+            <View className="flex-1">
+              <CancelButton onPress={onClose} />
+            </View>
+          )}
           <View className="flex-1">
             <ConfirmButton title="확인" onPress = {handleConfirm}/>
           </View>
