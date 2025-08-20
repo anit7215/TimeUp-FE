@@ -57,22 +57,22 @@ export default function MyAlarmPage() {
     );
     return sorted[0];
   }, [autoAlarms]);
-  
+
   // 날짜/시간 포맷터 (KST 기준, 디바이스 로컬 시간 사용)
   const formatAutoDateLine = (iso: string) => {
     const d = new Date(iso);
     const days = ['일', '월', '화', '수', '목', '금', '토'];
-    return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+    return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일 (${days[d.getUTCDay()]})`;
   };
+
   const formatAutoTimeLine = (iso: string) => {
     const d = new Date(iso);
-    const h = d.getHours();
-    const m = d.getMinutes();
+    const h = d.getUTCHours();
+    const m = d.getUTCMinutes();
     const period = h < 12 ? '오전' : '오후';
     const hh = (h % 12) || 12;
     return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
   };
-
 
   const handleToggleAutoAlarm = () => {
     if (!autoAlarmOn) {
