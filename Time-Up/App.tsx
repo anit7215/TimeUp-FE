@@ -27,7 +27,8 @@ import SelectWakeupAlarmVibratePage from './src/pages/Alarm/WakeUp/SelectWakeupA
 import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUp/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/Alarm/WakeUp/WakeUpAlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
-import DiaryWritePage from './src/pages/DiaryWritePage';
+import DiaryPage from './src/pages/Diary/DiaryPage';
+import DiaryWritePage from './src/pages/Diary/DiaryWritePage';
 import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
 import EditInfoPage from './src/pages/Mypage/EditInfoPage';
 import FeedbackPage from './src/pages/Mypage/FeedbackPage';
@@ -40,6 +41,7 @@ import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
+import DiaryDetailPage from './src/pages/Diary/DiaryDetailPage';
 
 import { getAccessToken } from './src/utils/storage';
 
@@ -80,6 +82,8 @@ export default function App() {
               <Stack.Screen name="MyPage" component={MyPage} />
               <Stack.Screen name="WakeUpAlarmPage" component={WakeUpAlarmPage} />
               <Stack.Screen name="AlarmPage" component={AlarmPage} />
+              <Stack.Screen name="DiaryPage" component={DiaryPage} />
+              <Stack.Screen name="DiaryDetailPage" component={DiaryDetailPage} />
               <Stack.Screen name="DiaryWritePage" component={DiaryWritePage} />
               <Stack.Screen name="MyAlarmPage" component={MyAlarmPage} />
               <Stack.Screen name="SelectMyAlarmReplayPage" component={SelectMyAlarmReplayPage} />

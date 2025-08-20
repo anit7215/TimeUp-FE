@@ -9,11 +9,11 @@ import IconCalendar from '../../../assets/images/IconCalendar.png';
 import IconDiary from '../../../assets/images/IconDiary.png';
 import IconMy from '../../../assets/images/IconMy.png';
 
-type TabName = 'DiaryWritePage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
+type TabName = 'DiaryPage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
 
 // 탭의 소속 페이지 그룹 정의. 페이지 만들 때마다 여기에 추가!!
 const tabGroups: Record<TabName, string[]> = {
-  DiaryWritePage: ['DiaryWritePage'],
+  DiaryPage: ['DiaryWritePage', 'DiaryPage'],
   AlarmPage: ['EditMyAlarmPage', 'MyAlarmDetailPage', 'MyAlarmPage',
       'SelectMyAlarmReplayPage', 'SelectMyAlarmSoundPage', 'SelectMyAlarmVibratePage',
       'EditWakeUpAlarmPage', 'SelectWakeupAlarmReplayPage', 'SelectWakeupAlarmSoundPage',
@@ -24,7 +24,7 @@ const tabGroups: Record<TabName, string[]> = {
 };
 
 const tabs: { name: TabName; icon: any; label: string }[] = [
-  { name: 'DiaryWritePage', icon: IconDiary, label: '일기쓰기' },
+  { name: 'DiaryPage', icon: IconDiary, label: '일기쓰기' },
   { name: 'AlarmPage', icon: IconAlarm, label: '알람' },
   { name: 'CalendarPage', icon: IconCalendar, label: '캘린더' },
   { name: 'MyPage', icon: IconMy, label: '마이' },
