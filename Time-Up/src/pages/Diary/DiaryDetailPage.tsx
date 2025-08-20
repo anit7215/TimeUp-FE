@@ -1,4 +1,5 @@
 import BeforeHeader from '@/src/components/common/BeforeHeader';
+import BottomLayout from '@/src/Layouts/BottomLayout';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import moment from 'moment';
 import 'moment/locale/ko';
@@ -35,6 +36,10 @@ export default function DiaryDetailPage() {
 
     const handleSave = () => {
         if (!existingDiary) return;
+        if (typeof existingDiary.diary_id !== 'number') {
+        // diary_id가 문자열인 경우 (예: 'add-today-diary')는 저장 로직을 실행하지 않음
+            return;
+        }
         if (!title.trim() || !content.trim()) {
             Alert.alert('입력 오류', '제목과 내용을 모두 입력해주세요.');
             return;
@@ -60,6 +65,9 @@ export default function DiaryDetailPage() {
 
     const handleConfirmDelete = () => {
         if (!existingDiary) return;
+        if (typeof existingDiary.diary_id !== 'number') {
+            return;
+        }
         deleteMutate(existingDiary.diary_id, {
             onSuccess: () => {
                 Alert.alert('성공', '일기가 삭제되었습니다.');
@@ -87,16 +95,23 @@ export default function DiaryDetailPage() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-black p-4 font-pretendard">
-            <BeforeHeader title={formatDate(date)} onBackPress={() => navigation.goBack()} />
-            <View className="mb-6">
-                <TouchableOpacity onPress={() => setDatePickerVisible(true)} disabled={!isEditable}>
-                    <Text className="text-white text-xl font-semibold">{formatDate(date)}</Text>
+        <BottomLayout>
+        <SafeAreaView className="flex-1 bg-black px-4 py-6 font-pretendard">
+            {isEditable ? (
+                <TouchableOpacity 
+                    onPress={() => setDatePickerVisible(true)} 
+                    className="mb-3 mt-6"
+                >
+                    <Text className="text-white text-xl font-medium leading-7">
+                        {formatDate(date)}
+                    </Text>
                 </TouchableOpacity>
-            </View>
+            ) : (
+                <BeforeHeader title={formatDate(date)} onBackPress={() => navigation.goBack()} />
+            )}
             <View className="mb-3">
                 <TextInput
-                    className="text-white text-2xl font-medium leading-7"
+                    className="text-white text-2xl font-medium leading-loose"
                     value={title}
                     onChangeText={setTitle}
                     placeholder="제목"
@@ -106,7 +121,7 @@ export default function DiaryDetailPage() {
             </View>
             <View className="flex-1">
                 <TextInput
-                    className="text-white text-lg flex-1"
+                    className="text-white text-slate-50 text-base font-normal leading-normal flex-1"
                     value={content}
                     onChangeText={setContent}
                     placeholder="오늘의 이야기"
@@ -121,21 +136,21 @@ export default function DiaryDetailPage() {
                     <>
                         <TouchableOpacity
                             onPress={handleCancelEdit}
-                            className="py-3 px-12 rounded-[20px] bg-gray-900"
+                            className="w-28 py-2 px-[46px] rounded-[20px] bg-gray-700"
                         >
-                            <Text className="text-white text-lg">취소</Text>
+                            <Text className="text-gray-100 text-base text-medium">취소</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleSave} className="py-3 px-12 rounded-[20px] bg-light-button">
-                            <Text className="text-black text-lg">저장</Text>
+                        <TouchableOpacity onPress={handleSave} className="w-28 py-2 px-[46px] rounded-[20px] bg-light-button">
+                            <Text className="text-black text-base text-medium">저장</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
                     <>
-                        <TouchableOpacity onPress={handleDelete} className="py-3 px-12 rounded-[20px] bg-gray-900">
-                            <Text className="text-white text-lg">삭제</Text>
+                        <TouchableOpacity onPress={handleDelete} className="w-28 py-2 px-[46px] rounded-[20px] bg-gray-700">
+                            <Text className="text-gray-100 text-base text-medium">삭제</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setIsEditable(true)} className="py-3 px-12 rounded-[20px] bg-light-button">
-                            <Text className="text-black text-lg">편집</Text>
+                        <TouchableOpacity onPress={() => setIsEditable(true)} className="w-28 py-2 px-[46px] rounded-[20px] bg-light-button">
+                            <Text className="text-black text-base text-medium">편집</Text>
                         </TouchableOpacity>
                     </>
                 )}
@@ -151,11 +166,11 @@ export default function DiaryDetailPage() {
             {isDeleteModalVisible && (
                 <DeleteModal
                     onClose={() => setDeleteModalVisible(false)}
-                    onConfirm={handleConfirmDelete}
-                >
+                    onConfirm={handleConfirmDelete}>
                     정말로 이 일기를 삭제하시겠습니까?
                 </DeleteModal>
             )}
         </SafeAreaView>
+        </BottomLayout>
     );
 }
