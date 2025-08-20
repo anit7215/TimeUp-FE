@@ -4,7 +4,7 @@ import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useGetDiaryList } from '@/src/hooks/useDiaries';
 import moment from 'moment';
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, FlatList,  SafeAreaView, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { DateData } from 'react-native-calendars';
 import PlusIcon from '../../../assets/images/PlusIcon.svg';
 import SearchIcon from '../../../assets/images/SearchIcon.svg';
@@ -89,9 +89,9 @@ export default function DiaryPage() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-black">
-            <BottomLayout>
-                <View className="flex-1 pt-9 font-['Pretendard']">
+        <BottomLayout>
+            <SafeAreaView className="flex-1 font-pretendard">
+                <View className="flex-1 pt-9 font-pretendard">
                     <View className="px-4">
                         <View className="flex-row justify-between items-center w-full mb-1">
                             <Text className="text-white text-xl font-medium leading-7">하루 일기</Text>
@@ -118,7 +118,6 @@ export default function DiaryPage() {
                     </View>
                     <View>{renderContent()}</View>
                 </View>
-            </BottomLayout>
 
             <DateModal
                 isVisible={isSearchModalVisible}
@@ -132,6 +131,9 @@ export default function DiaryPage() {
                     {alertMessage}
                 </Modal>
             )}
-        </SafeAreaView>
+            </SafeAreaView>
+
+        </BottomLayout>
+
     );
 }

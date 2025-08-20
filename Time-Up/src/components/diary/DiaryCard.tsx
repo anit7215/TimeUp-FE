@@ -49,7 +49,7 @@ const DiaryCard: FC<DiaryCardProps> = ({ item, index, scrollX }) => {
         style={[dynamicContainerStyle, animatedStyle]}
         className="items-center justify-center"
       >
-        <View className="w-full h-full bg-gray-800 rounded-[20px] p-5">
+        <View className="w-56 h-80 bg-gray-800 rounded-[20px] p-5">
           <Text className="text-white text-base font-bold mb-[10px]">
             {formattedDate}
           </Text>

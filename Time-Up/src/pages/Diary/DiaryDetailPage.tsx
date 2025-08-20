@@ -87,7 +87,7 @@ export default function DiaryDetailPage() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-black p-4">
+        <SafeAreaView className="flex-1 bg-black p-4 font-pretendard">
             <BeforeHeader title={formatDate(date)} onBackPress={() => navigation.goBack()} />
             <View className="mb-6">
                 <TouchableOpacity onPress={() => setDatePickerVisible(true)} disabled={!isEditable}>

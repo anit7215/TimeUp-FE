@@ -1,9 +1,9 @@
-import BeforeHeader from '@/src/components/common/BeforeHeader';
+import BottomLayout from '@/src/Layouts/BottomLayout';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import moment from 'moment';
 import 'moment/locale/ko';
 import React, { useState } from 'react';
-import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { DateData } from 'react-native-calendars';
 import DateModal from '../../components/diary/DateModal';
 import { usePostDiary } from '../../hooks/useDiaries';
@@ -16,7 +16,7 @@ export default function DiaryWritePage() {
     const route = useRoute<DiaryWriteRouteProp>();
     const { mutate: postMutate } = usePostDiary();
 
-    const [date, setDate] = useState(new Date());
+    const [date, setDate] = useState<Date | null>(null);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -56,45 +56,50 @@ export default function DiaryWritePage() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-black p-4">
-            <BeforeHeader title={formatDate(date)} onBackPress={() => navigation.goBack()} />
-            <View className="mb-6">
+        <BottomLayout>
+        <View className="flex-1 px-4 py-6">
+            <View className="mb-2">
                 <TouchableOpacity onPress={() => setDatePickerVisible(true)}>
-                    <Text className="text-white text-xl font-semibold">{formatDate(date)}</Text>
+                    {date ? (
+                            <Text className="text-gray-100 text-xl font-medium leading-7 font-pretendard">
+                                {formatDate(date)}
+                            </Text>
+                        ) : (
+                            <Text className="text-gray-500 text-xl font-medium leading-7 font-pretendard">
+                                날짜 선택
+                            </Text>
+                        )}
                 </TouchableOpacity>
             </View>
 
-            <View className="mb-3">
+            <View className="mb-4">
                 <TextInput
-                    className="text-white text-2xl font-medium leading-7"
+                    className="text-white text-2xl font-medium leading-loose placeholder-gray-100 font-pretendard"
                     value={title}
                     onChangeText={setTitle}
-                    placeholder="제목을 입력하세요"
-                    placeholderTextColor="gray"
+                    placeholder="제목 입력"
                 />
             </View>
 
-            <View className="flex-1">
+            <View className="flex-1 mb-6">
                 <TextInput
-                    className="text-white text-lg flex-1"
+                    className="p-3 rounded-xl border border-gray-800 bg-gray-900 text-white text-lg flex-1 placeholder-gray-100"
                     value={content}
                     onChangeText={setContent}
-                    placeholder="오늘의 이야기를 기록해보세요."
-                    placeholderTextColor="gray"
+                    placeholder="내용 입력"
                     multiline
                     textAlignVertical="top"
                 />
             </View>
 
-            <View className="flex-row justify-around items-center pt-4">
+            <View className="flex-row justify-around items-center px-8 gap-6 font-pretendard">
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
-                    className="py-3 px-12 rounded-[20px] bg-gray-900"
-                >
-                    <Text className="text-white text-lg">취소</Text>
+                    className="flex-1 py-2 px-[46px] rounded-[20px] bg-gray-900 items-center">
+                    <Text className="text-gray-100 text-base text-medium">취소</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleSave} className="py-3 px-12 rounded-[20px] bg-light-button">
-                    <Text className="text-black text-lg">저장</Text>
+                <TouchableOpacity onPress={handleSave} className="flex-1 py-2 px-[46px] rounded-[20px] bg-light-button items-center">
+                    <Text className="text-black text-base text-medium">저장</Text>
                 </TouchableOpacity>
             </View>
 
@@ -102,8 +107,9 @@ export default function DiaryWritePage() {
                 isVisible={isDatePickerVisible}
                 onClose={() => setDatePickerVisible(false)}
                 onDaySelect={handleDateSelect}
-                currentDate={date}
+                currentDate={date ?? new Date()}
             />
-        </SafeAreaView>
+            </View>
+        </BottomLayout>
     );
 }
