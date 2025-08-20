@@ -201,7 +201,7 @@ export async function toggleAutoAlarmActivation(autoAlarmId: number) {
   return res.data.success; // { is_active, wakeup_time, ... }
 }
 
-// 알람 조회. 내 알람(myAlams), 기상알람(wakeup)
+// 알람 조회. 내 알람(myAlams), 기상알람(wakeup), 자동알람(autoAlarms)
 export const getMyAlarms = async (): Promise<{
   myAlarms: MyAlarmSummary[];
   wakeupAlarms: WakeupAlarmSummary[];

@@ -126,6 +126,7 @@ export default function MyAlarmPage() {
   };
 
   const handleNewAlarm = async () => {
+    debugger;
     //debugger;
     // 날짜-시간 조정하기. 오전 오후 시간 계산? 우선 안전하게 하루 뒤로 지정해 둠.
     try {

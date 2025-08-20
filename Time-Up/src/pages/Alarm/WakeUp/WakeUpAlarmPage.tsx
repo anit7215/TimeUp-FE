@@ -5,7 +5,7 @@ import { GetAllAlarmsResponse } from '@/src/types/alarm';
 import { formatTime } from '@/src/utils/AlarmFormat';
 import { getAccessToken } from '@/src/utils/storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import BottomLayout from '../../../Layouts/BottomLayout';
 import ToggleSwitch from '../../../components/common/ToggleSwitch';
@@ -119,6 +119,24 @@ export default function WakeUpAlarmPage() {
     console.log(`${day} 기상알람 디테일 페이지로 이동합니다.`);
     navigation.navigate('WakeUpAlarmDetailPage');
   };
+
+  const { refreshAlarms } = useAlarmContext();
+  const syncedOnceRef = useRef(false);
+
+  useEffect(() => {
+    // 알람 동기화
+    if (!syncedOnceRef.current) {
+      syncedOnceRef.current = true;
+      (async () => {
+        try {
+          await refreshAlarms();
+          console.log('알람 동기화 성공');
+        } catch (e) {
+          console.warn('초기 알람 동기화 실패(무시 가능):', e);
+        }
+      })();
+    }
+  }, [navigation, refreshAlarms]);
 
 
   return (

@@ -72,7 +72,7 @@ export default function App() {
 
   useEffect(() => {
     //debugger;
-    console.log('현재 Platform.OS:', Platform.OS);
+    //console.log('현재 Platform.OS:', Platform.OS);
     if (Platform.OS !== 'web') return;
     if (webPushInitRef.current) return;
     webPushInitRef.current = true;
@@ -83,7 +83,6 @@ export default function App() {
     let cancelled = false;
 
     (async () => {
-      console.log('실행됨');
       try {
         const token = await requestWebPushToken(); // SW ready 이후 getToken
         if (!token || cancelled) {
@@ -97,7 +96,7 @@ export default function App() {
         //   console.warn('웹 토큰 저장 실패(서버/CORS 확인 필요):', err?.message || err);
         // });
 
-        // (선택) 포그라운드 수신
+        // 포그라운드 수신
         // listenForegroundMessages(payload => console.log('웹 포그라운드 메시지:', payload));
       } catch (e) {
         console.warn('웹 푸시 토큰 발급/저장 실패:', e);
