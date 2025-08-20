@@ -1,7 +1,7 @@
 import { getAutoAlarmCheckTime, putAutoAlarmCheckTime } from '@/src/apis/users';
 import { alarmSoundOptions, intervalOptions, remindSoundOptions, remindVibrationOptions, repeatCountOptions, vibrationTypeOptions } from '@/src/constants/userOptions';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
-import { AutoAlarmSettings, loadAutoAlarmSettings, saveAutoAlarmSettings } from '@/src/utils/autoAlarmStorage';
+import { loadAutoAlarmSettings, saveAutoAlarmSettings } from '@/src/utils/autoAlarmStorage';
 import { loadRemindSettings, saveRemindSettings } from '@/src/utils/remindStorage';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -25,34 +25,34 @@ export default function EditrAlarmPage() {
   const handleOpenTimeModal = useCallback(() => timeModalRef.current?.present(), []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const remindSettings = await loadRemindSettings();
-      if (remindSettings) {
-        setRemindSound(remindSettings.sound);
-        setRemindVibration(remindSettings.vibration);
+  const fetchData = async () => {
+    const remindSettings = await loadRemindSettings();
+    setRemindSound(remindSettings?.sound ?? 'basic');
+    setRemindVibration(remindSettings?.vibration ?? 'basic');
+
+    const autoAlarmSettings = await loadAutoAlarmSettings();
+    setAlarmSound(autoAlarmSettings?.alarmSound ?? 'basic');
+    setVibrationType(autoAlarmSettings?.vibrationType ?? 'basic');
+    setInterval(autoAlarmSettings?.interval ?? '0');
+    setRepeatCount(autoAlarmSettings?.repeatCount ?? '0');
+
+    try {
+      const response = await getAutoAlarmCheckTime();
+      if (response?.alarm_check_time) {
+        const date = new Date(response.alarm_check_time);
+        setAlarmTime({
+          hour: date.getUTCHours().toString().padStart(2, '0'),
+          minute: date.getUTCMinutes().toString().padStart(2, '0'),
+        });
+      } else {
+        setAlarmTime({ hour: '07', minute: '00' }); // 기본값
       }
-      const autoAlarmSettings: AutoAlarmSettings | null = await loadAutoAlarmSettings();
-      if (autoAlarmSettings) {
-        setAlarmSound(autoAlarmSettings.alarmSound);
-        setVibrationType(autoAlarmSettings.vibrationType);
-        setInterval(autoAlarmSettings.interval);
-        setRepeatCount(autoAlarmSettings.repeatCount);
-      }
-      try {
-        const response = await getAutoAlarmCheckTime();
-        const timeStr = response?.alarm_check_time;
-        if (timeStr) {
-          const date = new Date(timeStr);
-          const hour = date.getUTCHours().toString().padStart(2, '0');
-          const minute = date.getUTCMinutes().toString().padStart(2, '0');
-          setAlarmTime({ hour, minute });
-        }
-      } catch (error) {
-        console.error('자동 알람 확인 시간 불러오기 실패:', error);
-      }
-    };
-    fetchData();
-  }, []);
+    } catch {
+      setAlarmTime({ hour: '07', minute: '00' });
+    }
+  };
+  fetchData();
+}, []);
 
   const handleSave = async () => {
     if (!alarmTime) {

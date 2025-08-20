@@ -136,7 +136,7 @@ export default function ProfileSettingPage() {
                 workAddress,
               });
               await onboarding(payload);
-              navigation.navigate('MyPage');
+              navigation.navigate('CalendarPage');
             } catch (err) {
               console.error('온보딩 제출 실패', err);
               alert('제출 중 오류가 발생했습니다.');

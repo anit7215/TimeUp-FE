@@ -1,6 +1,6 @@
 
 import { AddressItem } from './address';
-import ViewScheduleDetailPage from '../pages/ViewScheduleDetailPage';
+import { DiaryItem } from './diary';
 export type RootStackParamList = {
   CalendarPage: undefined;
   OnboardingPage: undefined;
@@ -16,6 +16,9 @@ export type RootStackParamList = {
   };
   EditInfoPage: undefined;
   EditAlarmPage: undefined;
+  DiaryWritePage: undefined;
+  DiaryPage: undefined;
+  DiaryDetailPage: { diary?: DiaryItem }; 
   FeedbackPage: { alarmId: number };
   AlarmMemoPage: undefined;
   AlarmPage: undefined;

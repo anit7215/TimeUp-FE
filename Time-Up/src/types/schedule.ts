@@ -6,8 +6,8 @@ export interface Schedule {
   name: string;
   start_date: string;
   end_date: string;
-  place_name?: string;
-  address?: string;
+  place_name: string;
+  address: string;
   color: string;
   memo?: string;
   is_reminding: boolean;
