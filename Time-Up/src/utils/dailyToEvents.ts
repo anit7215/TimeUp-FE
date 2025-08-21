@@ -3,7 +3,7 @@ import type { UIEvent } from '../components/SetSchedule/ScheduleUI';
 import { toHex } from '@/src/utils/colors';
 
 // 서버가 "KST 시각 + Z"로 보내는 버그 우회 스위치
-const Z_FIX_TREATS_Z_AS_LOCAL = true;
+const Z_FIX_TREATS_Z_AS_LOCAL = false;
 
 const toWallClockStartTime = (iso: string) => {
   const hasZ = /Z$/i.test(iso);

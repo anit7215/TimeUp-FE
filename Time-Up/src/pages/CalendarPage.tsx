@@ -18,8 +18,13 @@ import BottomLayout from '../Layouts/BottomLayout';
 import { toHex } from '../utils/colors'; // 색상 변환 유틸리티
 import { toYyyyMm } from '../utils/userTimeFormat';
 import { ImportantSchedule } from '../types/schedule';
+import moment from 'moment-timezone';
 
 const { width, height } = Dimensions.get('window');
+
+const pad2 = (n:number) => String(n).padStart(2, '0');
+const makeDateKey = (y: number, mIndex0: number, d: number) =>
+  `${y}-${pad2(mIndex0 + 1)}-${pad2(d)}`; // 'YYYY-MM-DD' 포맷
 
 
 const CalendarPage = () => {
@@ -28,7 +33,9 @@ const CalendarPage = () => {
   
   // State 관리
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState(
+  moment().format('YYYY-MM-DD')   // 예: '2025-08-21'
+);
   const [isDaySelected, setIsDaySelected] = useState(false);
   const [events, setEvents] = useState<Record<string, { count: number; colors: string[] }>>({});
   const [isPlusButtonPressed, setIsPlusButtonPressed] = useState(false);
@@ -38,26 +45,6 @@ const CalendarPage = () => {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-/*  const schedules = [
-    {
-      scheduleId: '1',
-      name: '옷 사기',
-      start_date: '2025-07-15T10:00:00',
-      end_date: '2025-07-15T12:00:00',
-      color: '#FF6B6B',
-      is_important: true,
-      place_name: '회의실 A',
-    },
-    {
-      scheduleId: '2',
-      name: '프로젝트 마감',
-      start_date: '2025-07-15T10:00:00',
-      end_date: '2025-07-15T12:00:00',
-      color: '#4ECDC4',
-      is_important: true,
-      place_name: '회의실 B'
-    }
-  ]; */
 
   const buildDotsFromByDay = (
     schedulesByDay: Record<string, { color: string, scheduleId?: string }[]>,
@@ -68,7 +55,7 @@ const CalendarPage = () => {
   
     Object.entries(schedulesByDay || {}).forEach(([dayStr, arr]) => {
       const day = Number(dayStr); // "8" -> 8
-      const key = `${year}-${monthIndex0 + 1}-${day}`; // getEventCount 포맷과 동일
+      const key = makeDateKey(year, monthIndex0, day); // getEventCount 포맷과 동일
 
       // 중복 제거를 위해 Map 사용
       // scheduleId가 없으면 color와 랜덤값으로 고유 ID 생성
@@ -207,14 +194,14 @@ useEffect(() => {
 
   // 날짜 선택 핸들러
   const handleDatePress = (day: any) => { // 이거 any타입이어도 될지 모르겠다...
-    const dateString = `${year}-${month + 1}-${day.date}`;
+    const dateString = makeDateKey(year, month, day.date);
     navigation.navigate('SchedulePage', { selectedDate: dateString }) // selectedDate 삭제
     
   };
   
   // 특정 날짜의 일정 개수 가져오기
   const getEventCount = (date: number) => {
-    const dateKey = `${year}-${month + 1}-${date}`;
+    const dateKey = makeDateKey(year, month, date);
     return events[dateKey]?.count || 0;
   };
   
@@ -313,7 +300,7 @@ useEffect(() => {
       weeks.push(
         <View key={i} style={styles.weekRow}>
           {week.map((day, index) => {
-            const dateString = `${year}-${month + 1}-${day.date}`;
+            const dateString = makeDateKey(year, month, day.date);
             const isSelected = selectedDate === dateString && day.isCurrentMonth;
             const isTodayDate = isToday(day.date) && day.isCurrentMonth;
             const dayIndex = (i / 7) * 7 + index;

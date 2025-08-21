@@ -30,6 +30,7 @@ import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate
 import { useSchedule } from '../context/ScheduleContext';
 import { RootStackParamList } from '../types/navigation';
 import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
+import Modal from '../components/common/Modal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,6 +44,36 @@ export default function AddSchedulePage() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['50%', '70%'], []);
   const [currentDate, setCurrentDate] = useState(form.start_date);
+
+  const [open, setOpen] = useState(false); // 모달 상태 관리
+  const [modalMessage, setModalMessage] = useState(''); // 모달 메시지 상태 관리
+
+  const validateDraft = () => {
+    const req = [
+      { label: '일정 이름', value: form.name?.trim()},
+      { label: '시작 날짜', value: form.start_date },
+      { label: '종료 날짜', value: form.end_date },
+      { label: '주소', value: form.place_name?.trim() },
+      { label: '장소명', value: form.place_name?.trim() },
+    ]
+
+    const missing = req.filter(r => !r.value);
+    if (missing.length) {
+      return `필수 입력 항목이 입력되지 않았습니다.\n다음 항목을 확인해 주세요:\n- ${missing.map(m => m.label).join('\n- ')}`;
+    
+    }
+
+      const start = moment(form.start_date, moment.ISO_8601, true);
+  const end   = moment(form.end_date,   moment.ISO_8601, true);
+
+  if (!start.isValid() || !end.isValid()) {
+    return '날짜/시간 형식이 올바르지 않습니다.\n다시 선택해 주세요.';
+  }
+  if (end.isBefore(start)) {
+    return '종료 시간이 시작 시간보다 빠릅니다.\n시간을 다시 확인해 주세요.';
+  }
+  return null;
+};
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"];
 
@@ -59,10 +90,16 @@ export default function AddSchedulePage() {
   
 
 const handleSave = async () => {
+  const errText = validateDraft();
+  if (errText) {
+    setModalMessage(errText);
+    setOpen(true);
+    return;
+  }
   const formToSend = {
     ...form,
-    start_date: moment(form.start_date).format('YYYY-MM-DDTHH:mm:ss'),
-    end_date: moment(form.end_date).format('YYYY-MM-DDTHH:mm:ss'),
+    start_date: moment(form.start_date).utc().format('YYYY-MM-DDTHH:mm:ss'),
+    end_date: moment(form.end_date).utc().format('YYYY-MM-DDTHH:mm:ss'),
   }
   try {
     await createSchedule(formToSend);
@@ -110,19 +147,6 @@ const handleSave = async () => {
         keyboardBehavior="interactive"
       >
         <BottomSheetView style={{ flex: 1, padding: 16 }}>
-          {selectedItem === '일정 이름' && (
-            <TextInput
-              style={{ width: '100%', height: 50, borderColor: '#65696D', borderWidth: 1, padding: 16, borderRadius: 16, color: 'white', fontSize: 16 }}
-              placeholder='일정 이름 입력'
-              placeholderTextColor={'#979B9F'}
-              value={form.name}
-              onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
-                  onSubmitEditing={() => {
-                  bottomSheetModalRef.current?.dismiss();
-                  setSelectedItem(null);
-                  }}
-            />
-          )}
 
           {selectedItem === '메모' && (
             <TextInput
@@ -152,6 +176,7 @@ const handleSave = async () => {
           )}
 
           {['시작 시간', '종료 시간'].includes(selectedItem || '') && (
+            <View className="flex-1 justify-center items-center">
             <HalfTimeScrollPanel
             onTimeChange={(hourStr: string, minuteStr: string, period: string) => {
               const targetField = (selectedItem === '시작 시간' ? 'start_date' : 'end_date') as
@@ -174,6 +199,7 @@ const handleSave = async () => {
     });
   }}
 />
+</View>
 
           )}
           <View  className="flex-row mx-2 py-4 rounded-2xl justify-between bg-[#33363B]">
@@ -213,27 +239,16 @@ const handleSave = async () => {
               marginBottom: height > 700 ? 20 : 10 
             }}
           >
-            <TouchableOpacity
-            style={{ flex: 1, 
-              marginLeft: 10,
-              marginTop: 20, }}
-              onPress={() => {
-                setSelectedItem("일정 이름")
-                bottomSheetModalRef.current?.present()
-              }}
-            >
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: width > 400 ? 20 : 18,
-                  lineHeight: width > 400 ? 24 : 22,
-                  minHeight: 45,
-                  textAlign: 'left',
-                }}
-              >
-                {form.name ? form.name : '일정 이름'}
-              </Text>
-            </TouchableOpacity>
+                <TextInput
+              style={{ width: '100%', height: 50, borderColor: '#65696D', borderWidth: 1, padding: 16, borderRadius: 16, color: 'white', fontSize: 16 }}
+              placeholder='일정 이름 입력'
+              placeholderTextColor={'#979B9F'}
+              value={form.name}
+              onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
+                  onSubmitEditing={() => {
+                  setSelectedItem(null);
+                  }}
+            />
 
             <TouchableOpacity 
               onPress={()=>dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important }})}
@@ -567,24 +582,18 @@ const handleSave = async () => {
                 </Text>
               </View>
 
-              <TouchableOpacity
-                onPress={(() => {
-                  setSelectedItem("메모")
-                  bottomSheetModalRef.current?.present() // 모달 오픈
-                })}
-                style={{
-                  marginVertical: 16,
-                  justifyContent: 'flex-start'
-                }}
-              >
-                <Text style={{
-                  color: 'white',
-                  fontSize: width > 400 ? 18 : 16
-                }}>
-                  {form.memo || '입력'}
-                </Text>
-              </TouchableOpacity>
+
+                <TextInput
+                  style={{ width: '100%', height: 150, borderColor: '#65696D', borderWidth: 1, padding: 16, borderRadius: 16, color: 'white', fontSize: 16 }}
+                  placeholder='내용 입력'
+                  placeholderTextColor={'#979B9F'}
+                  multiline
+                  textAlignVertical='top'
+                  value={form.memo}
+                  onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { memo: text } })}
+                />
             </View>
+
 
             {/* 하단 버튼 */}
             <View style={{
@@ -633,6 +642,14 @@ const handleSave = async () => {
             </View>
           </View>
         </ScrollView>
+                          {open && (
+                <Modal
+                  onClose={() => setOpen(false)}
+                  onConfirm={() => setOpen(false)}
+                >
+                  {modalMessage}
+                </Modal>
+              )}
       </View>
   </GestureHandlerRootView>
   )

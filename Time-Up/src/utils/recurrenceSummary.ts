@@ -17,11 +17,11 @@ const fmtYMDdot = (ymd: string) => {
 
 interface RecurrenceRuleSnake {
   repeat_type: 'weekly' | 'monthly' | null;
-  repeat_week_days?: number[];          // 0~6
+  repeat_weekdays?: number[];          // 0~6
   monthly_option?: MonthlyOption;       // 'day_of_month' | 'nth_weekday'
   day_of_month?: number | null;         // 1~31
   nth_week?: number | null;             // 1~5
-  weekday: number[];                    // nth_weekday일 때 길이 1 권장
+  weekday: number;                   // nth_weekday일 때 길이 1 권장
   repeat_mode?: 'count' | 'until' | string | null;
   repeat_count?: number | null;
   repeat_until_date?: string | null;    // 'YYYY-MM-DD' 권장
@@ -52,8 +52,8 @@ export function buildRecurrenceSummary(draft: DraftLikeSnake) {
   const start = new Date(draft.start_date);
   const startWeekday = Number.isFinite(start.getTime()) ? start.getDay() : 0;
   const fallbackWeekdays =
-    rule.repeat_week_days && rule.repeat_week_days.length
-      ? rule.repeat_week_days
+    rule.repeat_weekdays && rule.repeat_weekdays.length
+      ? rule.repeat_weekdays
       : [startWeekday];
 
   // 3) 빈 텍스트 준비
@@ -61,7 +61,7 @@ export function buildRecurrenceSummary(draft: DraftLikeSnake) {
 
   if (repeat_type === 'weekly') {
     // 매주 월·수·금
-    const labels = (rule.repeat_week_days ?? fallbackWeekdays)
+    const labels = (rule.repeat_weekdays ?? fallbackWeekdays)
       .map((n) => WEEK_LABELS[n])
       .filter(Boolean);
     const labelText = labels.length ? joinWithMiddleDot(labels) : WEEK_LABELS[startWeekday];
@@ -76,7 +76,7 @@ export function buildRecurrenceSummary(draft: DraftLikeSnake) {
       freqText = `매달 ${dom}일마다`;
     } else if (opt === 'nth_weekday') {
       const nth = rule.nth_week ?? Math.floor((start.getDate() - 1) / 7) + 1;
-      const w = (rule.weekday?.[0] ?? startWeekday) as number;
+      const w = (rule.weekday ?? startWeekday) as number;
       const nthLabel = NTH_LABELS[nth] || `${nth}번째`;
       const wLabel = WEEK_LABELS[w];
       freqText = `매달 ${nthLabel} ${wLabel}요일마다`;
