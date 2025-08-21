@@ -87,7 +87,18 @@ export default function AddSchedulePage() {
     "#F8A0DA": "pink",
     "#CCCCCC": "gray",
   };
-  
+
+  const getRemindText = (minutes: number) => {
+    switch (minutes) {
+      case 0: return '일정 시작 시간';
+      case 5: return '5분 전';
+      case 10: return '10분 전';
+      case 30: return '30분 전';
+      case 60: return '1시간 전';
+      case 1440: return '1일 전';
+      default: return `${minutes}분 전`;
+    }
+}
 
 const handleSave = async () => {
   const errText = validateDraft();
@@ -454,7 +465,7 @@ const handleSave = async () => {
                     fontSize: width > 400 ? 14 : 12,
                     textAlign: 'center'
                   }}>
-                    {form.is_reminding ? `${form.remind_at}분 전` : '알림 설정 안함'}
+                    {form.is_reminding ? getRemindText(form.remind_at ?? 0) : '알림 설정 안함'}
                   </Text>
                 </TouchableOpacity>
               </View>

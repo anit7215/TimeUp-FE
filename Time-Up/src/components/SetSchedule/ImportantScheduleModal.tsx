@@ -8,8 +8,8 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { timeOnly } from './formatDate';
 import { useSchedule } from '@/src/context/ScheduleContext';
 import { getScheduleById } from '../../apis/schedule';
-type Navigation = NativeStackNavigationProp<RootStackParamList, 'ViewScheduleDetailPage'>;
 
+type Navigation = NativeStackNavigationProp<RootStackParamList, 'ViewScheduleDetailPage'>;
 interface ImportantScheduleModalProps {
   selectedMonth: string; // "2024-07"
   schedules: ImportantSchedule[]; // 이미 '중요+월'로 필터된 리스트
@@ -32,7 +32,6 @@ const ImportantScheduleModal: React.FC<ImportantScheduleModalProps> = ({
 
   const { dispatch } = useSchedule();
 
-  // ✅ 추가 필터링 없이 정렬만
   const sortedSchedules = useMemo(
     () =>
       [...(schedules ?? [])].sort(
