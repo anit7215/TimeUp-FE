@@ -3,18 +3,13 @@ import DateModal from '@/src/components/diary/DateModal';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useGetDiaryList } from '@/src/hooks/useDiaries';
 import moment from 'moment';
-import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, FlatList,  SafeAreaView, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, FlatList, LayoutChangeEvent, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { DateData } from 'react-native-calendars';
 import PlusIcon from '../../../assets/images/PlusIcon.svg';
 import SearchIcon from '../../../assets/images/SearchIcon.svg';
-import DiaryCard from '../../components/diary/DiaryCard';
+import DiaryCard, { ADD_DIARY_CARD_ID } from '../../components/diary/DiaryCard';
 import BottomLayout from '../../Layouts/BottomLayout';
-
-const { width } = Dimensions.get('window');
-const ITEM_WIDTH = width * 0.7;
-const SPACING = (width * 0.3) / 4;
-const ITEM_FULL_SIZE = ITEM_WIDTH + SPACING * 2;
 
 export default function DiaryPage() {
     const navigation = useAppNavigation();
@@ -23,12 +18,41 @@ export default function DiaryPage() {
     const [isSearchModalVisible, setSearchModalVisible] = useState(false);
     const [isAlertModalVisible, setAlertModalVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [containerWidth, setContainerWidth] = useState(0);
 
     const { data: diaries = [], isLoading } = useGetDiaryList();
 
-    const handlePressAdd = () => {
-        navigation.navigate('DiaryWritePage');
+    const { ITEM_WIDTH, ITEM_GAP, ITEM_FULL_SIZE, PAGE_HORIZONTAL_PADDING } = useMemo(() => {
+        if (containerWidth === 0) {
+            return { ITEM_WIDTH: 0, ITEM_GAP: 0, ITEM_FULL_SIZE: 0, PAGE_HORIZONTAL_PADDING: 0 };
+        }
+        const PADDING = 68;
+        const GAP = 12;
+        const ITEM_W = containerWidth - PADDING * 2;
+        return {
+            ITEM_WIDTH: ITEM_W,
+            ITEM_GAP: GAP,
+            ITEM_FULL_SIZE: ITEM_W + GAP,
+            PAGE_HORIZONTAL_PADDING: PADDING,
+        };
+    }, [containerWidth]);
+
+    const onLayout = (event: LayoutChangeEvent) => {
+        const { width } = event.nativeEvent.layout;
+        setContainerWidth(width);
     };
+
+    const processedDiaries = useMemo(() => {
+        if (diaries.length === 0) {
+            return [{ diary_id: ADD_DIARY_CARD_ID, title: '', content: '', diary_date: moment().format('YYYY-MM-DD') }];
+        }
+        const todayString = moment().format('YYYY-MM-DD');
+        const hasTodayDiary = diaries.some((diary) => moment(diary.diary_date).format('YYYY-MM-DD') === todayString);
+        if (hasTodayDiary) return diaries;
+        return [{ diary_id: ADD_DIARY_CARD_ID, title: '', content: '', diary_date: moment().format('YYYY-MM-DD') }, ...diaries];
+    }, [diaries]);
+
+    const handlePressAdd = () => navigation.navigate('DiaryWritePage');
 
     const showAlert = (message: string) => {
         setAlertMessage(message);
@@ -38,18 +62,12 @@ export default function DiaryPage() {
     const handleSearchDateSelect = (day: DateData) => {
         setSearchModalVisible(false);
         const selectedDate = day.dateString;
-        const foundIndex = diaries.findIndex(
-            (diary) => moment(diary.diary_date).format('YYYY-MM-DD') === selectedDate
-        );
+        const foundIndex = processedDiaries.findIndex((diary) => moment(diary.diary_date).format('YYYY-MM-DD') === selectedDate);
 
-        if (foundIndex !== -1) {
-            flatListRef.current?.scrollToIndex({
-                index: foundIndex,
-                animated: true,
-                viewPosition: 0.5, 
-            });
+        if (foundIndex !== -1 && processedDiaries[foundIndex].diary_id !== ADD_DIARY_CARD_ID) {
+            flatListRef.current?.scrollToIndex({ index: foundIndex, animated: true, viewPosition: 0.5, });
         } else {
-            showAlert('해당 날짜에 작성된 일기가 목록에 없습니다.');
+            showAlert('해당 날짜에 작성된 일기가 없습니다.');
         }
     };
 
@@ -57,28 +75,30 @@ export default function DiaryPage() {
         if (isLoading) {
             return <ActivityIndicator size="large" color="#FFFFFF" className="mt-12" />;
         }
-        if (diaries.length === 0) {
-            return (
-                <View className="items-center mt-12">
-                    <Text className="text-white text-base text-center">
-                        작성된 일기가 없습니다. {'\n'}첫 일기를 작성해보세요!
-                    </Text>
-                </View>
-            );
+        if (containerWidth === 0) {
+            return null;
         }
 
         return (
             <FlatList
-                ref={flatListRef} 
-                data={diaries}
-                renderItem={({ item, index }) => <DiaryCard item={item} index={index} scrollX={scrollX} />}
+                ref={flatListRef}
+                data={processedDiaries}
+                renderItem={({ item, index }) => (
+                    <DiaryCard
+                        item={item}
+                        index={index}
+                        scrollX={scrollX}
+                        ITEM_WIDTH={ITEM_WIDTH}
+                        ITEM_FULL_SIZE={ITEM_FULL_SIZE}
+                    />
+                )}
                 keyExtractor={(item) => String(item.diary_id)}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 snapToInterval={ITEM_FULL_SIZE}
                 decelerationRate="fast"
                 contentContainerStyle={{
-                    paddingHorizontal: (width - ITEM_WIDTH) / 2,
+                    paddingHorizontal: PAGE_HORIZONTAL_PADDING - ITEM_GAP / 2,
                 }}
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
                     useNativeDriver: true,
@@ -89,10 +109,10 @@ export default function DiaryPage() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-black">
-            <BottomLayout>
-                <View className="flex-1 pt-9 font-['Pretendard']">
-                    <View className="px-4">
+        <BottomLayout>
+            <SafeAreaView className="flex-1 font-pretendard">
+                <ScrollView className="flex-1 pt-9 font-pretendard" onLayout={onLayout}>
+                    <View className="px-4 pt-12 pb-6">
                         <View className="flex-row justify-between items-center w-full mb-1">
                             <Text className="text-white text-xl font-medium leading-7">하루 일기</Text>
                             <TouchableOpacity onPress={handlePressAdd}>
@@ -116,22 +136,21 @@ export default function DiaryPage() {
                             <SearchIcon width={20} height={20} />
                         </TouchableOpacity>
                     </View>
-                    <View>{renderContent()}</View>
-                </View>
-            </BottomLayout>
+                    <View style={{  height: ITEM_WIDTH * 1.5 }}>
+                        {renderContent()}
+                    </View>
+                </ScrollView>
 
-            <DateModal
-                isVisible={isSearchModalVisible}
-                onClose={() => setSearchModalVisible(false)}
-                onDaySelect={handleSearchDateSelect}
-                currentDate={new Date()}
-            />
-
-            {isAlertModalVisible && (
-                <Modal onClose={() => setAlertModalVisible(false)}>
-                    {alertMessage}
-                </Modal>
-            )}
-        </SafeAreaView>
+                <DateModal
+                    isVisible={isSearchModalVisible}
+                    onClose={() => setSearchModalVisible(false)}
+                    onDaySelect={handleSearchDateSelect}
+                    currentDate={new Date()}
+                />
+                {isAlertModalVisible && (
+                    <Modal onClose={() => setAlertModalVisible(false)}>{alertMessage}</Modal>
+                )}
+            </SafeAreaView>
+        </BottomLayout>
     );
 }
