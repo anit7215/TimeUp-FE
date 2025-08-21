@@ -36,8 +36,8 @@ export default function Navbar() {
 
   const renderTabs = () => (
     <View
-      className="flex-row justify-around items-center h-16"
-      style={Platform.OS === 'web' ? { width: 474, alignSelf: 'center' } : undefined}
+      className="flex-row justify-between items-center h-16 w-full px-9 py-2"
+      style={Platform.OS === 'web' ? { maxWidth: 474, alignSelf: 'center' } : undefined}
     >
       {tabs.map((tab) => {
         const relatedRoutes = tabGroups[tab.name] || [];
@@ -46,7 +46,7 @@ export default function Navbar() {
         return (
           <TouchableOpacity
             key={tab.name}
-            className="flex-1 items-center justify-center"
+            className="items-center justify-center"
             onPress={() => navigation.navigate(tab.name)}
           >
             <Image

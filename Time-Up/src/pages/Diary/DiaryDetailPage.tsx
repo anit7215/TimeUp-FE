@@ -136,21 +136,21 @@ export default function DiaryDetailPage() {
                     <>
                         <TouchableOpacity
                             onPress={handleCancelEdit}
-                            className="w-28 py-2 px-[46px] rounded-[20px] bg-gray-700"
+                            className="w-28 py-2 items-center rounded-[20px] bg-gray-700"
                         >
-                            <Text className="text-gray-100 text-base text-medium">취소</Text>
+                            <Text className="text-gray-100 text-base font-medium">취소</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleSave} className="w-28 py-2 px-[46px] rounded-[20px] bg-light-button">
-                            <Text className="text-black text-base text-medium">저장</Text>
+                        <TouchableOpacity onPress={handleSave} className="w-28 py-2 items-center rounded-[20px] bg-light-button">
+                            <Text className="text-black text-base font-medium">저장</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
                     <>
-                        <TouchableOpacity onPress={handleDelete} className="w-28 py-2 px-[46px] rounded-[20px] bg-gray-700">
-                            <Text className="text-gray-100 text-base text-medium">삭제</Text>
+                        <TouchableOpacity onPress={handleDelete} className="w-28 py-2 items-center rounded-[20px] bg-gray-700">
+                            <Text className="text-gray-100 text-base font-medium">삭제</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setIsEditable(true)} className="w-28 py-2 px-[46px] rounded-[20px] bg-light-button">
-                            <Text className="text-black text-base text-medium">편집</Text>
+                        <TouchableOpacity onPress={() => setIsEditable(true)} className="w-28 py-2 items-center rounded-[20px] bg-light-button">
+                            <Text className="text-black text-base font-medium">편집</Text>
                         </TouchableOpacity>
                     </>
                 )}

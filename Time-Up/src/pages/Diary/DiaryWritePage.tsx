@@ -108,12 +108,12 @@ export default function DiaryWritePage() {
                 <View className="flex-row justify-around items-center px-8 gap-6 font-pretendard">
                     <TouchableOpacity
                         onPress={() => navigation.goBack()}
-                        className="w-28 py-2 px-[46px] rounded-[20px] bg-gray-700"
+                        className="w-28 py-2 rounded-[20px] bg-gray-700 items-center"
                     >
-                        <Text className="text-gray-100 text-base text-medium">취소</Text>
+                        <Text className="text-gray-100 text-base font-medium">취소</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleSave} className="w-28 py-2 px-[46px] rounded-[20px] bg-light-button">
-                        <Text className="text-black text-base text-medium">저장</Text>
+                    <TouchableOpacity onPress={handleSave} className="w-28 py-2 rounded-[20px] bg-light-button items-center">
+                        <Text className="text-black text-base font-medium">저장</Text>
                     </TouchableOpacity>
                 </View>
 
