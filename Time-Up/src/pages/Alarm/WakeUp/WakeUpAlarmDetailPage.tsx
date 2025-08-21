@@ -111,22 +111,39 @@ export default function WakeUpAlarmDetailPage() {
 
         <View className="w-[91%] flex-row gap-3">
           <View className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3">
-            <View className="flex-row items-center">
-              <IconMusic width={20} height={20} />
-              <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
+            <View className="flex-row items-center justify-between pr-3">
+              <View className="flex-row items-center">
+                <IconMusic width={20} height={20} />
+                <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
+              </View>
+              <View pointerEvents="none">
+                <ToggleSwitch isOn={!!alarm.isSound} onToggle={() => { }} />
+              </View>
             </View>
-            <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
+            <View
+              pointerEvents="none"
+              className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center"
+            >
               <Text className="font-pretendard text-gray-200 text-[19px] font-semibold">
                 {alarm.sound && alarm.sound !== '선택' ? alarm.sound : '-'}
               </Text>
             </View>
           </View>
+
           <View className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3">
-            <View className="flex-row items-center">
-              <IconBiv width={20} height={20} />
-              <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
+            <View className="flex-row items-center justify-between pr-3">
+              <View className="flex-row items-center">
+                <IconBiv width={20} height={20} />
+                <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
+              </View>
+              <View pointerEvents="none">
+                <ToggleSwitch isOn={!!alarm.isVibrating} onToggle={() => { }} />
+              </View>
             </View>
-            <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
+            <View
+              pointerEvents="none"
+              className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center"
+            >
               <Text className="font-pretendard text-gray-200 text-[19px] font-semibold">
                 {alarm.vibrate && alarm.vibrate !== '선택' ? alarm.vibrate : '-'}
               </Text>
@@ -134,12 +151,17 @@ export default function WakeUpAlarmDetailPage() {
           </View>
         </View>
 
-        <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
-          <View className="flex-row items-center">
-            <IconRepeat width={20} height={20} />
-            <Text className="font-pretendard text-gray-200 text-[19px] font-semibold ml-2">다시 울림</Text>
+        <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 px-3">
+          <View className="flex-row items-center justify-between w-full">
+            <View className="flex-row items-center">
+              <IconRepeat width={20} height={20} />
+              <Text className="font-pretendard text-gray-200 text-xl ml-2">다시 울림</Text>
+            </View>
+            <View pointerEvents="none">
+              <ToggleSwitch isOn={!!alarm.isRepeating} onToggle={() => { }} />
+            </View>
           </View>
-          <Text className="font-pretendard text-gray-200 text-xl ml-2">
+          <Text className="font-pretendard text-gray-200 text-[19px] font-semibold ml-2">
             {alarm.repeat && alarm.repeat !== '선택' ? alarm.repeat : '-'}
           </Text>
         </View>
