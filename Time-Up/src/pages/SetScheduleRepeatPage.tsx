@@ -339,7 +339,7 @@ export default function SetScheduleRepeatPage() {
             <TouchableOpacity
               onPress={pickMonthlyByStartDay}
               className={`bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center ${
-                is_day_of_month_selected ? 'opacity-100' : 'opacity-80'
+                is_day_of_month_selected ? 'bg-blue' : 'bg-gray'
               }`}
             >
               <Text className="text-white text-[18px]">
@@ -350,7 +350,7 @@ export default function SetScheduleRepeatPage() {
             <TouchableOpacity
               onPress={pickMonthlyByStartNthWeekday}
               className={`bg-[#33373B] w-[300px] rounded-[24px] m-2 px-4 py-[8px] items-center justify-center ${
-                is_nth_weekday_selected ? 'opacity-100' : 'opacity-80'
+                is_nth_weekday_selected ? 'bg-blue' : 'bg-gray'
               }`}
             >
               <Text className="text-white text-[18px]">

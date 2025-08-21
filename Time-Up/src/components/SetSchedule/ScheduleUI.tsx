@@ -14,19 +14,17 @@ import { formatKoreanDate } from './formatDate';
 import { useNavigation } from '@react-navigation/native';
 import { useSchedule } from '@/src/context/ScheduleContext';
 
-
 const GRID_START = 0;        // 0시 시작
-const ROW_HEIGHT = 90;       // 1시간(60+30) = 90px
-const TIMELINE_PADDING_TOP = 0;  // 타임라인 위쪽 여백을 주고 싶으면 스타일에서 paddingTop으로만 제어
-
+const ROW_HEIGHT = 90;       // 1시간 = 90px
+const TIMELINE_PADDING_TOP = 0;
 
 export interface UIEvent {
   id: string;
   title: string;
-  startTime: number; // 시간 (7, 8, 9, etc.)
-  duration: number; // 지속 시간 (1 = 1시간)
+  startTime: number; // 시간 (7.5 = 7시 30분)
+  duration: number; // 지속 시간 (0.5 = 30분, 1 = 1시간)
   color: string;
-  scheduleId: string; // 백엔드 스케줄 ID 추가
+  scheduleId: string;
   url?: string;
 }
 
@@ -38,39 +36,128 @@ interface ScheduleUIProps {
   onBackPress?: () => void;
 }
 
+// 겹치는 이벤트들을 그룹화하고 위치를 계산하는 함수
+const calculateEventLayout = (events: UIEvent[]) => {
+  const sortedEvents = [...events].sort((a, b) => {
+    if (a.startTime !== b.startTime) return a.startTime - b.startTime;
+    return a.duration - b.duration;
+  });
+
+  const eventGroups: UIEvent[][] = [];
+  
+  sortedEvents.forEach(event => {
+    // 현재 이벤트와 겹치는 그룹 찾기
+    let foundGroup = false;
+    
+    for (let group of eventGroups) {
+      const hasOverlap = group.some(groupEvent => {
+        const eventEnd = event.startTime + event.duration;
+        const groupEventEnd = groupEvent.startTime + groupEvent.duration;
+        
+        return !(eventEnd <= groupEvent.startTime || event.startTime >= groupEventEnd);
+      });
+      
+      if (hasOverlap) {
+        group.push(event);
+        foundGroup = true;
+        break;
+      }
+    }
+    
+    if (!foundGroup) {
+      eventGroups.push([event]);
+    }
+  });
+
+  // 각 그룹 내에서 이벤트들의 위치 계산
+  const eventLayouts = new Map();
+  
+  eventGroups.forEach(group => {
+    const columns: UIEvent[][] = [];
+    
+    group.forEach(event => {
+      let columnIndex = 0;
+      
+      // 배치 가능한 컬럼 찾기
+      while (columnIndex < columns.length) {
+        const column = columns[columnIndex];
+        const hasConflict = column.some(colEvent => {
+          const eventEnd = event.startTime + event.duration;
+          const colEventEnd = colEvent.startTime + colEvent.duration;
+          
+          return !(eventEnd <= colEvent.startTime || event.startTime >= colEventEnd);
+        });
+        
+        if (!hasConflict) {
+          column.push(event);
+          break;
+        }
+        columnIndex++;
+      }
+      
+      // 새 컬럼 생성
+      if (columnIndex === columns.length) {
+        columns.push([event]);
+      }
+      
+      eventLayouts.set(event.id, {
+        columnIndex,
+        totalColumns: 0, // 나중에 설정
+      });
+    });
+    
+    // 총 컬럼 수 설정
+    group.forEach(event => {
+      const layout = eventLayouts.get(event.id);
+      layout.totalColumns = columns.length;
+    });
+  });
+  
+  return eventLayouts;
+};
+
 const ScheduleUI: React.FC<ScheduleUIProps> = ({
   date,
   events = [],
   onEventPress,
   onTimeSlotPress
 }) => {
-  const hours = Array.from({ length: 24 }, (_, i) => i); // 0시부터 24시까지
-  const SLOT_HEIGHT = 60;
-  const FULL_SLOT_HEIGHT = SLOT_HEIGHT + 30; // 30분 단위로 나누기 위해 2배 높이 설정
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  
+  // 이벤트 레이아웃 계산
+  const eventLayouts = calculateEventLayout(events);
 
   const getEventStyle = (event: UIEvent) => {
-    // const startIndex = event.startTime - 6;
-    // const top = startIndex * FULL_SLOT_HEIGHT + 30;
-    // const height = event.duration * FULL_SLOT_HEIGHT - 2;
-      
-    const top = (event.startTime - GRID_START) * ROW_HEIGHT + TIMELINE_PADDING_TOP;
-    const height = event.duration * ROW_HEIGHT;
+    const layout = eventLayouts.get(event.id);
+    const { columnIndex, totalColumns } = layout || { columnIndex: 0, totalColumns: 1 };
+    
+    // 분 단위 계산
+    const pixelsPerHour = ROW_HEIGHT;
+    const top = (event.startTime - GRID_START) * pixelsPerHour + TIMELINE_PADDING_TOP;
+    const height = event.duration * pixelsPerHour;
+    
+    // 겹치는 이벤트들의 너비와 위치 계산
+    const eventWidth = totalColumns > 1 ? `${95 / totalColumns}%` : '95%';
+    const leftOffset = totalColumns > 1 ? `${(95 / totalColumns) * columnIndex}%` : '0%';
 
     return {
       position: 'absolute' as const,
-      top: top+32,
-      left: 50,
-      right: 16,
-      height,
+      top: top + 32,
+      left: `${((50 - 16) / (375 - 32)) * 100 + 2}%`, // 기본 left 위치에서 약간 조정
+      width: eventWidth,
+      marginLeft: leftOffset,
+      height: Math.max(height - 2, 20), // 최소 높이 20px
       backgroundColor: event.color,
-      borderRadius: 8,
-      padding: 8,
+      borderRadius: 6,
+      padding: totalColumns > 2 ? 4 : 8,
       justifyContent: 'center' as const,
       zIndex: 1,
+      borderWidth: 0.5,
+      borderColor: 'rgba(255,255,255,0.1)',
     };
   };
 
-  const renderTimeSlot = (hour: number, index: number) => { // 시간 슬롯 렌더링
+  const renderTimeSlot = (hour: number) => {
     return (
       <View key={hour}>
         <TouchableOpacity
@@ -88,7 +175,18 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
     );
   };
 
-  const renderEvent = (event: UIEvent) => { // 이벤트 렌더링
+  const renderEvent = (event: UIEvent) => {
+    const layout = eventLayouts.get(event.id);
+    const { totalColumns } = layout || { totalColumns: 1 };
+    
+    // 제목을 컬럼 수에 따라 조정
+    const truncateTitle = (title: string, maxLength: number) => {
+      return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+    };
+    
+    const maxTitleLength = totalColumns > 2 ? 8 : totalColumns > 1 ? 12 : 20;
+    const fontSize = totalColumns > 2 ? 12 : totalColumns > 1 ? 14 : 16;
+    
     return (
       <TouchableOpacity
         key={event.id}
@@ -96,15 +194,35 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
         onPress={() => onEventPress?.(event)}
         activeOpacity={0.8}
       >
-        <Text style={styles.eventTitle}>{event.title}</Text>
+        <Text 
+          style={[
+            styles.eventTitle, 
+            { fontSize, lineHeight: fontSize + 2 }
+          ]}
+          numberOfLines={totalColumns > 2 ? 2 : 3}
+          ellipsizeMode="tail"
+        >
+          {truncateTitle(event.title, maxTitleLength)}
+        </Text>
+        {event.duration < 1 && totalColumns <= 2 && (
+          <Text style={[styles.eventTime, { fontSize: fontSize - 2 }]}>
+            {formatTime(event.startTime)} - {formatTime(event.startTime + event.duration)}
+          </Text>
+        )}
       </TouchableOpacity>
     );
   };
 
-  
-    const navigation = useNavigation<any>();
-    const { dispatch } = useSchedule();
-    const selectedDate = date;
+  // 시간을 형식화하는 헬퍼 함수
+  const formatTime = (time: number) => {
+    const hour = Math.floor(time);
+    const minute = Math.floor((time - hour) * 60);
+    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+  };
+
+  const navigation = useNavigation<any>();
+  const { dispatch } = useSchedule();
+  const selectedDate = date;
 
   const handleAddSchedule = () => {
     const dateToUse = selectedDate;
@@ -116,7 +234,6 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
   };
 
   return (
-    
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2A2A2A" />
       
@@ -132,7 +249,7 @@ const ScheduleUI: React.FC<ScheduleUIProps> = ({
       {/* Schedule Content */}
       <ScrollView 
         style={styles.scheduleContainer}
-        showsVerticalScrollIndicator={false} // 스크롤바 안 보이게
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scheduleContent}
       >
         <View style={styles.timelineContainer}>
@@ -152,11 +269,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#121212',
   },
-
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // 가로 방향 가운데 정렬
-    alignItems: 'center',     // 세로 방향 가운데 정렬
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#121212',
@@ -183,7 +299,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1C1F21',
   },
   scheduleContent: {
-    paddingBottom: 100, // 하단 여백
+    paddingBottom: 100,
   },
   timelineContainer: {
     position: 'relative',
@@ -193,7 +309,7 @@ const styles = StyleSheet.create({
   halfSlot: {
     height: 30,
     justifyContent: 'center',
-    backgroundColor : '#1C1F21', // 배경색과 동일하게 설정
+    backgroundColor: '#1C1F21',
   },
   timeSlot: {
     flexDirection: 'row',
@@ -223,9 +339,14 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     color: '#33373B',
-    fontSize: 16,
     fontWeight: '600',
     textAlign: 'left',
+  },
+  eventTime: {
+    color: '#55595B',
+    fontWeight: '400',
+    textAlign: 'left',
+    marginTop: 2,
   },
 });
 
