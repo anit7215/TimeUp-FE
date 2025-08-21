@@ -21,8 +21,7 @@ export default function MyAlarmPage() {
     autoAlarmOn, setAutoAlarmOn,
     autoAlarms, setAutoAlarms,
     myAlarms, setMyAlarms,
-    setSelectedAlarmId, updateAlarmField, toggleAlarmActivation,
-    toggleAutoAlarmActiveById,
+    setSelectedAlarmId, updateAlarmField, toggleMyAlarmActivation, toggleAutoAlarmActivation,
   } = useAlarmContext();
 
   useEffect(() => {
@@ -33,22 +32,22 @@ export default function MyAlarmPage() {
           '/alarm/alarmlist',
           { headers: { Authorization: `Bearer ${token}` } }
         );
-  
-          // 전체 응답 출력
-          console.log('전체 알람 응답:', res.data);
-  
-          console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
-          console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
-          console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
-  
-        } catch (err) {
-          console.error('전체 알람 조회 실패:', err);
-        }
-      };
-  
-      fetchAlarms();
-    }, []);
-  
+
+        // 전체 응답 출력
+        console.log('전체 알람 응답:', res.data);
+
+        console.log('기상 알람 목록:', res.data.success?.wakeup_alarms ?? []);
+        console.log('자동 알람 목록:', res.data.success?.auto_alarms ?? []);
+        console.log('내 알람 목록:', res.data.success?.my_alarms ?? []);
+
+      } catch (err) {
+        console.error('전체 알람 조회 실패:', err);
+      }
+    };
+
+    fetchAlarms();
+  }, []);
+
   // 가장 가까운 자동 알람 선택
   const nextAutoAlarm = React.useMemo(() => {
     if (!autoAlarms || autoAlarms.length === 0) return null;
@@ -57,31 +56,42 @@ export default function MyAlarmPage() {
     );
     return sorted[0];
   }, [autoAlarms]);
-  
+
   // 날짜/시간 포맷터 (KST 기준, 디바이스 로컬 시간 사용)
   const formatAutoDateLine = (iso: string) => {
     const d = new Date(iso);
     const days = ['일', '월', '화', '수', '목', '금', '토'];
-    return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+    return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일 (${days[d.getUTCDay()]})`;
   };
+
   const formatAutoTimeLine = (iso: string) => {
     const d = new Date(iso);
-    const h = d.getHours();
-    const m = d.getMinutes();
+    const h = d.getUTCHours();
+    const m = d.getUTCMinutes();
     const period = h < 12 ? '오전' : '오후';
     const hh = (h % 12) || 12;
     return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
   };
 
+  // const handleToggleAutoAlarm = async (autoAlarmId: number, currentState: boolean) => {
+  //   try {
+  //     await toggleAutoAlarmActivation(autoAlarmId);
+  //     const newState = !currentState;
+  //     updateAlarmField(autoAlarmId, 'isActive', newState);
+  //     console.log(`알람 ${autoAlarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+  //   } catch (error) {
+  //     console.error(`알람 ${autoAlarmId}번 토글 실패:`, error);
+  //   }
+  // };
 
-  const handleToggleAutoAlarm = () => {
-    if (!autoAlarmOn) {
-      console.log('자동알람이 켜졌습니다.');
-    } else {
-      console.log('자동알람이 꺼졌습니다.');
+  const handleToggleAutoAlarm = async (autoAlarmId: number) => {
+    try {
+      await toggleAutoAlarmActivation(autoAlarmId);
+    } catch (error) {
+      console.error(`자동 알람 ${autoAlarmId} 토글 실패:`, error);
     }
-    setAutoAlarmOn((prev) => !prev);
   };
+
 
   //   const handleToggleAutoAlarm = async () => {
   //   try {
@@ -114,19 +124,18 @@ export default function MyAlarmPage() {
     navigation.navigate('MyAlarmDetailPage');
   };
 
-  const handleToggleAlarm = async (id: number, currentState: boolean) => {
+  const handleToggleAlarm = async (myalarmId: number, currentState: boolean) => {
     try {
-      await toggleAlarmActivation(id);
+      await toggleMyAlarmActivation(myalarmId);
       const newState = !currentState;
-      updateAlarmField(id, 'isActive', newState);
-      console.log(`알람 ${id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+      updateAlarmField(myalarmId, 'isActive', newState);
+      console.log(`알람 ${myalarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
     } catch (error) {
-      console.error(`알람 ${id}번 토글 실패:`, error);
+      console.error(`알람 ${myalarmId}번 토글 실패:`, error);
     }
   };
 
   const handleNewAlarm = async () => {
-    //debugger;
     // 날짜-시간 조정하기. 오전 오후 시간 계산? 우선 안전하게 하루 뒤로 지정해 둠.
     try {
       const now = new Date();
@@ -179,7 +188,10 @@ export default function MyAlarmPage() {
     <BottomLayout>
       <View className="flex-row items-center justify-between mr-[4%] mt-[6%]">
         <Text className="font-pretendard text-white text-3xl ml-5 mb-4">내일의 자동 알람</Text>
-        <ToggleSwitch isOn={autoAlarmOn} onToggle={handleToggleAutoAlarm} disabled={false} />
+        <ToggleSwitch
+          isOn={Boolean(nextAutoAlarm?.is_active)}
+          onToggle={() => nextAutoAlarm?.auto_alarm_id && handleToggleAutoAlarm(nextAutoAlarm.auto_alarm_id)} disabled={!nextAutoAlarm} />
+
       </View>
 
       <LinearGradient

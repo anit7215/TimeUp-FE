@@ -1,5 +1,5 @@
 // src/contexts/AlarmContext.tsx
-import { deleteMyAlarm, patchToggleWakeupAlarmActive, toggleAutoAlarmActivation, toggleMyAlarmActivation } from '@/src/apis/alarmApi';
+import { deleteMyAlarm, patchToggleMyAlarmActivation, patchToggleWakeupAlarmActive, patchtoggleAutoAlarmActivation } from '@/src/apis/alarmApi';
 import { transformAlarmResponseToItem, transformWakeupSummaryToAlarmItem } from '@/src/utils/alarmTransform';
 import moment from 'moment';
 import React, { createContext, useContext, useState } from 'react';
@@ -28,7 +28,6 @@ interface AlarmContextProps {
 
   autoAlarms: AutoAlarmSummary[];
   setAutoAlarms: React.Dispatch<React.SetStateAction<AutoAlarmSummary[]>>;
-  toggleAutoAlarmActiveById: (autoAlarmId: number) => Promise<void>;
 
   selectedAlarmId: number | null;
   setSelectedAlarmId: (id: number | null) => void;
@@ -43,9 +42,11 @@ interface AlarmContextProps {
     value: AlarmItem[K]
   ) => void;
 
-  toggleAlarmActivation: (alarmId: number) => Promise<void>;
+  toggleMyAlarmActivation: (myalarmId: number) => Promise<void>;
+  toggleWakeupAlarmActivation: (wakeupAlarmId: number) => Promise<void>;
+  toggleAutoAlarmActivation: (autoAlarmId: number) => Promise<void>;
+
   deleteAlarmById: (alarmId: number) => Promise<void>;
-  toggleWakeupAlarmActiveById: (wakeupAlarmId: number) => Promise<void>;
 
   isLoadingAlarms: boolean;
   refreshAlarms: () => Promise<void>;
@@ -88,7 +89,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const mappedMy = myList.map((a, idx) => {
         const serverId = (a as any).alarm_id ?? (a as any).my_alarm_id;
-        const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단임.. 이거 쓰면 안됨.. 에러 방지용..^^;;
+        const tsId = new Date(a.my_alarm_time).getTime() + idx; // 최후의 수단.. 이거 쓰면 안됨.. 에러 방지용..;;
         // 화면 id는 서버ID가 있으면 서버ID로 고정
         const uiId = serverId ?? tsId;
         const item = transformAlarmResponseToItem(a);
@@ -97,13 +98,13 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const mappedWake = wakeList.map((w, idx) => {
         const serverId = (w as any).wakeup_alarm_id;
         const dayFromApi = typeof (w as any).day === 'number' ? (w as any).day : new Date(w.wakeup_time).getDay();
-        const dayId = ((dayFromApi % 7) + 7) % 7; // 안전한 0~6
+        const dayId = ((dayFromApi % 7) + 7) % 7;
 
         const item = transformWakeupSummaryToAlarmItem(w);
         return {
           ...item,
-          id: dayId,                            // 화면용 id = 요일(0~6)
-          serverId: (w as any).wakeup_alarm_id, // 서버ID 따로 보관(삭제/수정용)
+          id: dayId,
+          serverId: (w as any).wakeup_alarm_id,
         };
       });
 
@@ -123,7 +124,6 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // }, []);
 
 
-  // 아래 서버 id로 바꾸기?
   const updateAlarmField = <K extends keyof AlarmItem>(alarmId: number, field: K, value: AlarmItem[K]) => {
     setMyAlarms((prev) => prev.map((a) => (a.id === alarmId ? { ...a, [field]: value } : a)));
   };
@@ -138,68 +138,74 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  const toggleAlarmActivation = async (alarmId: number) => {
+  const toggleMyAlarmActivation = async (myalarmId: number) => {
     try {
-      await toggleMyAlarmActivation(alarmId);
-      setMyAlarms((prev) => prev.map((a) => (a.id === alarmId ? { ...a, isActive: !a.isActive } : a)));
-      // 서버 상태와 불일치 우려가 있으면 다음 줄을 사용:
-      // await refreshAlarms();
-      console.log(`알람 ${alarmId}의 상태를 토글했습니다.`);
+      await patchToggleMyAlarmActivation(myalarmId);
+      setMyAlarms((prev) => prev.map((a) => (a.id === myalarmId ? { ...a, isActive: !a.isActive } : a)));
+      console.log(`알람 ${myalarmId}의 상태를 토글했습니다.`);
     } catch (error) {
-      console.error(`알람 ${alarmId} 토글 실패:`, error);
+      console.error(`알람 ${myalarmId} 토글 실패:`, error);
     }
   };
 
-  const toggleWakeupAlarmActiveById = async (wakeupAlarmId: number) => {
+  const toggleWakeupAlarmActivation = async (wakeupAlarmId: number) => {
     try {
-      await patchToggleWakeupAlarmActive(wakeupAlarmId); // 서버 토글
-      setWakeupAlarms(prev =>
-        prev.map(a => (a.serverId === wakeupAlarmId ? { ...a, isActive: !a.isActive } : a))
-      ); // 로컬 반영
-      console.log(`기상 알람 ${wakeupAlarmId} 상태를 토글했습니다.`);
+      await patchToggleWakeupAlarmActive(wakeupAlarmId);
+      setWakeupAlarms((prev) => prev.map((a) => (a.id === wakeupAlarmId ? { ...a, isActive: !a.isActive } : a)));
+      console.log(`알람 ${wakeupAlarmId}의 상태를 토글했습니다.`);
     } catch (error) {
-      console.error(`기상 알람 ${wakeupAlarmId} 토글 실패:`, error);
-      throw error;
+      console.error(`알람 ${wakeupAlarmId} 토글 실패:`, error);
+    }
+  };
+
+  // 자동알람은 alamitem에 관리 안 해서 동일한 로직 안 됨??
+  const toggleAutoAlarmActivation = async (autoAlarmId: number) => {
+    try {
+      await patchtoggleAutoAlarmActivation(autoAlarmId);
+      setAutoAlarms((prev) => prev.map((a) => (a.auto_alarm_id === autoAlarmId ? { ...a, is_active: !a.is_active } : a)));
+      console.log(`알람 ${autoAlarmId}의 상태를 토글했습니다.`);
+    } catch (error) {
+      console.error(`알람 ${autoAlarmId} 토글 실패:`, error);
     }
   };
 
   // 자동알람 토글
-  const toggleAutoAlarmActiveById = async (autoAlarmId: number) => {
-    setAutoAlarms(prev =>
-      prev.map(a =>
-        a.auto_alarm_id === autoAlarmId ? { ...a, is_active: !a.is_active } : a
-      )
-    );
+  // const toggleAutoAlarmActiveById = async (autoAlarmId: number) => {
+  //   setAutoAlarms(prev =>
+  //     prev.map(a =>
+  //       a.auto_alarm_id === autoAlarmId ? { ...a, is_active: !a.is_active } : a
+  //     )
+  //   );
 
-    try {
-      const updated = await toggleAutoAlarmActivation(autoAlarmId); // API 호출
-      // 서버가 내려준 최신 is_active로 동기화(신뢰도 ↑)
-      setAutoAlarms(prev =>
-        prev.map(a =>
-          a.auto_alarm_id === autoAlarmId ? { ...a, is_active: updated.is_active, wakeup_time: updated.wakeup_time } : a
-        )
-      );
-      // 상단 메인 토글(스위치) 기본값도 맞춰줌 (가장 가까운 알람 기준이면 MyAlarmPage에서 메모로 처리)
-      setAutoAlarmOn(updated.is_active);
-    } catch (e) {
-      console.error('자동알람 토글 실패:', e);
-      // 실패 시 롤백
-      setAutoAlarms(prev =>
-        prev.map(a =>
-          a.auto_alarm_id === autoAlarmId ? { ...a, is_active: !a.is_active } : a
-        )
-      );
-      throw e;
-    }
-  };
+  //   try {
+  //     const updated = await patchtoggleAutoAlarmActivation(autoAlarmId); // API 호출
+  //     // 서버가 내려준 최신 is_active로 동기화(신뢰도 ↑)
+  //     setAutoAlarms(prev =>
+  //       prev.map(a =>
+  //         a.auto_alarm_id === autoAlarmId ? { ...a, is_active: updated.is_active, wakeup_time: updated.wakeup_time } : a
+  //       )
+  //     );
+  //     // 상단 메인 토글(스위치) 기본값도 맞춰줌 (가장 가까운 알람 기준이면 MyAlarmPage에서 메모로 처리)
+  //     setAutoAlarmOn(updated.is_active);
+  //   } catch (e) {
+  //     console.error('자동알람 토글 실패:', e);
+  //     // 실패 시 롤백
+  //     setAutoAlarms(prev =>
+  //       prev.map(a =>
+  //         a.auto_alarm_id === autoAlarmId ? { ...a, is_active: !a.is_active } : a
+  //       )
+  //     );
+  //     throw e;
+  //   }
+  // };
 
   const deleteAlarmById = async (alarmId: number) => {
     try {
       const target = myAlarms.find(a => a.id === alarmId);
-      const remoteId = target?.serverId ?? target?.id; // 우선 서버 ID 사용
+      const remoteId = target?.serverId ?? target?.id;
       if (!remoteId) throw new Error('서버 ID 없음');
 
-      await deleteMyAlarm(remoteId);                   // 서버와 동기화
+      await deleteMyAlarm(remoteId);
       setMyAlarms(prev => prev.filter(a => a.id !== alarmId));
       console.log(`알람 ${alarmId} 삭제 완료 (서버ID: ${remoteId})`);
     } catch (error) {
@@ -226,14 +232,14 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedAlarmDate,
         updateAlarmField,
         updateWakeupAlarmField,
-        toggleAlarmActivation,
+        toggleMyAlarmActivation,
         deleteAlarmById,
         isLoadingAlarms,
         refreshAlarms,
         autoAlarms,
         setAutoAlarms,
-        toggleAutoAlarmActiveById,
-        toggleWakeupAlarmActiveById,
+        toggleWakeupAlarmActivation,
+        toggleAutoAlarmActivation,
       }}
     >
       {children}

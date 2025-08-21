@@ -3,7 +3,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -27,6 +27,7 @@ import SelectWakeupAlarmVibratePage from './src/pages/Alarm/WakeUp/SelectWakeupA
 import WakeUpAlarmDetailPage from './src/pages/Alarm/WakeUp/WakeUpAlarmDetailPage';
 import WakeUpAlarmPage from './src/pages/Alarm/WakeUp/WakeUpAlarmPage';
 import CalendarPage from './src/pages/CalendarPage';
+import DiaryDetailPage from './src/pages/Diary/DiaryDetailPage';
 import DiaryPage from './src/pages/Diary/DiaryPage';
 import DiaryWritePage from './src/pages/Diary/DiaryWritePage';
 import EditAlarmPage from './src/pages/Mypage/EditAlarmPage';
@@ -41,9 +42,10 @@ import SetLocationPage from './src/pages/SetLocationPage';
 import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
-import DiaryDetailPage from './src/pages/Diary/DiaryDetailPage';
 
+import { saveFCMPushToken } from './src/apis/pushToken';
 import { getAccessToken } from './src/utils/storage';
+import { requestWebPushToken } from './src/utils/webPush';
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,10 @@ export default function App() {
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const [mapsLoaded, setMapsLoaded] = useState(Platform.OS !== 'web');
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  //const { registerForPushNotificationsAsync } = NotificationContext();
+  const webPushInitRef = useRef(false);
+  const nativePushInitRef = useRef(false);
+
   useEffect(() => {
     if (Platform.OS === 'web' && !window.google) {
       const script = document.createElement('script');
@@ -70,6 +76,74 @@ export default function App() {
     const token = getAccessToken();
     setInitialRoute(token ? 'CalendarPage' : 'OnboardingPage'); 
   }, []);
+
+//   // 앱 토큰 발급
+//   useEffect(() => {
+//   if (Platform.OS === 'web') return;
+//   if (nativePushInitRef.current) return;
+//   nativePushInitRef.current = true;
+
+//   let cancelled = false;
+
+//   (async () => {
+//     try {
+//       // 기기 권한 요청 + Expo push token 발급
+//       const token = await registerForPushNotificationsAsync();
+//       if (!token || cancelled) return;
+
+//       // 로그인 토큰 없으면 서버 저장 skip (선택)
+//       const access = await getAccessToken();
+//       if (!access) {
+//         console.warn('로그인 토큰 없음: push-token 저장 생략');
+//         return;
+//       }
+
+//       // 서버 저장
+//       // const res = await saveExpoPushToken(token);
+//       // if ((res as any)?.result === 'Error') {
+//       //   console.warn('push-token 저장 실패:', (res as any)?.error);
+//       // } else {
+//       //   console.log('push-token 저장 성공');
+//       // }
+//     } catch (e) {
+//       console.warn('모바일 푸시 토큰 발급/저장 실패:', e);
+//     }
+//   })();
+
+//   return () => { cancelled = true; };
+// }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    if (webPushInitRef.current) return;
+    webPushInitRef.current = true;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const token = await requestWebPushToken();
+        if (!token || cancelled) {
+          console.warn('웹 푸시 권한 거부 또는 토큰 없음');
+          return;
+        }
+        console.log('Web FCM Token:', token);
+
+          const res = await saveFCMPushToken(token);
+          if ((res as any)?.result === 'Error') {
+            console.warn('웹 push-token 저장 실패:', (res as any)?.error);
+          } else {
+            console.log('웹 push-token 저장 성공');
+          }
+        } catch (e) {
+          console.warn('웹 푸시 토큰 발급/저장 실패:', e);
+        }
+      })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (!mapsLoaded || !initialRoute) return null;
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>

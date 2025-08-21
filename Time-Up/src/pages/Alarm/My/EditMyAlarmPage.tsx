@@ -12,7 +12,7 @@ import { toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -24,7 +24,8 @@ import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, toggleAlarmActivation } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate,
+     updateAlarmField, toggleMyAlarmActivation } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
@@ -44,7 +45,12 @@ export default function EditMyAlarmPage() {
     alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
   );
   const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
+
+  const [SoundOn, SoundSetOn] = useState(alarmToEdit?.isSound ?? false);
+  const [VibrateOn, VibrateSetOn] = useState(alarmToEdit?.isVibrating ?? false);
+  const [RepeatOn, RepeatSetOn] = useState(alarmToEdit?.isRepeating ?? false);
 
   const handleCancel = () => {
     console.log(`${title} 알람 편집을 취소합니다`);
@@ -80,11 +86,20 @@ export default function EditMyAlarmPage() {
         console.log('수정 요청할 alarm_id:', selectedAlarmId);
         const res = await putMyAlarm(selectedAlarmId, patchBody);
         console.log('알람 수정 성공:', res);
-      } catch (error) {
+        navigation.navigate('MyAlarmPage');
+      } catch (error: any) {
+        const status = error?.response?.status;
+        const apiErr = error?.response?.data?.error;
+        const apiMsg = error?.response?.data?.message;
+
+        if ((status === 422 || status === 400) &&
+        (apiErr === 'BusinessLogicError')) {
+          Alert.alert('저장 실패', '과거 시간에는 알람을 설정할 수 없습니다.');
+          return;
+        }
+        else Alert.alert('저장 실패', '문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
         console.error('알람 수정 실패:', error);
       }
-
-      navigation.navigate('MyAlarmPage');
     }
   }
 
@@ -92,7 +107,7 @@ export default function EditMyAlarmPage() {
     if (!selectedAlarmId) return;
 
     try {
-      await toggleAlarmActivation(selectedAlarmId);
+      await toggleMyAlarmActivation(selectedAlarmId);
       const newState = !isActive;
       setIsActive(newState);
       updateAlarmField(selectedAlarmId, 'isActive', newState);
@@ -102,10 +117,33 @@ export default function EditMyAlarmPage() {
     }
   }, [selectedAlarmId, isActive]);
 
-
   const handleSelectSound = () => {
     navigation.navigate('SelectMyAlarmSoundPage');
   };
+
+  const handleSoundToggleSwitch = useCallback(() => {
+    const newState = !SoundOn;
+    SoundSetOn(newState);
+    if (selectedAlarmId != null) {
+      updateAlarmField(selectedAlarmId, 'isSound', newState);
+    }
+  }, [SoundOn, selectedAlarmId]);
+
+  const handleVibrateToggleSwitch = useCallback(() => {
+    const newState = !VibrateOn;
+    VibrateSetOn(newState);
+    if (selectedAlarmId != null) {
+      updateAlarmField(selectedAlarmId, 'isVibrating', newState);
+    }
+  }, [VibrateOn, selectedAlarmId]);
+
+  const handleRepeatToggleSwitch = useCallback(() => {
+    const newState = !RepeatOn;
+    RepeatSetOn(newState);
+    if (selectedAlarmId != null) {
+      updateAlarmField(selectedAlarmId, 'isRepeating', newState);
+    }
+  }, [RepeatOn, selectedAlarmId]);
 
   const handleSelectVibrate = () => {
     navigation.navigate('SelectMyAlarmVibratePage');
@@ -142,18 +180,6 @@ export default function EditMyAlarmPage() {
     console.log(`시간 선택됨: ${time.period} ${String(time.hour).padStart(2, '0')}시 ${String(time.minute).padStart(2, '0')}분`);
   };
 
-
-  const handleMemoCancel = () => {
-    bottomSheetModalRef.current?.dismiss();
-    setSelectedItem(null);
-    console.log(`메모 취소됨`);
-  };
-
-  const handleMemoSave = () => {
-    bottomSheetModalRef.current?.dismiss();
-    setSelectedItem(null);
-    console.log(`메모 저장됨: ${memo}`);
-  };
 
   useEffect(() => {
     if (selectedAlarmDate) {
@@ -278,25 +304,6 @@ export default function EditMyAlarmPage() {
                 </View>
               </View>
             )}
-
-            {(selectedItem === '메모') && (
-              <View>
-                <TextInput
-                  className="w-full h-[250px] border-[#65696D] border-[1px] p-4 rounded-[16px] text-white text-xl"
-                  placeholder="내용 입력"
-                  placeholderTextColor="#979B9F"
-                  multiline={true}
-                  textAlignVertical="top"
-                  value={memo}
-                  onChangeText={(text) => setMemo(text)}
-                />
-                <View className="flex-row items-center justify-center gap-10 mt-[10%]">
-                  <AlarmButton title="취소" onPress={handleMemoCancel} backgroundColor="#52565A" textColor="#E8ECF0" style={{ width: 120, height: 48 }} />
-                  <AlarmButton title="저장" onPress={handleMemoSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
-                </View>
-              </View>
-            )}
-
           </BottomSheetView>
         </BottomSheetModal>
 
@@ -366,72 +373,99 @@ export default function EditMyAlarmPage() {
 
         <View className="w-full h-[55%] items-center gap-3 space-y-3">
           <View className="w-[91%] flex-row gap-3">
-            <TouchableOpacity className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3"
-              activeOpacity={0.8}
-              onPress={handleSelectSound}
-            >
-              <View className="flex-row items-center">
-                <IconMusic width={20} height={20} />
-                <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
+
+            <View className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3 pr-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <IconMusic width={20} height={20} />
+                  <Text className="font-pretendard text-gray-200 text-xl ml-2">알람음</Text>
+                </View>
+                <ToggleSwitch isOn={SoundOn} onToggle={handleSoundToggleSwitch} disabled={false} />
               </View>
-              <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
-                <Text className="font-pretendard text-gray-200 font-semibold text-xl">
+              <TouchableOpacity
+                className="flex-1 items-center justify-center"
+                activeOpacity={0.8}
+                onPress={handleSelectSound}
+              >
+                <Text className="font-pretendard text-gray-200 font-semibold text-xl -mt-3">
                   {alarmToEdit?.sound ?? '선택'}
                 </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3 pr-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <IconBiv width={20} height={20} />
+                  <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
+                </View>
+                <ToggleSwitch isOn={VibrateOn} onToggle={handleVibrateToggleSwitch} disabled={false} />
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="w-[48%] h-[130px] bg-dark border border-dark-stroke rounded-3xl pt-2 pl-3"
-              activeOpacity={0.8}
-              onPress={handleSelectVibrate}
-            >
-              <View className="flex-row items-center">
-                <IconBiv width={20} height={20} />
-                <Text className="font-pretendard text-gray-200 text-xl ml-2">진동</Text>
-              </View>
-              <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
-                <Text className="font-pretendard text-gray-200 font-semibold text-xl">
+              <TouchableOpacity
+                className="flex-1 items-center justify-center"
+                activeOpacity={0.8}
+                onPress={handleSelectVibrate}
+              >
+                <Text className="font-pretendard text-gray-200 font-semibold text-xl -mt-3">
                   {alarmToEdit?.vibrate ?? '선택'}
                 </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3 pr-3">
+            <View className="flex-row items-center justify-between w-full">
+              <View className="flex-row items-center">
+                <IconRepeat width={20} height={20} />
+                <Text className="font-pretendard text-gray-200 text-xl ml-2">다시 울림</Text>
               </View>
+              <ToggleSwitch isOn={RepeatOn} onToggle={handleRepeatToggleSwitch} disabled={false} />
+            </View>
+            <TouchableOpacity
+              className="flex-1 items-center justify-center"
+              activeOpacity={0.8}
+              onPress={handleSelectReplay}
+            >
+              <Text className="font-pretendard text-gray-200 font-semibold text-xl">
+                {alarmToEdit?.repeat ?? '선택'}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3"
-            activeOpacity={0.8}
-            onPress={handleSelectReplay}
-          >
-            <View className="flex-row items-center">
-              <IconRepeat width={20} height={20} />
-              <Text className="font-pretendard text-gray-200 text-xl ml-2">다시 울림</Text>
-            </View>
-            <Text className="font-pretendard text-gray-200 font-semibold text-xl mt-2">
-              {alarmToEdit?.repeat ?? '선택'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
+          <View
             className="w-[91%] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3"
             style={{ height: Platform.OS === 'web' ? height * 0.25 : height * 0.185 }}
-            activeOpacity={0.8}
-            onPress={
-              () => {
-                setSelectedItem("메모")
-                bottomSheetModalRef.current?.present()
-              }}>
-
+          >
             <View className="flex-row items-center">
               <IconMemo width={20} height={20} />
               <Text className="font-pretendard text-gray-200 text-xl ml-2">메모</Text>
             </View>
-            <Text className="font-pretendard text-gray-200 text-xl ml-2">
-              {memo.trim() !== '' ? memo : '입력'}
-            </Text>
-          </TouchableOpacity>
+
+            {isEditingMemo ? (
+              <TextInput
+                className="w-full h-[150px] text-white text-xl mt-2 pr-4"
+                multiline
+                autoFocus
+                textAlignVertical="top"
+                placeholder="내용 입력"
+                placeholderTextColor="#979B9F"
+                value={memo}
+                onChangeText={setMemo}
+                onBlur={() => setIsEditingMemo(false)}
+                returnKeyType="done"
+                onSubmitEditing={() => setIsEditingMemo(false)}
+              />
+            ) : (
+              <TouchableOpacity onPress={() => setIsEditingMemo(true)} className="w-full">
+                <Text className="font-pretendard text-gray-200 text-xl ml-2 mt-2">
+                  {memo.trim() !== '' ? memo : '입력'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        <View className="flex-row items-center justify-center gap-10 -mt-[4%]">
+        <View className="flex-row items-center justify-center gap-10 -mt-[1%]">
           <AlarmButton title="취소" onPress={handleCancel} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
           <AlarmButton title="저장" onPress={handleSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
         </View>

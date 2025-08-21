@@ -1,4 +1,37 @@
-// // src/utils/notification.ts
+// src/utils/notification.ts
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+
+export type DevicePushToken = { type: 'fcm' | 'apns'; token: string };
+
+export async function registerForDevicePushToken(): Promise<DevicePushToken | null> {
+  if (!Device.isDevice) return null;
+
+  // Android 채널 (중요도 등)
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+    });
+  }
+
+  // 권한 요청
+  let { status } = await Notifications.getPermissionsAsync();
+  if (status !== 'granted') {
+    ({ status } = await Notifications.requestPermissionsAsync({
+      ios: { allowAlert: true, allowBadge: true, allowSound: true },
+    }));
+  }
+  if (status !== 'granted') return null;
+
+  // 디바이스 푸시 토큰
+  const { type, data } = await Notifications.getDevicePushTokenAsync(); 
+  // Android => type 'fcm', iOS => type 'apns' : apns 나중에.
+  return { type: type as 'fcm' | 'apns', token: data };
+}
+
+
 // import * as Device from 'expo-device';
 // import * as Notifications from 'expo-notifications';
 // import { Platform } from 'react-native';
@@ -18,7 +51,7 @@
 
 // // Expo Push Token 발급 + 안드 채널 설정
 // export async function registerForPushNotificationsAsync(): Promise<string | null> {
-//   //debugger;
+//   
 //   if (!Device.isDevice) {
 //     alert('푸시 알림은 실제 기기에서만 작동합니다.');
 //     return null;
