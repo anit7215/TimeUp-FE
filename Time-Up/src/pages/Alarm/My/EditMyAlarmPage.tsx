@@ -12,7 +12,7 @@ import { toPutMyAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -86,11 +86,20 @@ export default function EditMyAlarmPage() {
         console.log('수정 요청할 alarm_id:', selectedAlarmId);
         const res = await putMyAlarm(selectedAlarmId, patchBody);
         console.log('알람 수정 성공:', res);
-      } catch (error) {
+        navigation.navigate('MyAlarmPage');
+      } catch (error: any) {
+        const status = error?.response?.status;
+        const apiErr = error?.response?.data?.error;
+        const apiMsg = error?.response?.data?.message;
+
+        if ((status === 422 || status === 400) &&
+        (apiErr === 'BusinessLogicError')) {
+          Alert.alert('저장 실패', '과거 시간에는 알람을 설정할 수 없습니다.');
+          return;
+        }
+        else Alert.alert('저장 실패', '문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
         console.error('알람 수정 실패:', error);
       }
-
-      navigation.navigate('MyAlarmPage');
     }
   }
 
