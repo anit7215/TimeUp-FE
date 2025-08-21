@@ -78,17 +78,6 @@ export default function WakeUpAlarmPage() {
     return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
   };
 
-  // const handleToggleAutoAlarm = async (autoAlarmId: number, currentState: boolean) => {
-  //   try {
-  //     await toggleAutoAlarmActivation(autoAlarmId);
-  //     const newState = !currentState;
-  //     updateAlarmField(autoAlarmId, 'isActive', newState);
-  //     console.log(`알람 ${autoAlarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
-  //   } catch (error) {
-  //     console.error(`알람 ${autoAlarmId}번 토글 실패:`, error);
-  //   }
-  // };
-
   const handleToggleAutoAlarm = async (autoAlarmId: number) => {
     try {
       await toggleAutoAlarmActivation(autoAlarmId);
