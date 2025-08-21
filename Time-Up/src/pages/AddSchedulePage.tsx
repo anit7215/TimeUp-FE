@@ -90,7 +90,6 @@ export default function AddSchedulePage() {
   
 
 const handleSave = async () => {
-    // ✅ 검증
   const errText = validateDraft();
   if (errText) {
     setModalMessage(errText);
@@ -99,8 +98,8 @@ const handleSave = async () => {
   }
   const formToSend = {
     ...form,
-    start_date: moment(form.start_date).format('YYYY-MM-DDTHH:mm:ss'),
-    end_date: moment(form.end_date).format('YYYY-MM-DDTHH:mm:ss'),
+    start_date: moment(form.start_date).utc().format('YYYY-MM-DDTHH:mm:ss'),
+    end_date: moment(form.end_date).utc().format('YYYY-MM-DDTHH:mm:ss'),
   }
   try {
     await createSchedule(formToSend);
