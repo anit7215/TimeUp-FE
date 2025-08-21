@@ -111,7 +111,7 @@ export default function DiaryPage() {
     return (
         <BottomLayout>
             <SafeAreaView className="flex-1 font-pretendard">
-                <ScrollView className="flex-1 pt-9 font-pretendard" onLayout={onLayout}>
+                <ScrollView className="flex-1 font-pretendard" onLayout={onLayout}>
                     <View className="px-4 pt-12 pb-6">
                         <View className="flex-row justify-between items-center w-full mb-1">
                             <Text className="text-white text-xl font-medium leading-7">하루 일기</Text>
@@ -125,7 +125,7 @@ export default function DiaryPage() {
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => setSearchModalVisible(true)}
-                            className="flex-row w-full items-center border border-gray-300 rounded-[20px] px-4 py-3 mb-16"
+                            className="flex-row w-full items-center border border-gray-300 rounded-[20px] px-4 py-3 mb-10"
                         >
                             <TextInput
                                 className="flex-1 text-white text-base font-normal leading-tight"
