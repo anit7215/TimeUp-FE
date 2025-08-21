@@ -110,19 +110,6 @@ const handleSave = async () => {
         keyboardBehavior="interactive"
       >
         <BottomSheetView style={{ flex: 1, padding: 16 }}>
-          {selectedItem === '일정 이름' && (
-            <TextInput
-              style={{ width: '100%', height: 50, borderColor: '#65696D', borderWidth: 1, padding: 16, borderRadius: 16, color: 'white', fontSize: 16 }}
-              placeholder='일정 이름 입력'
-              placeholderTextColor={'#979B9F'}
-              value={form.name}
-              onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
-                  onSubmitEditing={() => {
-                  bottomSheetModalRef.current?.dismiss();
-                  setSelectedItem(null);
-                  }}
-            />
-          )}
 
           {selectedItem === '메모' && (
             <TextInput
@@ -213,27 +200,16 @@ const handleSave = async () => {
               marginBottom: height > 700 ? 20 : 10 
             }}
           >
-            <TouchableOpacity
-            style={{ flex: 1, 
-              marginLeft: 10,
-              marginTop: 20, }}
-              onPress={() => {
-                setSelectedItem("일정 이름")
-                bottomSheetModalRef.current?.present()
-              }}
-            >
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: width > 400 ? 20 : 18,
-                  lineHeight: width > 400 ? 24 : 22,
-                  minHeight: 45,
-                  textAlign: 'left',
-                }}
-              >
-                {form.name ? form.name : '일정 이름'}
-              </Text>
-            </TouchableOpacity>
+                <TextInput
+              style={{ width: '100%', height: 50, borderColor: '#65696D', borderWidth: 1, padding: 16, borderRadius: 16, color: 'white', fontSize: 16 }}
+              placeholder='일정 이름 입력'
+              placeholderTextColor={'#979B9F'}
+              value={form.name}
+              onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { name: text } })}
+                  onSubmitEditing={() => {
+                  setSelectedItem(null);
+                  }}
+            />
 
             <TouchableOpacity 
               onPress={()=>dispatch({ type: 'UPDATE_DRAFT', payload: { is_important: !form.is_important }})}
@@ -567,23 +543,16 @@ const handleSave = async () => {
                 </Text>
               </View>
 
-              <TouchableOpacity
-                onPress={(() => {
-                  setSelectedItem("메모")
-                  bottomSheetModalRef.current?.present() // 모달 오픈
-                })}
-                style={{
-                  marginVertical: 16,
-                  justifyContent: 'flex-start'
-                }}
-              >
-                <Text style={{
-                  color: 'white',
-                  fontSize: width > 400 ? 18 : 16
-                }}>
-                  {form.memo || '입력'}
-                </Text>
-              </TouchableOpacity>
+
+                <TextInput
+                  style={{ width: '100%', height: 150, borderColor: '#65696D', borderWidth: 1, padding: 16, borderRadius: 16, color: 'white', fontSize: 16 }}
+                  placeholder='내용 입력'
+                  placeholderTextColor={'#979B9F'}
+                  multiline
+                  textAlignVertical='top'
+                  value={form.memo}
+                  onChangeText={(text) => dispatch({ type: 'UPDATE_DRAFT', payload: { memo: text } })}
+                />
             </View>
 
             {/* 하단 버튼 */}

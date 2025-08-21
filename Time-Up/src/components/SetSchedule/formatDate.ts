@@ -25,7 +25,7 @@ import 'moment/locale/ko';
 moment.locale('ko');
 
 // 백엔드 임시버그: "KST 시각 + Z"를 보정할지 여부
-const Z_FIX_TREATS_Z_AS_LOCAL = true;
+const Z_FIX_TREATS_Z_AS_LOCAL = false;
 
 const asMomentForDisplay = (iso?: string | null) => {
   if (!iso) return null;
