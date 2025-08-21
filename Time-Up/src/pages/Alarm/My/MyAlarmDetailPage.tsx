@@ -18,7 +18,8 @@ import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 export default function MyAlarmDetailPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, setMyAlarms, deleteAlarmById, toggleAlarmActivation, updateAlarmField } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, setMyAlarms, deleteAlarmById, toggleMyAlarmActivation,
+     updateAlarmField } = useAlarmContext();
 
   const alarm = myAlarms.find(a => a.id === selectedAlarmId);
 
@@ -26,7 +27,7 @@ export default function MyAlarmDetailPage() {
     if (!alarm) return;
 
     try {
-      await toggleAlarmActivation(alarm.id);
+      await toggleMyAlarmActivation(alarm.id);
       const newState = !alarm.isActive;
       updateAlarmField(alarm.id, 'isActive', newState);
       console.log(`알람 ${alarm.id}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
@@ -150,7 +151,7 @@ export default function MyAlarmDetailPage() {
         </View>
       </View>
 
-      <View className="flex-row items-center justify-center gap-10 -mt-[4%]">
+      <View className="flex-row items-center justify-center gap-10 -mt-[1%]">
         <AlarmButton title="삭제" onPress={handleDelete} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
         <AlarmButton title="편집" onPress={handleEdit} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
       </View>

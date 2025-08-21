@@ -51,7 +51,7 @@ export async function registerForDevicePushToken(): Promise<DevicePushToken | nu
 
 // // Expo Push Token 발급 + 안드 채널 설정
 // export async function registerForPushNotificationsAsync(): Promise<string | null> {
-//   //debugger;
+//   
 //   if (!Device.isDevice) {
 //     alert('푸시 알림은 실제 기기에서만 작동합니다.');
 //     return null;

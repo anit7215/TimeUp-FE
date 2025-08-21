@@ -74,8 +74,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    //debugger;
-    //console.log('현재 Platform.OS:', Platform.OS);
     if (Platform.OS !== 'web') return;
     if (webPushInitRef.current) return;
     webPushInitRef.current = true;

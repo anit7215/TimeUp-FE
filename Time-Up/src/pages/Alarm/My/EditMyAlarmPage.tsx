@@ -24,7 +24,8 @@ import IconRepeat from '../../../../assets/images/AlarmRepeat.svg';
 export default function EditMyAlarmPage() {
   const navigation = useAppNavigation();
   const { height } = Dimensions.get('window');
-  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate, updateAlarmField, toggleAlarmActivation } = useAlarmContext();
+  const { selectedAlarmId, myAlarms, selectedAlarmDate, setSelectedAlarmDate,
+     updateAlarmField, toggleMyAlarmActivation } = useAlarmContext();
   const [currentDate, setCurrentDate] = useState(selectedAlarmDate);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
@@ -44,6 +45,7 @@ export default function EditMyAlarmPage() {
     alarmToEdit?.date ?? { fullDate: '2025-06-30', dayOfWeek: '월' }
   );
   const [memo, setMemo] = useState(alarmToEdit?.memo ?? '');
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [isActive, setIsActive] = useState(alarmToEdit?.isActive ?? true);
 
   const handleCancel = () => {
@@ -92,7 +94,7 @@ export default function EditMyAlarmPage() {
     if (!selectedAlarmId) return;
 
     try {
-      await toggleAlarmActivation(selectedAlarmId);
+      await toggleMyAlarmActivation(selectedAlarmId);
       const newState = !isActive;
       setIsActive(newState);
       updateAlarmField(selectedAlarmId, 'isActive', newState);
@@ -278,25 +280,6 @@ export default function EditMyAlarmPage() {
                 </View>
               </View>
             )}
-
-            {(selectedItem === '메모') && (
-              <View>
-                <TextInput
-                  className="w-full h-[250px] border-[#65696D] border-[1px] p-4 rounded-[16px] text-white text-xl"
-                  placeholder="내용 입력"
-                  placeholderTextColor="#979B9F"
-                  multiline={true}
-                  textAlignVertical="top"
-                  value={memo}
-                  onChangeText={(text) => setMemo(text)}
-                />
-                <View className="flex-row items-center justify-center gap-10 mt-[10%]">
-                  <AlarmButton title="취소" onPress={handleMemoCancel} backgroundColor="#52565A" textColor="#E8ECF0" style={{ width: 120, height: 48 }} />
-                  <AlarmButton title="저장" onPress={handleMemoSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
-                </View>
-              </View>
-            )}
-
           </BottomSheetView>
         </BottomSheetModal>
 
@@ -411,27 +394,40 @@ export default function EditMyAlarmPage() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          <View
             className="w-[91%] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3"
             style={{ height: Platform.OS === 'web' ? height * 0.25 : height * 0.185 }}
-            activeOpacity={0.8}
-            onPress={
-              () => {
-                setSelectedItem("메모")
-                bottomSheetModalRef.current?.present()
-              }}>
-
+          >
             <View className="flex-row items-center">
               <IconMemo width={20} height={20} />
               <Text className="font-pretendard text-gray-200 text-xl ml-2">메모</Text>
             </View>
-            <Text className="font-pretendard text-gray-200 text-xl ml-2">
-              {memo.trim() !== '' ? memo : '입력'}
-            </Text>
-          </TouchableOpacity>
+
+            {isEditingMemo ? (
+              <TextInput
+                className="w-full h-[150px] text-white text-xl mt-2 pr-4"
+                multiline
+                autoFocus
+                textAlignVertical="top"
+                placeholder="내용 입력"
+                placeholderTextColor="#979B9F"
+                value={memo}
+                onChangeText={setMemo}
+                onBlur={() => setIsEditingMemo(false)}
+                returnKeyType="done"
+                onSubmitEditing={() => setIsEditingMemo(false)}
+              />
+            ) : (
+              <TouchableOpacity onPress={() => setIsEditingMemo(true)} className="w-full">
+                <Text className="font-pretendard text-gray-200 text-xl ml-2 mt-2">
+                  {memo.trim() !== '' ? memo : '입력'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        <View className="flex-row items-center justify-center gap-10 -mt-[4%]">
+        <View className="flex-row items-center justify-center gap-10 -mt-[1%]">
           <AlarmButton title="취소" onPress={handleCancel} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
           <AlarmButton title="저장" onPress={handleSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
         </View>

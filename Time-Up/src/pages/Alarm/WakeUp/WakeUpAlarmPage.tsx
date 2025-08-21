@@ -16,7 +16,9 @@ const weekdays: Day[] = ['월', '화', '수', '목', '금', '토', '일'];
 
 export default function WakeUpAlarmPage() {
   const navigation = useAppNavigation();
-  const { setSelectedDay, weekdaySwitchStates, setWeekdaySwitchStates, autoAlarmOn, setAutoAlarmOn, wakeupAlarms, setSelectedAlarmId, autoAlarms } = useAlarmContext();
+  const { setSelectedDay, weekdaySwitchStates, toggleWakeupAlarmActivation,
+    toggleAutoAlarmActivation, updateAlarmField, wakeupAlarms, setSelectedAlarmId,
+    autoAlarms, updateWakeupAlarmField } = useAlarmContext();
 
   const dayToIndex: Record<Day, number> = {
     '일': 0, '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6,
@@ -76,22 +78,48 @@ export default function WakeUpAlarmPage() {
     return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
   };
 
-  const handleToggleAutoAlarm = () => {
-    if (!autoAlarmOn) {
-      console.log('자동알람이 켜졌습니다.');
-    } else {
-      console.log('자동알람이 꺼졌습니다.');
+  // const handleToggleAutoAlarm = async (autoAlarmId: number, currentState: boolean) => {
+  //   try {
+  //     await toggleAutoAlarmActivation(autoAlarmId);
+  //     const newState = !currentState;
+  //     updateAlarmField(autoAlarmId, 'isActive', newState);
+  //     console.log(`알람 ${autoAlarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+  //   } catch (error) {
+  //     console.error(`알람 ${autoAlarmId}번 토글 실패:`, error);
+  //   }
+  // };
+
+  const handleToggleAutoAlarm = async (autoAlarmId: number) => {
+    try {
+      await toggleAutoAlarmActivation(autoAlarmId);
+    } catch (error) {
+      console.error(`자동 알람 ${autoAlarmId} 토글 실패:`, error);
     }
-    setAutoAlarmOn((prev) => !prev);
   };
 
-  const handleToggleSwitchForDay = (day: Day) => {
-    setWeekdaySwitchStates(prev => {
-      const next = { ...prev, [day]: !prev[day] };
-      console.log(`${day} 기상알람이 ${next[day] ? '켜졌습니다' : '꺼졌습니다'}.`);
-      return next;
-    });
+  const handleToggleSwitchForDay = async (currentState: boolean, wakeupAlarmId?: number) => {
+    if (wakeupAlarmId == null) {
+      console.warn("wakeupAlarmId가 없습니다. 토글을 실행하지 않습니다.");
+      return;
+    }
+
+    try {
+      await toggleWakeupAlarmActivation(wakeupAlarmId);
+      const newState = !currentState;
+      updateWakeupAlarmField(wakeupAlarmId, 'isActive', newState);
+      console.log(`알람 ${wakeupAlarmId}번이 ${newState ? '활성화' : '비활성화'}되었습니다.`);
+    } catch (error) {
+      console.error(`알람 ${wakeupAlarmId}번 토글 실패:`, error);
+    }
   };
+
+  // const handleToggleSwitchForDay = (day: Day) => {
+  //   setWeekdaySwitchStates(prev => {
+  //     const next = { ...prev, [day]: !prev[day] };
+  //     console.log(`${day} 기상알람이 ${next[day] ? '켜졌습니다' : '꺼졌습니다'}.`);
+  //     return next;
+  //   });
+  // };
 
   const handleMyPage = () => {
     console.log('내 알람 페이지로 이동합니다.');
@@ -143,7 +171,9 @@ export default function WakeUpAlarmPage() {
     <BottomLayout>
       <View className="flex-row items-center justify-between mr-[4%] mt-[6%]">
         <Text className="font-pretendard text-white text-3xl ml-5 mb-4">내일의 자동 알람</Text>
-        <ToggleSwitch isOn={autoAlarmOn} onToggle={handleToggleAutoAlarm} disabled={false} />
+        <ToggleSwitch
+          isOn={Boolean(nextAutoAlarm?.is_active)}
+          onToggle={() => nextAutoAlarm?.auto_alarm_id && handleToggleAutoAlarm(nextAutoAlarm.auto_alarm_id)} disabled={!nextAutoAlarm} />
       </View>
 
       <LinearGradient
@@ -202,11 +232,15 @@ export default function WakeUpAlarmPage() {
                   <Text className="font-pretendard text-white text-xl">   ㅣ   </Text>
                   <Text className="font-pretendard text-white text-xl">{formattedTime}</Text>
                 </View>
-                <ToggleSwitch
-                  isOn={weekdaySwitchStates[day]}
-                  onToggle={() => handleToggleSwitchForDay(day)}
-                  disabled={false}
-                />
+                {alarm ? (
+                  <ToggleSwitch
+                    isOn={alarm.isActive}
+                    onToggle={() => handleToggleSwitchForDay(alarm.isActive, alarm.serverId)}
+                    disabled={false}
+                  />
+                ) : (
+                  <ToggleSwitch isOn={false} onToggle={() => { }} disabled={true} />
+                )}
               </View>
             </TouchableOpacity>
           );

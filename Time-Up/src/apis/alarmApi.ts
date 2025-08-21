@@ -8,7 +8,9 @@ import {
   PostMyAlarmResponse,
   PutMyAlarmRequest,
   PutMyAlarmResponse,
+  ToggleAutoAlarmActivationResponse,
   ToggleMyAlarmActivationResponse,
+  ToggleWakeupAlarmActivationResponse,
   UpdateWakeupAlarmRequest,
   WakeupAlarmSummary
 } from '@/src/types/alarm';
@@ -45,12 +47,46 @@ export const putMyAlarm = async (
 };
 
 // 내 알람 활성/비활성화
-export const toggleMyAlarmActivation = async (
+export const patchToggleMyAlarmActivation = async (
   alarmId: number,
 ): Promise<ToggleMyAlarmActivationResponse> => {
   const token = await getAccessToken();
   const res = await axiosInstance.patch<ToggleMyAlarmActivationResponse>(
     `/alarm/${alarmId}/my-active`,
+    null,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};
+
+// 기상알람 활성/비활성화 요청
+export const patchToggleWakeupAlarmActive = async (
+  wakeupAlarmId: number
+): Promise<ToggleWakeupAlarmActivationResponse> => {
+  const token = await getAccessToken();
+  const res = await axiosInstance.patch<ToggleWakeupAlarmActivationResponse>(
+    `/alarm/${wakeupAlarmId}/wakeup-active`,
+    null,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};
+
+// 자동알람 활성/비활성화 요청
+export const patchtoggleAutoAlarmActivation = async (
+  autoAlarmId: number,
+): Promise<ToggleAutoAlarmActivationResponse> => {
+  const token = await getAccessToken();
+  const res = await axiosInstance.patch<ToggleAutoAlarmActivationResponse>(
+    `/alarm/${autoAlarmId}/auto-active`,
     null,
     {
       headers: {
@@ -81,7 +117,6 @@ export const deleteMyAlarm = async (
 };
 
 // 기상알람 수정 요청
-// src/apis/alarmApi.ts
 export const putWakeupAlarm = async (wakeupAlarmId: number, body: UpdateWakeupAlarmRequest) => {
   const token = await getAccessToken();
   const res = await axiosInstance.put(
@@ -96,110 +131,6 @@ export const putWakeupAlarm = async (wakeupAlarmId: number, body: UpdateWakeupAl
   );
   return res.data;
 };
-
-
-// 기상알람 활성/비활성화 응답
-export interface ToggleWakeupActiveResponse {
-  result: 'Success' | 'Fail';
-  status: number;
-  success: (
-    // 간단 응답 형태
-    { is_active: boolean; message?: string }
-    // 혹은 상세 객체 형태(명세 예시)
-    | {
-        wakeup_alarm_id: number;
-        user_id: number;
-        day: number;
-        wakeup_time: string;
-        is_active: boolean;
-        is_repeating: boolean;
-        is_vibrating: boolean;
-        is_sound: boolean;
-        repeat_interval: number | null;
-        repeat_count: number | null;
-        sound_id: number | null;
-        vibration_type: string;
-        memo: string | null;
-        created_at: string | null;
-        updated_at: string | null;
-      }
-  ) | null;
-  error: { errorCode: string; message: string } | null;
-}
-
-// 기상알람 활성/비활성화 요청
-export const patchToggleWakeupAlarmActive = async (
-  wakeupAlarmId: number
-): Promise<ToggleWakeupActiveResponse> => {
-  const token = await getAccessToken();
-
-  const res = await axiosInstance.patch<ToggleWakeupActiveResponse>(
-    `/alarm/${wakeupAlarmId}/wakeup-active`,
-    null,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      params: {
-        wakeup_alarm_id: wakeupAlarmId,
-      },
-    }
-  );
-
-  return res.data;
-};
-
-// 자동알람 활성/비활성화
-export interface ToggleAutoAlarmResponse {
-  result: 'Success' | 'Fail';
-  status: number;
-  success: null | {
-    auto_alarm_id: number;
-    schedule_id: number;
-    wakeup_time: string; // ISO
-    is_active: boolean;
-    is_repeating: boolean;
-    repeat_interval: number;
-    repeat_count: number;
-    created_at: string;
-    is_sound: boolean;
-    is_vibrating: boolean;
-    sound_id: number;
-    vibration_type: string;
-  };
-  error: null | {
-    errorCode: string;
-    message: string;
-  };
-}
-
-export async function toggleAutoAlarmActivation(autoAlarmId: number) {
-  const token = await getAccessToken();
-
-  // Query 에 alarm_id 가 필요하다고 해서 동일 값으로 전달함.
-  const res = await axiosInstance.patch<ToggleAutoAlarmResponse>(
-    `/alarm/${autoAlarmId}/auto-active`,
-    null,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      params: {
-        alarm_id: autoAlarmId,
-      },
-    }
-  );
-
-  if (res.data.result !== 'Success' || !res.data.success) {
-    const msg = res.data.error?.message ?? '자동 알람 토글 실패';
-    throw new Error(msg);
-  }
-
-  return res.data.success; // { is_active, wakeup_time, ... }
-}
 
 // 알람 조회. 내 알람(myAlams), 기상알람(wakeup), 자동알람(autoAlarms)
 export const getMyAlarms = async (): Promise<{
