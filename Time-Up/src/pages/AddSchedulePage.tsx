@@ -30,6 +30,7 @@ import { formatKoreanDate, timeOnly } from '../components/SetSchedule/formatDate
 import { useSchedule } from '../context/ScheduleContext';
 import { RootStackParamList } from '../types/navigation';
 import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
+import Modal from '../components/common/Modal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,6 +44,36 @@ export default function AddSchedulePage() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['50%', '70%'], []);
   const [currentDate, setCurrentDate] = useState(form.start_date);
+
+  const [open, setOpen] = useState(false); // 모달 상태 관리
+  const [modalMessage, setModalMessage] = useState(''); // 모달 메시지 상태 관리
+
+  const validateDraft = () => {
+    const req = [
+      { label: '일정 이름', value: form.name?.trim()},
+      { label: '시작 날짜', value: form.start_date },
+      { label: '종료 날짜', value: form.end_date },
+      { label: '주소', value: form.place_name?.trim() },
+      { label: '장소명', value: form.place_name?.trim() },
+    ]
+
+    const missing = req.filter(r => !r.value);
+    if (missing.length) {
+      return `필수 입력 항목이 입력되지 않았습니다.\n다음 항목을 확인해 주세요:\n- ${missing.map(m => m.label).join('\n- ')}`;
+    
+    }
+
+      const start = moment(form.start_date, moment.ISO_8601, true);
+  const end   = moment(form.end_date,   moment.ISO_8601, true);
+
+  if (!start.isValid() || !end.isValid()) {
+    return '날짜/시간 형식이 올바르지 않습니다.\n다시 선택해 주세요.';
+  }
+  if (end.isBefore(start)) {
+    return '종료 시간이 시작 시간보다 빠릅니다.\n시간을 다시 확인해 주세요.';
+  }
+  return null;
+};
 
   const colorOptions = ["#F7A1A1", "#FACA9E", "#FAE39E", "#B9DFBB", "#A5C6F3", "#B6A3F5", "#F8A0DA", "#CCCCCC"];
 
@@ -59,6 +90,13 @@ export default function AddSchedulePage() {
   
 
 const handleSave = async () => {
+    // ✅ 검증
+  const errText = validateDraft();
+  if (errText) {
+    setModalMessage(errText);
+    setOpen(true);
+    return;
+  }
   const formToSend = {
     ...form,
     start_date: moment(form.start_date).format('YYYY-MM-DDTHH:mm:ss'),
@@ -139,6 +177,7 @@ const handleSave = async () => {
           )}
 
           {['시작 시간', '종료 시간'].includes(selectedItem || '') && (
+            <View className="flex-1 justify-center items-center">
             <HalfTimeScrollPanel
             onTimeChange={(hourStr: string, minuteStr: string, period: string) => {
               const targetField = (selectedItem === '시작 시간' ? 'start_date' : 'end_date') as
@@ -161,6 +200,7 @@ const handleSave = async () => {
     });
   }}
 />
+</View>
 
           )}
           <View  className="flex-row mx-2 py-4 rounded-2xl justify-between bg-[#33363B]">
@@ -555,6 +595,7 @@ const handleSave = async () => {
                 />
             </View>
 
+
             {/* 하단 버튼 */}
             <View style={{
               flexDirection: 'row',
@@ -602,6 +643,14 @@ const handleSave = async () => {
             </View>
           </View>
         </ScrollView>
+                          {open && (
+                <Modal
+                  onClose={() => setOpen(false)}
+                  onConfirm={() => setOpen(false)}
+                >
+                  {modalMessage}
+                </Modal>
+              )}
       </View>
   </GestureHandlerRootView>
   )
