@@ -36,6 +36,7 @@ import { buildRecurrenceSummary } from '../utils/recurrenceSummary';
 import { toDraft } from '../helpers/schedule';
 import Modal from '../components/common/Modal';
 import PageBackButton from '../components/common/PageBackButton';
+import { minus9HIfHotfix } from '../utils/time';
 
 const { width, height } = Dimensions.get('window');
 
@@ -169,8 +170,14 @@ const handleUpdate = async () => {
     console.log('🔄 스케줄 수정 시작...');
     console.log('🔍 수정할 데이터:', schedule);
 
+    const payload = {
+      ...schedule,
+    start_date: minus9HIfHotfix(schedule.start_date),
+     end_date: minus9HIfHotfix(schedule.end_date),
+    };
+
     // 1. 수정 요청
-    const updateResponse = await updateSchedule(scheduleId, schedule);
+    const updateResponse = await updateSchedule(scheduleId, payload);
     console.log('🔍 수정 API 응답:', updateResponse);
 
     // 2. 수정 후 최신 데이터 다시 로드
