@@ -6,11 +6,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { timeOnly } from './formatDate';
-import { Dispatch } from 'react';
 import { useSchedule } from '@/src/context/ScheduleContext';
 import { getScheduleById } from '../../apis/schedule';
-type Navigation = NativeStackNavigationProp<RootStackParamList, 'ViewScheduleDetailPage'>;
 
+type Navigation = NativeStackNavigationProp<RootStackParamList, 'ViewScheduleDetailPage'>;
 interface ImportantScheduleModalProps {
   selectedMonth: string; // "2024-07"
   schedules: ImportantSchedule[]; // 이미 '중요+월'로 필터된 리스트
@@ -25,7 +24,7 @@ const ImportantScheduleModal: React.FC<ImportantScheduleModalProps> = ({
   onClose,
 }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['8%', '90%'], []);
+  const snapPoints = useMemo(() => ['15%', '90%'], []);
   const navigation = useNavigation<Navigation>();
 
   // ID 필드 유연 처리 (scheduleId | schedule_id)
@@ -33,7 +32,6 @@ const ImportantScheduleModal: React.FC<ImportantScheduleModalProps> = ({
 
   const { dispatch } = useSchedule();
 
-  // ✅ 추가 필터링 없이 정렬만
   const sortedSchedules = useMemo(
     () =>
       [...(schedules ?? [])].sort(
@@ -115,7 +113,7 @@ const ImportantScheduleModal: React.FC<ImportantScheduleModalProps> = ({
                       type: 'VIEW_SCHEDULE_SUCCESS',
                       payload: scheduleData
                     })
-                    navigation.navigate('ViewScheduleDetailPage', { scheduleId: schedule.scheduleId }) // 타입 에러
+                    navigation.navigate('ViewScheduleDetailPage', { scheduleId: schedule.scheduleId })
                   }}
                 >
                   <View className="flex-row items-start">

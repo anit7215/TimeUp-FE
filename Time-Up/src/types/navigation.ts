@@ -35,7 +35,7 @@ export type RootStackParamList = {
   SetRemindAlarmPage: undefined;
   SetScheduleRepeatPage: undefined;
   SetLocationPage: undefined;
-  ViewScheduleDetailPage: undefined;
+  ViewScheduleDetailPage: {scheduleId: string};
   SelectWakeupAlarmReplayPage: undefined;
   SelectWakeupAlarmSoundPage: undefined;
   SelectWakeupAlarmVibratePage: undefined;

@@ -1,25 +1,19 @@
-
 // src/components/common/Navbar.tsx
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
-import { Image, Platform, TouchableOpacity, View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
 
-import IconAlarm from '../../../assets/images/IconAlarm.png';
-import IconCalendar from '../../../assets/images/IconCalendar.png';
-import IconDiary from '../../../assets/images/IconDiary.png';
-import IconMy from '../../../assets/images/IconMy.png';
+import IconAlarm from '../../../assets/images/IconAlarm.svg';
+import IconCalendar from '../../../assets/images/IconCalendar.svg';
+import IconDiary from '../../../assets/images/IconDiary.svg';
+import IconMy from '../../../assets/images/IconMy.svg';
 
 type TabName = 'DiaryPage' | 'AlarmPage' | 'CalendarPage' | 'MyPage';
 
-// 탭의 소속 페이지 그룹 정의. 페이지 만들 때마다 여기에 추가!!
 const tabGroups: Record<TabName, string[]> = {
   DiaryPage: ['DiaryWritePage', 'DiaryPage'],
-  AlarmPage: ['EditMyAlarmPage', 'MyAlarmDetailPage', 'MyAlarmPage',
-      'SelectMyAlarmReplayPage', 'SelectMyAlarmSoundPage', 'SelectMyAlarmVibratePage',
-      'EditWakeUpAlarmPage', 'SelectWakeupAlarmReplayPage', 'SelectWakeupAlarmSoundPage',
-      'SelectWakeupAlarmVibratePage', 'WakeUpAlarmDetailPage', 'WakeUpAlarmPage', ],
-  CalendarPage: ['CalendarPage', 'AddSchedulePage', 'SchedulePage',
-      'SetLocationPage', 'SetScheduleRepeatPage', 'ViewScheduleDetailPage'],
+  AlarmPage: ['EditMyAlarmPage', 'MyAlarmDetailPage', 'MyAlarmPage','SelectMyAlarmReplayPage','SelectMyAlarmSoundPage','SelectMyAlarmVibratePage','EditWakeUpAlarmPage','SelectWakeupAlarmReplayPage','SelectWakeupAlarmSoundPage','SelectWakeupAlarmVibratePage','WakeUpAlarmDetailPage','WakeUpAlarmPage', ],
+  CalendarPage: ['CalendarPage','AddSchedulePage','SchedulePage','SetLocationPage','SetScheduleRepeatPage','ViewScheduleDetailPage'],
   MyPage: ['MyPage', 'EditAlarmPage', 'EditInfoPage', 'FeedbackPage', ],
 };
 
@@ -36,28 +30,31 @@ export default function Navbar() {
 
   const renderTabs = () => (
     <View
-      className="flex-row justify-around items-center h-16"
-      style={Platform.OS === 'web' ? { width: 474, alignSelf: 'center' } : undefined}
+      className="flex-row justify-between items-center h-16 w-full px-9 py-2"
+      style={Platform.OS === 'web' ? { maxWidth: 474, alignSelf: 'center' } : undefined}
     >
       {tabs.map((tab) => {
         const relatedRoutes = tabGroups[tab.name] || [];
         const isActive = relatedRoutes.includes(route.name);
+        const Icon = tab.icon;
 
         return (
           <TouchableOpacity
             key={tab.name}
-            className="flex-1 items-center justify-center"
+            className="items-center justify-center"
             onPress={() => navigation.navigate(tab.name)}
           >
-            <Image
-              source={tab.icon}
-              style={{
-                width: 24,
-                height: 24,
-                tintColor: isActive ? 'white' : '#979B9F',
-              }}
-              resizeMode="contain"
-            />
+            <View
+              className={`items-center justify-center rounded-full w-10 h-10 ${
+                isActive ? 'bg-gray-900 p-2' : ''
+              }`}
+            >
+              <Icon
+                width={24}
+                height={24}
+                color={isActive ? 'white' : '#979B9F'}
+              />
+            </View>
           </TouchableOpacity>
         );
       })}

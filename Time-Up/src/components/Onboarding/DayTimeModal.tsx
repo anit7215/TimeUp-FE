@@ -5,9 +5,9 @@ import HalfTimeScrollPanel from '../common/HalfTimeScrollPanel';
 
 interface TimeModalProps {
   onClose?: () => void;
-  onSelect: (hour: string, minute: string) => void;
+  onSelect: (hour: string, minute: string, period: string) => void;
   choice?: 'optional' | 'required';
-  initialTime?: { hour: string; minute: string };
+  initialTime?: { hour: string; minute: string; period: '오전' | '오후' };
 }
 
 export interface TimeModalRef {
@@ -20,11 +20,11 @@ const DayTimeModal = forwardRef<TimeModalRef, TimeModalProps>(
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const snapPoints = useMemo(() => ['55%'], []);
     const [selectedTime, setSelectedTime] = useState(
-      initialTime || { hour: '00', minute: '00' }
+      initialTime || { hour: '00', minute: '00', period: '오전' }
     );
     useImperativeHandle(ref, () => ({
       present: () => {
-        setSelectedTime(initialTime || { hour: '00', minute: '00' });
+        setSelectedTime(initialTime || { hour: '00', minute: '00', period: '오전' });
         bottomSheetModalRef.current?.present();
       },
       dismiss: () => {
@@ -32,12 +32,12 @@ const DayTimeModal = forwardRef<TimeModalRef, TimeModalProps>(
       },
     }));
 
-    const handleTimeChange = useCallback((hour: string, minute: string) => {
-      setSelectedTime({ hour, minute });
+    const handleTimeChange = useCallback((hour: string, minute: string, period: string) => {
+      setSelectedTime({ hour, minute, period });
     }, []);
 
     const handleSelect = () => {
-      onSelect(selectedTime.hour, selectedTime.minute);
+      onSelect(selectedTime.hour, selectedTime.minute, selectedTime.period);
       bottomSheetModalRef.current?.dismiss();
     };
 
@@ -46,7 +46,7 @@ const DayTimeModal = forwardRef<TimeModalRef, TimeModalProps>(
     };
 
     const handleSelectLater = () => {
-      onSelect('00','00');
+      onSelect('오전','00','00');
       bottomSheetModalRef.current?.dismiss();
     };
 
