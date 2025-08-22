@@ -67,18 +67,19 @@ export default function OnboardingPage() {
           }
 
           if (data.success?.isNew) {
-            // try {
-            //   await refreshAlarms();
-            // } catch (e) {
-            //   console.warn('초기 알람 동기화 실패(무시 가능):', e);
-            // }
+            debugger;
+            try {
+              await refreshAlarms();
+            } catch (e) {
+              console.warn('초기 알람 동기화 실패(무시 가능):', e);
+            }
             navigation.navigate('ProfileSettingPage', {});
           } else {
-            // try {
-            //   await refreshAlarms();
-            // } catch (e) {
-            //   console.warn('초기 알람 동기화 실패(무시 가능):', e);
-            // }
+            try {
+              await refreshAlarms();
+            } catch (e) {
+              console.warn('초기 알람 동기화 실패(무시 가능):', e);
+            }
             navigation.navigate('CalendarPage');
           }
         } catch (error: any) {

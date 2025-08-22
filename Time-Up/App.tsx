@@ -43,7 +43,6 @@ import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
 
-import { saveFCMPushToken } from './src/apis/pushToken';
 import { getAccessToken } from './src/utils/storage';
 import { requestWebPushToken } from './src/utils/webPush';
 
@@ -114,6 +113,7 @@ export default function App() {
 // }, []);
 
   useEffect(() => {
+    //debugger;
     if (Platform.OS !== 'web') return;
     if (webPushInitRef.current) return;
     webPushInitRef.current = true;
@@ -128,12 +128,12 @@ export default function App() {
         }
         console.log('Web FCM Token:', token);
 
-          const res = await saveFCMPushToken(token);
-          if ((res as any)?.result === 'Error') {
-            console.warn('웹 push-token 저장 실패:', (res as any)?.error);
-          } else {
-            console.log('웹 push-token 저장 성공');
-          }
+          // const res = await saveFCMPushToken(token);
+          // if ((res as any)?.result === 'Error') {
+          //   console.warn('웹 push-token 저장 실패:', (res as any)?.error);
+          // } else {
+          //   console.log('웹 push-token 저장 성공');
+          // }
         } catch (e) {
           console.warn('웹 푸시 토큰 발급/저장 실패:', e);
         }

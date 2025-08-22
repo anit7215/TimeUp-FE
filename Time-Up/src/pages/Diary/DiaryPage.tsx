@@ -1,10 +1,11 @@
 import Modal from '@/src/components/common/Modal';
 import DateModal from '@/src/components/diary/DateModal';
+import { useAlarmContext } from '@/src/contexts/AlarmContext';
 import useAppNavigation from '@/src/hooks/useAppNavigation';
 import { useGetDiaryList } from '@/src/hooks/useDiaries';
 import moment from 'moment';
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, FlatList,  SafeAreaView, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { DateData } from 'react-native-calendars';
 import PlusIcon from '../../../assets/images/PlusIcon.svg';
 import SearchIcon from '../../../assets/images/SearchIcon.svg';
@@ -23,8 +24,23 @@ export default function DiaryPage() {
     const [isSearchModalVisible, setSearchModalVisible] = useState(false);
     const [isAlertModalVisible, setAlertModalVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const syncedOnceRef = useRef(false);
+    const { refreshAlarms } = useAlarmContext();
 
     const { data: diaries = [], isLoading } = useGetDiaryList();
+
+    //   useEffect(() => {
+    
+    // if (!syncedOnceRef.current) {
+    //     syncedOnceRef.current = true;
+    //     try {
+    //         await refreshAlarms();
+    //     } catch (e) {
+    //         console.warn('초기 알람 동기화 실패(무시 가능):', e);
+    //     }
+    // }
+    //   })
+
 
     const handlePressAdd = () => {
         navigation.navigate('DiaryWritePage');
