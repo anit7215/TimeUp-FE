@@ -7,6 +7,7 @@ import { getAccessToken } from '@/src/utils/storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import BottomLayout from '../../../Layouts/BottomLayout';
 import ToggleSwitch from '../../../components/common/ToggleSwitch';
 import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
@@ -190,7 +191,6 @@ export default function WakeUpAlarmPage() {
           </View>
         </View>
       </LinearGradient>
-
       <View className="flex-row items-start mt-[20%] ml-[4%]">
         <Text className="font-pretendard text-[24px] mr-4 text-white font-semibold">
           기상 알람
@@ -199,6 +199,7 @@ export default function WakeUpAlarmPage() {
           내 알람
         </Text>
       </View>
+      <ScrollView>
       <View className="flex-row items-start mt-2">
         <View className="h-[2px] w-[21%] bg-white ml-[4%]" />
         <View className="h-[2px] w-[15%] bg-black ml-[4%]" />
@@ -235,6 +236,7 @@ export default function WakeUpAlarmPage() {
           );
         })}
       </View>
+      </ScrollView>
     </BottomLayout>
   );
 }
