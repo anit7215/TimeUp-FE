@@ -44,7 +44,6 @@ import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
 
 import { getAccessToken } from './src/utils/storage';
-import { initWebPush } from './src/utils/webPush';
 import { requestWebPushToken } from './src/utils/webToken';
 
 const queryClient = new QueryClient();
@@ -145,17 +144,17 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = await initWebPush();
-        console.log('FCM 웹 토큰:', token);
-        // 이미 토큰 저장 API는 구현했다 했으니 여기선 로깅만
-      } catch (e) {
-        console.warn('웹 푸시 초기화 실패:', e);
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const token = await initWebPush();
+  //       console.log('FCM 웹 토큰:', token);
+  //       // 이미 토큰 저장 API는 구현했다 했으니 여기선 로깅만
+  //     } catch (e) {
+  //       console.warn('웹 푸시 초기화 실패:', e);
+  //     }
+  //   })();
+  // }, []);
 
   if (!mapsLoaded || !initialRoute) return null;
   const content = (
