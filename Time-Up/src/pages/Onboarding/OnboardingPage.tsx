@@ -6,9 +6,9 @@ import { setAccessToken, setRefreshToken } from '@/src/utils/storage';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useRef } from 'react';
-import { Alert, Animated, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Image, Text, TouchableOpacity, View } from 'react-native';
 import GoogleIcon from '../../../assets/images/GoogleIcon.svg';
-import IconImage from '../../../assets/images/Icon.svg';
+import IconImage from '../../../assets/images/Icon.png';
 import { login } from '../../apis/auth';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -101,14 +101,14 @@ export default function OnboardingPage() {
 
   return (
     <View className="flex-1 items-center pt-[208px] bg-black gap-3">
-      <IconImage/>
+      <Image source={IconImage} style={{ width: 186, height: 186 }} />
       <Animated.View style={{ opacity: opacityAnim,position: 'absolute', bottom: 50 }}>
       <TouchableOpacity
         disabled={!request}
         onPress={() => promptAsync()}
         className="bg-[#ffffff] rounded-full px-8 py-3 justify-center">
-        <View className="flex-row items-center justify-center gap-[10px]">
-          <GoogleIcon width={18} height={18} />
+        <View className="flex-row items-center justify-center">
+          <GoogleIcon width={18} height={18} style={{ marginRight: 10 }} />
           <Text className="text-[#1F1F1F] text-base font-roboto font-medium leading-normal">Sign in with Google</Text>
         </View>
       </TouchableOpacity>
