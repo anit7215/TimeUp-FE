@@ -101,8 +101,15 @@ export default function OnboardingPage() {
 
   return (
     <View className="flex-1 items-center pt-[208px] bg-black gap-3">
-      <Image source={IconImage} style={{ width: 186, height: 186 }} />
-      <Animated.View style={{ opacity: opacityAnim,position: 'absolute', bottom: 50 }}>
+      <Image source={IconImage} style={{ width: 186, height: 186, resizeMode: 'contain' }} />
+      <Animated.View style={{ 
+        opacity: opacityAnim,
+        position: 'absolute', 
+        bottom: 50,
+        left: 0, 
+        right: 0,
+        alignItems: 'center' 
+      }}>
       <TouchableOpacity
         disabled={!request}
         onPress={() => promptAsync()}
