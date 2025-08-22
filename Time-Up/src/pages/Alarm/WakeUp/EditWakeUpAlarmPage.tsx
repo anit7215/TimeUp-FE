@@ -6,7 +6,7 @@ import { AlarmItem } from '@/src/types/alarm';
 import { toPutWakeupAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ToggleSwitch from '../../../components/common/ToggleSwitch';
 import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
@@ -159,6 +159,7 @@ export default function EditWakeUpAlarmPage() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomLayout>
+        <ScrollView>
         <BottomSheetModal
           ref={bottomSheetModalRef}
           snapPoints={snapPoints}
@@ -355,12 +356,12 @@ export default function EditWakeUpAlarmPage() {
           </View>
         </View>
 
+        </ScrollView>
 
         <View className="flex-row items-center justify-center gap-10 -mt-[4%]">
           <AlarmButton title="취소" onPress={handleCancel} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
           <AlarmButton title="저장" onPress={handleSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
         </View>
-
       </BottomLayout>
     </GestureHandlerRootView>
   );

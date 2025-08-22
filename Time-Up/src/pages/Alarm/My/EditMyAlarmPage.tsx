@@ -14,7 +14,7 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 
 import IconBiv from '../../../../assets/images/AlarmBiv.svg';
 import IconMemo from '../../../../assets/images/AlarmMemo.svg';
@@ -194,6 +194,7 @@ export default function EditMyAlarmPage() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomLayout>
+        <ScrollView>
         <BottomSheetModal
           ref={bottomSheetModalRef}
           snapPoints={snapPoints}
@@ -469,7 +470,7 @@ export default function EditMyAlarmPage() {
           <AlarmButton title="취소" onPress={handleCancel} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
           <AlarmButton title="저장" onPress={handleSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
         </View>
-
+        </ScrollView>
       </BottomLayout>
     </GestureHandlerRootView>
   );

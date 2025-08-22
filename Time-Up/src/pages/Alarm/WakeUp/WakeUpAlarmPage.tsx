@@ -72,8 +72,8 @@ export default function WakeUpAlarmPage() {
   };
   const formatAutoTimeLine = (iso: string) => {
     const d = new Date(iso);
-    const h = d.getHours();
-    const m = d.getMinutes();
+    const h = d.getUTCHours();
+    const m = d.getUTCMinutes();
     const period = h < 12 ? '오전' : '오후';
     const hh = (h % 12) || 12;
     return `${period} ${String(hh).padStart(2, '0')} : ${String(m).padStart(2, '0')}`;
@@ -199,12 +199,11 @@ export default function WakeUpAlarmPage() {
           내 알람
         </Text>
       </View>
-      <ScrollView>
       <View className="flex-row items-start mt-2">
         <View className="h-[2px] w-[21%] bg-white ml-[4%]" />
         <View className="h-[2px] w-[15%] bg-black ml-[4%]" />
       </View>
-
+      <ScrollView>
       <View className="mt-3">
         {weekdays.map((day) => {
           const alarm = wakeupAlarms.find((a) => a.date.dayOfWeek === day);

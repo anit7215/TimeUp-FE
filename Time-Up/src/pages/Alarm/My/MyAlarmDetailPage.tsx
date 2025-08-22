@@ -9,6 +9,7 @@ import ToggleSwitch from '../../../components/common/ToggleSwitch';
 import useAppNavigation from '../../../hooks/useAppNavigation';
 import BottomLayout from '../../../Layouts/BottomLayout';
 
+import { ScrollView } from 'react-native-gesture-handler';
 import IconBiv from '../../../../assets/images/AlarmBiv.svg';
 import IconMemo from '../../../../assets/images/AlarmMemo.svg';
 import IconMusic from '../../../../assets/images/AlarmMusic.svg';
@@ -79,6 +80,7 @@ export default function MyAlarmDetailPage() {
 
   return (
     <BottomLayout>
+      <ScrollView>
       <View className="flex-row items-center justify-between mr-[4%]" style={{ marginTop: Platform.OS === 'web' ? 30 : 0 }}>
         <PageBackButton goTo="MyAlarmPage" />
         <Text className="font-pretendard text-white text-[24px] mr-[4%]" style={{ width: Platform.OS === 'web' ? 300 : 210 }}>{alarm.title}</Text>
@@ -174,7 +176,7 @@ export default function MyAlarmDetailPage() {
         <AlarmButton title="삭제" onPress={handleDelete} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
         <AlarmButton title="편집" onPress={handleEdit} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
       </View>
-
+    </ScrollView>
     </BottomLayout>
   );
 }

@@ -43,9 +43,7 @@ import SetRemindAlarmPage from './src/pages/SetPage/SetRemindAlarmPage';
 import SetScheduleRepeatPage from './src/pages/SetScheduleRepeatPage';
 import ViewScheduleDetailPage from './src/pages/ViewScheduleDetailPage';
 
-import { saveFCMPushToken } from './src/apis/pushToken';
 import { getAccessToken } from './src/utils/storage';
-import { requestWebPushToken } from './src/utils/webPush';
 
 const queryClient = new QueryClient();
 
@@ -113,36 +111,36 @@ export default function App() {
 //   return () => { cancelled = true; };
 // }, []);
 
-  useEffect(() => {
-    if (Platform.OS !== 'web') return;
-    if (webPushInitRef.current) return;
-    webPushInitRef.current = true;
-    let cancelled = false;
+  // useEffect(() => {
+  //   if (Platform.OS !== 'web') return;
+  //   if (webPushInitRef.current) return;
+  //   webPushInitRef.current = true;
+  //   let cancelled = false;
 
-    (async () => {
-      try {
-        const token = await requestWebPushToken();
-        if (!token || cancelled) {
-          console.warn('웹 푸시 권한 거부 또는 토큰 없음');
-          return;
-        }
-        console.log('Web FCM Token:', token);
+  //   (async () => {
+  //     try {
+  //       const token = await requestWebPushToken();
+  //       if (!token || cancelled) {
+  //         console.warn('웹 푸시 권한 거부 또는 토큰 없음');
+  //         return;
+  //       }
+  //       console.log('Web FCM Token:', token);
 
-          const res = await saveFCMPushToken(token);
-          if ((res as any)?.result === 'Error') {
-            console.warn('웹 push-token 저장 실패:', (res as any)?.error);
-          } else {
-            console.log('웹 push-token 저장 성공');
-          }
-        } catch (e) {
-          console.warn('웹 푸시 토큰 발급/저장 실패:', e);
-        }
-      })();
+  //         const res = await saveFCMPushToken(token);
+  //         if ((res as any)?.result === 'Error') {
+  //           console.warn('웹 push-token 저장 실패:', (res as any)?.error);
+  //         } else {
+  //           console.log('웹 push-token 저장 성공');
+  //         }
+  //       } catch (e) {
+  //         console.warn('웹 푸시 토큰 발급/저장 실패:', e);
+  //       }
+  //     })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, []);
 
   if (!mapsLoaded || !initialRoute) return null;
   const content = (
