@@ -466,7 +466,7 @@ export default function EditMyAlarmPage() {
           </View>
         </View>
 
-        <View className="flex-row items-center justify-center gap-10 -mt-[1%]">
+        <View className="flex-row items-center justify-center gap-10 mt-[4%]">
           <AlarmButton title="취소" onPress={handleCancel} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
           <AlarmButton title="저장" onPress={handleSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
         </View>

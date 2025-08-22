@@ -182,7 +182,7 @@ export default function WakeUpAlarmDetailPage() {
         </View>
       </View>
 
-      <View className="flex-row items-center justify-center -mt-[6%]">
+      <View className="flex-row items-center justify-center mt-[2%]">
         <AlarmButton title="편집" onPress={handleEdit} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
       </View>
       </ScrollView>
