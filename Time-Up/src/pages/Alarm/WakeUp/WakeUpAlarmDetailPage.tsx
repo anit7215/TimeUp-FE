@@ -8,6 +8,7 @@ import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
 import useAppNavigation from '../../../hooks/useAppNavigation';
 import BottomLayout from '../../../Layouts/BottomLayout';
 
+import { ScrollView } from 'react-native-gesture-handler';
 import IconBiv from '../../../../assets/images/AlarmBiv.svg';
 import IconCalendar from '../../../../assets/images/AlarmCalendar.svg';
 import IconMemo from '../../../../assets/images/AlarmMemo.svg';
@@ -52,6 +53,7 @@ export default function WakeUpAlarmDetailPage() {
 
   return (
     <BottomLayout>
+      <ScrollView>
       <View className="flex-row items-center justify-between mr-[4%]"
         style={{ marginTop: Platform.OS === 'web' ? 30 : 15 }}>
         <PageBackButton goTo="WakeUpAlarmPage" />
@@ -183,7 +185,7 @@ export default function WakeUpAlarmDetailPage() {
       <View className="flex-row items-center justify-center -mt-[6%]">
         <AlarmButton title="편집" onPress={handleEdit} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
       </View>
-
+      </ScrollView>
     </BottomLayout>
   );
 }
