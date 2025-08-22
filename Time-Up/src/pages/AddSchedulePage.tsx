@@ -55,6 +55,7 @@ export default function AddSchedulePage() {
       { label: '종료 날짜', value: form.end_date },
       { label: '주소', value: form.place_name?.trim() },
       { label: '장소명', value: form.place_name?.trim() },
+      { label: '색상', value: form.color },
     ]
 
     const missing = req.filter(r => !r.value);
