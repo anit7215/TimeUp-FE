@@ -92,7 +92,6 @@ export default function MyAlarmPage() {
     }
   };
 
-
   //   const handleToggleAutoAlarm = async () => {
   //   try {
   //     if (nextAutoAlarm?.auto_alarm_id != null) {

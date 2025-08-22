@@ -6,7 +6,7 @@ import { AlarmItem } from '@/src/types/alarm';
 import { toPutWakeupAlarmRequest } from '@/src/utils/alarmTransform';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Dimensions, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ToggleSwitch from '../../../components/common/ToggleSwitch';
 import { Day, useAlarmContext } from '../../../contexts/AlarmContext';
@@ -159,7 +159,6 @@ export default function EditWakeUpAlarmPage() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomLayout>
-        <ScrollView>
         <BottomSheetModal
           ref={bottomSheetModalRef}
           snapPoints={snapPoints}
@@ -234,7 +233,7 @@ export default function EditWakeUpAlarmPage() {
         </View>
 
         <View className="w-full h-[55%] items-center gap-3 space-y-3">
-          <View className="w-[91%] h-[80px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
+          <View className="w-[91%] h-[90px] bg-dark border border-dark-stroke rounded-3xl items-start justify-start pt-2 pl-3">
             <View className="flex-row items-center">
               <IconCalendar width={20} height={20} />
               <Text className="font-pretendard text-gray-200 text-xl ml-2">반복요일</Text>
@@ -356,12 +355,12 @@ export default function EditWakeUpAlarmPage() {
           </View>
         </View>
 
-        </ScrollView>
 
         <View className="flex-row items-center justify-center gap-10 -mt-[4%]">
           <AlarmButton title="취소" onPress={handleCancel} backgroundColor="#1C1F21" textColor="#CFD3D7" style={{ width: 120, height: 48 }} />
           <AlarmButton title="저장" onPress={handleSave} backgroundColor="#CCCCFF" textColor="black" style={{ width: 120, height: 48 }} />
         </View>
+
       </BottomLayout>
     </GestureHandlerRootView>
   );

@@ -67,7 +67,6 @@ export default function OnboardingPage() {
           }
 
           if (data.success?.isNew) {
-            debugger;
             try {
               await refreshAlarms();
             } catch (e) {
