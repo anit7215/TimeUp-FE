@@ -32,7 +32,7 @@ export default function StepAddress({ homeAddress, workAddress, onSelect }: Prop
       >
         <View className="flex-col">
           <Text className="text-white font-medium text-base leading-normal">
-            직장/학교까지 이동 시간
+            직장/학교
           </Text>
           <Text className="text-gray-200 font-regular text-[10px] leading-3 tracking-tight">
             *선택 사항
